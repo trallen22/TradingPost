@@ -1,7 +1,7 @@
 '''
 Test file for using polygon for one_day indicator
 '''
-# TODO: See if can get one day averages to avoid scraping barchart 
+# See if can get one day averages to avoid scraping barchart 
 
 from cmath import e
 from polygon import RESTClient
@@ -44,7 +44,7 @@ def get_day_indicator(tickers):
     # dict for moving average of prices for last 200 mins of trading hours per minute
     ticker_two_hundred_one_day = {}
 
-    # TODO: Clean up new poly logic  below 
+    # Clean up new poly logic  below 
     for ticker in tickers:
         '''
         Generate 1 day interval data

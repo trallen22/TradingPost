@@ -198,7 +198,7 @@ def get_minute_indicator(tickers):
             # print(ticker_two_hundred_one_minute)
 
             # five minute interval data 
-            # TODO verify this 15:55 is what to use 
+            # verify this 15:55 is what to use 
             # df = df.loc[(df["timestamp"] <= to + " 15:55")]
 
             # df = df.loc[(df["minute"] % 5 == 4)]
