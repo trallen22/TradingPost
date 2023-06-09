@@ -4,6 +4,7 @@ This script scrapes polygon.io and returns the 50 day sma for intervals
 and 1 day and close price 
 '''
 
+from pkgutil import get_data
 from polygon import RESTClient
 from datetime import datetime, timedelta, date
 import time
@@ -65,6 +66,7 @@ def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier, printDF=
 '''
 Gets the sma values for each ticker
 '''
+# TODO4: make this script format not function 
 def get_indicators(tickers, dfPrint, dfParams, client, strToday):
 
     # use '- timedelta(1) ' to debug using yesterday's data 
@@ -87,11 +89,18 @@ def get_indicators(tickers, dfPrint, dfParams, client, strToday):
     close_dict = {} # dict of closing prices
 
     for ticker in tickers:
-        # TODO: break up try statement
+        # TODO1: Add get_dataframe parameter values to the config file
+
+        paramSet = [[ ticker, client, strToday, 'minute', 1, dfPrint ], 
+                        [ticker, client, strToday, "minute", 5, dfPrint], 
+                        [ticker, client, strToday, "day", 1, dfPrint]]
+
+        for paramList in paramSet: 
+            curDF = get_dataframe(paramList[0], paramList[1], paramList[2], paramList[3], paramList[4], paramList)
+
+        # TODO2: break up try statement
         try:
-            # TODO: Add get_dataframe parameter values to the config file
-
-
+            
             '''
             Generate 1 minute interval data
             '''
@@ -124,7 +133,7 @@ def get_indicators(tickers, dfPrint, dfParams, client, strToday):
                 print(f)
                 close_dict[ticker] = -1
 
-        # TODO: make these errors on a case by case bases
+        # TODO3: make these errors on a case by case bases
         except Exception as e:
             print("Error from Polygon: " + str(e))
             ticker_fifty_one_minute[ticker] = -1
