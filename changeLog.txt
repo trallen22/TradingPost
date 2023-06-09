@@ -1,0 +1,13 @@
+List of TODOS 
+
+TODO# 	Status  Priority	Summary
+----------------------------------------------------------------------------
+1 	Working     High 	Add get_dataframe parameter values to the config file 
+2 	Working 	Low     break up try statement
+3 	Working 	Low     make these errors on a case by case bases 
+4 	------	    Low 	make get_indicators script format not function 
+5 	------	    Low 	Try to clean time stuff up 
+6 	------ 		Low     Change get_indicators return to index the list 
+7 	------		Low     in get_dataframe Fix time delta for one day interval -> timedelta(300) 
+
+
