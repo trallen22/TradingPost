@@ -9,7 +9,7 @@ from datetime import date, timedelta
 import configurationFile as config
 # from email_csv import send_email
 
-# TODO5: Try to clean this up
+# TODO5: Try to clean time stuff up
 to = date.today()
 days = timedelta(7)
 from_ = to - days
@@ -24,7 +24,7 @@ DFPARAM = config.DFPARAM
 CLIENT = config.DFPARAM[0][0]
 STRTODAY = config.STRTODAY
 
-# TODO6: Index the list
+# TODO6: Change get_indicators return to index the list
 # uses newpoly.py
 one_minute_fifty, one_minute_two_hundred, five_minute_fifty, five_minute_two_hundred, \
     one_day_fifty, one_day_two_hundred, close_price = get_indicators(TICKERS, PRINTDF, DFPARAM, CLIENT, STRTODAY)
