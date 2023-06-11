@@ -10,26 +10,19 @@ import configurationFile as config
 
 # from email_csv import send_email
 
-# TODO5: Try to clean time stuff up
-to = date.today()
-days = timedelta(7)
-from_ = to - days
-to = to.strftime('%Y-%m-%d')
-from_ = from_.strftime('%Y-%m-%d')
-
-full_time = f"{from_} to {to}"
+# This might could be used with PRINTDF in config
+# full_time = f"{from_} to {to}"
 
 TICKERS = config.TESTTICKERS
 PRINTDF = config.PRINTDF
-DFPARAM = config.DFPARAM
-CLIENT = config.DFPARAM[0][0]
+CLIENT = config.client
 STRTODAY = config.STRTODAY
 PARAMSET = config.PARAMSET
 
 # TODO6: Change get_indicators return to index the list
 # uses newpoly.py
 one_minute_fifty, one_minute_two_hundred, five_minute_fifty, five_minute_two_hundred, \
-    one_day_fifty, one_day_two_hundred, close_price = get_indicators(TICKERS, PRINTDF, DFPARAM, CLIENT, STRTODAY, PARAMSET)
+    one_day_fifty, one_day_two_hundred, close_price = get_indicators(TICKERS, PRINTDF, CLIENT, STRTODAY, PARAMSET)
 
 
 with open(config.TESTCSV, mode='w') as csv_file:

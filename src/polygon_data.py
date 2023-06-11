@@ -77,7 +77,7 @@ def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier, printDF=
 Gets the sma values for each ticker
 '''
 # TODO4: make get_indicators script format not function 
-def get_indicators(tickers, dfPrint, dfParams, client, strToday, paramSet):
+def get_indicators(tickers, dfPrint, client, strToday, paramSet):
 
     ticker_fifty_one_minute = {} # dict 50 sma 1 min interval
     ticker_two_hundred_one_minute = {} # dict 200 sma 1 min interval
@@ -128,7 +128,8 @@ def get_indicators(tickers, dfPrint, dfParams, client, strToday, paramSet):
             close_dict[ticker] = -1
 
         # ensure we don't pass 5 API calls/min for polygon 
-        time.sleep(30)
+        if not (ticker == tickers[-1]):
+            time.sleep(30)
 
 
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
