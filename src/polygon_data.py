@@ -10,13 +10,15 @@ import time
 import pandas as pd 
 import numpy as np
 
+import configurationFile as config
+
 def ts_to_time_of_day(ts) -> timedelta:
     return timedelta(seconds=ts.second,minutes=ts.minute,hours=ts.hour)
 
 '''
 get_dataframe - Called by get_indicators(), Gets the dataframe for the given ticker and time interval 
 '''
-def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier, printDF=0):
+def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier):
 
     to = date.today()
 
@@ -54,7 +56,7 @@ def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier, printDF=
     # assigns value of ticker to simple moving average of last 200mins of before market close and rounds to two decimal
     two_hundred_interval = round(np.mean(df[["close"]].head(200)).values[0],2)
 
-    if (printDF):
+    if (config.PRINTDF):
         print(f'--- {intMultiplier} {timeUnit} ---')
         print(df)
         print('--------')
@@ -65,7 +67,7 @@ def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier, printDF=
 Gets the sma values for each ticker
 '''
 # TODO4: make get_indicators script format not function 
-def get_indicators(tickers, dfPrint, client, strToday, paramSet):
+def get_indicators(tickers, client, strToday, paramSet):
 
     ticker_fifty_one_minute = {} # dict 50 sma 1 min interval
     ticker_two_hundred_one_minute = {} # dict 200 sma 1 min interval
@@ -87,10 +89,9 @@ def get_indicators(tickers, dfPrint, client, strToday, paramSet):
             curStrToday = paramSet[i][2] # today string 'Y-m-d' 
             curTimeInterval = paramSet[i][3] # time interval (minute, day) 
             curMultiplier = paramSet[i][4] # multiplier for time interval 
-            curdfPrint = paramSet[i][5] # print dataframe 
 
             try: 
-                curDF = get_dataframe(ticker, curClient, curStrToday, curTimeInterval, curMultiplier, curdfPrint)
+                curDF = get_dataframe(ticker, curClient, curStrToday, curTimeInterval, curMultiplier)
                 finalIndexes.append(curDF[0])
                 finalIndexes.append(curDF[1])
             except Exception as e:
@@ -117,7 +118,7 @@ def get_indicators(tickers, dfPrint, client, strToday, paramSet):
 
         # ensure we don't pass 5 API calls/min for polygon 
         if not (ticker == tickers[-1]):
-            time.sleep(30)
+            time.sleep(60)
 
 
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \

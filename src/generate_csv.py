@@ -5,7 +5,6 @@ and newpoly.py
 
 import csv
 from polygon_data import get_indicators
-from datetime import date, timedelta
 import configurationFile as config
 
 # from email_csv import send_email
@@ -14,7 +13,6 @@ import configurationFile as config
 # full_time = f"{from_} to {to}"
 
 TICKERS = config.TESTTICKERS
-PRINTDF = config.PRINTDF
 CLIENT = config.client
 STRTODAY = config.STRTODAY
 PARAMSET = config.PARAMSET
@@ -22,7 +20,7 @@ PARAMSET = config.PARAMSET
 # TODO6: Change get_indicators return to index the list
 # uses newpoly.py
 one_minute_fifty, one_minute_two_hundred, five_minute_fifty, five_minute_two_hundred, \
-    one_day_fifty, one_day_two_hundred, close_price = get_indicators(TICKERS, PRINTDF, CLIENT, STRTODAY, PARAMSET)
+    one_day_fifty, one_day_two_hundred, close_price = get_indicators(TICKERS, CLIENT, STRTODAY, PARAMSET)
 
 
 with open(config.TESTCSV, mode='w') as csv_file:

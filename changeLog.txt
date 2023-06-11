@@ -13,3 +13,4 @@ tODO# 	Status  Priority	Summary
 9   Done        5       DFPARAM can be deleted in configurationFile.py
 10  ------      5       Clean up PARAMSET in configurationFile.py
 11  Working     1       Work to auto fill Trading Post Excel (not platform) in fillTP.py 
+12  Done        2       Remove PRINTDF as parameter in polygon_data.py
