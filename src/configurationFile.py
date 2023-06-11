@@ -18,12 +18,11 @@ PRINTDF = 1 # prints dataframes to terminal
 # polygon login 
 '''Insert your key. Play around with the free tier key first.'''
 key = "nGJdIcDOy3hzWwn6X6gritFJkgDWTpRJ"
-client = RESTClient(key)
+CLIENT = RESTClient(key)
 
-# TODO10: Clean up PARAMSET. Remove ticker (index [0]) from parameters. 
-PARAMSET = [[ '', client, STRTODAY, 'minute', 1, PRINTDF], 
-                ['', client, STRTODAY, "minute", 5, PRINTDF], 
-                ['', client, STRTODAY, "day", 1, PRINTDF]]
+PARAMSET = [[ 'minute', 1 ], # one minute time interval 
+                [ 'minute', 5 ], # 5 minute time interval 
+                [ 'day', 1 ]] #one day time interval 
 
 TEMPLATEEXCELFILE = 'TA.WORK.xlsx'
 OUTPUTEXCELFILE = 'testOutputExcel.xlsx'
@@ -38,7 +37,7 @@ TICKERS = ["JNK", "GDX", "VCR", "VDC", "VIG", "VDE", "VFH",
 
 TESTTICKERS = ["JNK"]
 
-INDICATORS = ['one_day_50', 'one_day_200', 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200']
+INDICATORS = ['one_day_50', 'one_day_200', 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200', 'close_price']
 
 INPUTS = { 'G':'last_price', 'H':'one_day_50', 'I':'one_day_200', 'J':'five_min_50', 
         'K':'five_min_200', 'L':'one_min_50', 'M':'one_min_200' }

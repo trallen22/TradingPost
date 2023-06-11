@@ -18,9 +18,9 @@ def ts_to_time_of_day(ts) -> timedelta:
 '''
 get_dataframe - Called by get_indicators(), Gets the dataframe for the given ticker and time interval 
 '''
-def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier):
+def get_dataframe(curTicker, timeUnit, intMultiplier):
 
-    to = date.today()
+    endDay = date.today()
 
     if timeUnit == 'minute':
         days = timedelta(7)
@@ -30,11 +30,11 @@ def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier):
         print('Invalid time unit')
         exit(5)
 
-    startDay = to - days
+    startDay = endDay - days
     startDay = startDay.strftime('%Y-%m-%d')
 
     # call to polygon.io api 
-    resp = client.get_aggs(ticker=curTicker, multiplier=intMultiplier, timespan = timeUnit, from_=startDay, to=strToday, adjusted=True, sort="desc")
+    resp = config.CLIENT.get_aggs(ticker=curTicker, multiplier=intMultiplier, timespan = timeUnit, from_=startDay, to=config.STRTODAY, adjusted=True, sort="desc")
     df = pd.DataFrame(resp)
 
     # converts UTC timestampt to EST and creates time of day column
@@ -67,7 +67,7 @@ def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier):
 Gets the sma values for each ticker
 '''
 # TODO4: make get_indicators script format not function 
-def get_indicators(tickers, client, strToday, paramSet):
+def get_indicators(tickers, paramSet):
 
     ticker_fifty_one_minute = {} # dict 50 sma 1 min interval
     ticker_two_hundred_one_minute = {} # dict 200 sma 1 min interval
@@ -84,14 +84,12 @@ def get_indicators(tickers, client, strToday, paramSet):
         Generate 50 and 200 for given time interval 
         '''
         for i in range(len(paramSet)): 
-            # curTicker = paramSet[i][0] # need to remove 
-            curClient = paramSet[i][1] # client 
-            curStrToday = paramSet[i][2] # today string 'Y-m-d' 
-            curTimeInterval = paramSet[i][3] # time interval (minute, day) 
-            curMultiplier = paramSet[i][4] # multiplier for time interval 
+
+            curTimeInterval = paramSet[i][0] # time interval (minute, day) 
+            curMultiplier = paramSet[i][1] # multiplier for time interval 
 
             try: 
-                curDF = get_dataframe(ticker, curClient, curStrToday, curTimeInterval, curMultiplier)
+                curDF = get_dataframe(ticker, curTimeInterval, curMultiplier)
                 finalIndexes.append(curDF[0])
                 finalIndexes.append(curDF[1])
             except Exception as e:
@@ -110,7 +108,7 @@ def get_indicators(tickers, client, strToday, paramSet):
         '''
         try:
             # this needs to be run after midnight 
-            close_price = client.get_daily_open_close_agg(ticker=ticker, date=str(date.today() - timedelta(1))).close
+            close_price = config.CLIENT.get_daily_open_close_agg(ticker=ticker, date=str(date.today() - timedelta(1))).close
             close_dict[ticker] =  close_price if not close_price == '' else -1
         except Exception as f:
             print(f)

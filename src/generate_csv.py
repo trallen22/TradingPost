@@ -13,14 +13,13 @@ import configurationFile as config
 # full_time = f"{from_} to {to}"
 
 TICKERS = config.TESTTICKERS
-CLIENT = config.client
 STRTODAY = config.STRTODAY
 PARAMSET = config.PARAMSET
 
 # TODO6: Change get_indicators return to index the list
 # uses newpoly.py
 one_minute_fifty, one_minute_two_hundred, five_minute_fifty, five_minute_two_hundred, \
-    one_day_fifty, one_day_two_hundred, close_price = get_indicators(TICKERS, CLIENT, STRTODAY, PARAMSET)
+    one_day_fifty, one_day_two_hundred, close_price = get_indicators(TICKERS, PARAMSET)
 
 
 with open(config.TESTCSV, mode='w') as csv_file:
