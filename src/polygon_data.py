@@ -5,6 +5,7 @@ and 1 day and close price
 '''
 
 from pkgutil import get_data
+from typing import final
 from polygon import RESTClient
 from datetime import datetime, timedelta, date
 import time
@@ -28,6 +29,7 @@ def ts_to_time_of_day(ts) -> timedelta:
 get_dataframe - Called by get_indicators(), Gets the dataframe for the given ticker and time interval 
 '''
 def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier, printDF=0):
+    # TODO7: in get_dataframe Fix time delta for one day interval -> timedelta(300)
     to = date.today()
     days = timedelta(7)
     ffrom_ = to - days
@@ -66,13 +68,12 @@ def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier, printDF=
 '''
 Gets the sma values for each ticker
 '''
-# TODO4: make this script format not function 
-def get_indicators(tickers, dfPrint, dfParams, client, strToday):
+# TODO4: make get_indicators script format not function 
+def get_indicators(tickers, dfPrint, dfParams, client, strToday, paramSet):
 
     # use '- timedelta(1) ' to debug using yesterday's data 
     today = date.today()
     strToday = today.strftime('%Y-%m-%d')
-    print(f'strToday: {strToday}')
     
     minDelta = timedelta(7)
     minDays = today - minDelta
@@ -89,63 +90,47 @@ def get_indicators(tickers, dfPrint, dfParams, client, strToday):
     close_dict = {} # dict of closing prices
 
     for ticker in tickers:
-        # TODO1: Add get_dataframe parameter values to the config file
+        finalIndexes = []
 
-        paramSet = [[ ticker, client, strToday, 'minute', 1, dfPrint ], 
-                        [ticker, client, strToday, "minute", 5, dfPrint], 
-                        [ticker, client, strToday, "day", 1, dfPrint]]
+        '''
+        Generate 50 and 200 for given time interval 
+        '''
+        for i in range(len(paramSet)): 
+            # curTicker = paramSet[i][0] # need to remove 
+            curClient = paramSet[i][1]
+            curStrToday = paramSet[i][2]
+            curTimeInterval = paramSet[i][3]
+            curMultiplier = paramSet[i][4]
+            curdfPrint = paramSet[i][5]
+            try: 
+                curDF = get_dataframe(ticker, curClient, curStrToday, curTimeInterval, curMultiplier, curdfPrint)
+                finalIndexes.append(curDF[0])
+                finalIndexes.append(curDF[1])
+            except Exception as e:
+                finalIndexes.append(-1)
+                finalIndexes.append(-1) 
 
-        for paramList in paramSet: 
-            curDF = get_dataframe(paramList[0], paramList[1], paramList[2], paramList[3], paramList[4], paramList)
+        ticker_fifty_one_minute[ticker] = finalIndexes[0]
+        ticker_two_hundred_one_minute[ticker] = finalIndexes[1]
+        ticker_fifty_five_minute[ticker] = finalIndexes[2]
+        ticker_two_hundred_five_minute[ticker] = finalIndexes[3]
+        ticker_fifty_one_day[ticker] = finalIndexes[4]
+        ticker_two_hundred_one_day[ticker] = finalIndexes[5]
 
-        # TODO2: break up try statement
+        '''
+        Generate closing price by date 
+        '''
         try:
-            
-            '''
-            Generate 1 minute interval data
-            '''
-            one_minute_df = get_dataframe(ticker, client, strToday, "minute", 1, dfPrint)
-            ticker_fifty_one_minute[ticker] = one_minute_df[0] # 50 interval
-            ticker_two_hundred_one_minute[ticker] = one_minute_df[1] # 200 interval
-            
-            '''
-            Generate 5 minute interval data
-            '''
-            five_minute_df = get_dataframe(ticker, client, strToday, "minute", 5, dfPrint)
-            ticker_fifty_five_minute[ticker] = five_minute_df[0]
-            ticker_two_hundred_five_minute[ticker] = five_minute_df[1]
-
-            '''
-            Generate 1 day interval data
-            '''
-            one_day_df = get_dataframe(ticker, client, strToday, "day", 1, dfPrint)
-            ticker_fifty_one_day[ticker] = one_day_df[0]
-            ticker_two_hundred_one_day[ticker] = one_day_df[1]
-
-            '''
-            Generate closing price by date 
-            '''
-            try:
-                # this needs to be run after midnight 
-                close_price = client.get_daily_open_close_agg(ticker=ticker, date=str(date.today() - timedelta(1))).close
-                close_dict[ticker] =  close_price if not close_price == '' else -1
-            except Exception as f:
-                print(f)
-                close_dict[ticker] = -1
-
-        # TODO3: make these errors on a case by case bases
-        except Exception as e:
-            print("Error from Polygon: " + str(e))
-            ticker_fifty_one_minute[ticker] = -1
-            ticker_two_hundred_one_minute[ticker] = -1
+            # this needs to be run after midnight 
+            close_price = client.get_daily_open_close_agg(ticker=ticker, date=str(date.today() - timedelta(1))).close
+            close_dict[ticker] =  close_price if not close_price == '' else -1
+        except Exception as f:
+            print(f)
             close_dict[ticker] = -1
-            ticker_fifty_five_minute[ticker] = -1
-            ticker_two_hundred_five_minute[ticker] = -1
-            ticker_fifty_one_day[ticker] = -1
-            ticker_two_hundred_one_day[ticker] = -1
 
         # ensure we don't pass 5 API calls/min for polygon 
         time.sleep(30)
+
 
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
     ticker_two_hundred_five_minute, ticker_fifty_one_day, ticker_two_hundred_one_day, close_dict

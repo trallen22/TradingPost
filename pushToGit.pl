@@ -1,3 +1,6 @@
+#!/usr/bin/perl 
+# Exectuable script to push all repo changes to git 
+
 use strict;
 
 my $commitMsg = shift;

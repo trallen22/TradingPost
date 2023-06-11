@@ -2,6 +2,7 @@
 This file holds all the configuraion information
 '''
 from datetime import date
+from re import S
 from polygon import RESTClient 
 
 # convert todays date to mm/dd form 
@@ -18,8 +19,14 @@ PRINTDF = 1 # prints dataframes to terminal
 '''Insert your key. Play around with the free tier key first.'''
 key = "nGJdIcDOy3hzWwn6X6gritFJkgDWTpRJ"
 client = RESTClient(key)
-DFPARAM = [[ client, 
-                ]]
+
+# TODO9: DFPARAM can be deleted 
+DFPARAM = [[ client ]]
+
+# TODO10: Clean up PARAMSET. Remove ticker (index [0]) from parameters. 
+PARAMSET = [[ '', client, STRTODAY, 'minute', 1, PRINTDF], 
+                ['', client, STRTODAY, "minute", 5, PRINTDF], 
+                ['', client, STRTODAY, "day", 1, PRINTDF]]
 
 TEMPLATEEXCELFILE = 'TA.WORK.xlsx'
 OUTPUTEXCELFILE = 'testOutputExcel.xlsx'
