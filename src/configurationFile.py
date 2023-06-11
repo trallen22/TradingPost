@@ -23,7 +23,7 @@ client = RESTClient(key)
 # TODO9: DFPARAM can be deleted 
 DFPARAM = [[ client ]]
 
-# TODO10: Clean up PARAMSET 
+# TODO10: Clean up PARAMSET. Remove ticker (index [0]) from parameters. 
 PARAMSET = [[ '', client, STRTODAY, 'minute', 1, PRINTDF], 
                 ['', client, STRTODAY, "minute", 5, PRINTDF], 
                 ['', client, STRTODAY, "day", 1, PRINTDF]]
