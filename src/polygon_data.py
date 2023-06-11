@@ -4,23 +4,11 @@ This script scrapes polygon.io and returns the 50 day sma for intervals
 and 1 day and close price 
 '''
 
-from pkgutil import get_data
-from typing import final
 from polygon import RESTClient
-from datetime import datetime, timedelta, date
+from datetime import timedelta, date
 import time
 import pandas as pd 
 import numpy as np
-import configurationFile as config
-
-def ts_to_datetime(ts) -> str:
-    return datetime.fromtimestamp(ts / 1000.0).strftime('%Y-%m-%d %H:%M')
-
-def ts_to_hour(ts) -> int:
-    return int(datetime.fromtimestamp(ts / 1000.0).hour)
-
-def ts_to_min(ts) -> int:
-    return int(datetime.fromtimestamp(ts / 1000.0).minute)
 
 def ts_to_time_of_day(ts) -> timedelta:
     return timedelta(seconds=ts.second,minutes=ts.minute,hours=ts.hour)
