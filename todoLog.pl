@@ -1,13 +1,16 @@
 use strict;
 
+
+# Gets the todo number for format TODO#
 sub get_number {
     my $task = shift; 
     my $logNumber = (my @tmpTask = split(':', $task))[0];
     my $number = substr($logNumber, 5);
-    
+
     return $number;
 }
 
+# Checks each file in directory for TODOs 
 sub check_folder {
     my $curPath = shift;
     chomp($curPath);
@@ -27,13 +30,18 @@ sub check_folder {
                 my $tmpStr = substr($_, 0, 5);
                 if ($tmpStr eq uc('#todo')) {
                     my $logNum = get_number($_);
-                    print "$logNum\n";
+                    if ($logNum eq '') {
+                        print "Lonesome TODO\n";
+                    } else {
+                        print "$logNum\n";
+                    }
+                    
                 }
             }
         }     
     }
 }
-
+# TODO: TEST
 # TODO8: Work on script to editing changeLog.txt
 
 my $cwd = `pwd`;
