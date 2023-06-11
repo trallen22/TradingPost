@@ -29,14 +29,22 @@ def ts_to_time_of_day(ts) -> timedelta:
 get_dataframe - Called by get_indicators(), Gets the dataframe for the given ticker and time interval 
 '''
 def get_dataframe(curTicker, client, strToday, timeUnit, intMultiplier, printDF=0):
-    # TODO7: in get_dataframe Fix time delta for one day interval -> timedelta(300)
+
     to = date.today()
-    days = timedelta(7)
-    ffrom_ = to - days
-    ffrom_ = ffrom_.strftime('%Y-%m-%d')
+
+    if timeUnit == 'minute':
+        days = timedelta(7)
+    elif timeUnit == 'day':
+        days = timedelta(300)
+    else: 
+        print('Invalid time unit')
+        exit(5)
+
+    startDay = to - days
+    startDay = startDay.strftime('%Y-%m-%d')
 
     # call to polygon.io api 
-    resp = client.get_aggs(ticker=curTicker, multiplier=intMultiplier, timespan = timeUnit, from_=ffrom_, to=strToday, adjusted=True, sort="desc")
+    resp = client.get_aggs(ticker=curTicker, multiplier=intMultiplier, timespan = timeUnit, from_=startDay, to=strToday, adjusted=True, sort="desc")
     df = pd.DataFrame(resp)
 
     # converts UTC timestampt to EST and creates time of day column
@@ -71,16 +79,6 @@ Gets the sma values for each ticker
 # TODO4: make get_indicators script format not function 
 def get_indicators(tickers, dfPrint, dfParams, client, strToday, paramSet):
 
-    # use '- timedelta(1) ' to debug using yesterday's data 
-    today = date.today()
-    strToday = today.strftime('%Y-%m-%d')
-    
-    minDelta = timedelta(7)
-    minDays = today - minDelta
-
-    daysDelta = timedelta(300)
-    daysDays = today - daysDelta
-
     ticker_fifty_one_minute = {} # dict 50 sma 1 min interval
     ticker_two_hundred_one_minute = {} # dict 200 sma 1 min interval
     ticker_fifty_five_minute = {} # dict 50 sma 5 min interval
@@ -97,11 +95,12 @@ def get_indicators(tickers, dfPrint, dfParams, client, strToday, paramSet):
         '''
         for i in range(len(paramSet)): 
             # curTicker = paramSet[i][0] # need to remove 
-            curClient = paramSet[i][1]
-            curStrToday = paramSet[i][2]
-            curTimeInterval = paramSet[i][3]
-            curMultiplier = paramSet[i][4]
-            curdfPrint = paramSet[i][5]
+            curClient = paramSet[i][1] # client 
+            curStrToday = paramSet[i][2] # today string 'Y-m-d' 
+            curTimeInterval = paramSet[i][3] # time interval (minute, day) 
+            curMultiplier = paramSet[i][4] # multiplier for time interval 
+            curdfPrint = paramSet[i][5] # print dataframe 
+
             try: 
                 curDF = get_dataframe(ticker, curClient, curStrToday, curTimeInterval, curMultiplier, curdfPrint)
                 finalIndexes.append(curDF[0])
