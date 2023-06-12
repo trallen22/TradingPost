@@ -2,8 +2,10 @@
 This file holds all the configuraion information
 '''
 from datetime import date
-from re import S
 from polygon import RESTClient 
+import os
+
+SRCPATH = os.path.dirname(__file__) + '/'
 
 # convert todays date to mm/dd form 
 today = date.today()
@@ -24,12 +26,11 @@ PARAMSET = [[ 'minute', 1 ], # one minute time interval
                 [ 'minute', 5 ], # 5 minute time interval 
                 [ 'day', 1 ]] #one day time interval 
 
-TEMPLATEEXCELFILE = 'TA.WORK.xlsx'
-OUTPUTEXCELFILE = 'testOutputExcel.xlsx'
+TEMPLATEEXCELFILE = SRCPATH + 'TA.WORK.xlsx'
+OUTPUTEXCELFILE = SRCPATH + 'testOutputExcel.xlsx'
 
-CSVFILE = 'etf.csv'
-
-TESTCSV = 'etf3.csv'
+CSVFILE = SRCPATH + 'etf.csv'
+TESTCSV = SRCPATH + 'etf3.csv'
 
 TICKERS = ["JNK", "GDX", "VCR", "VDC", "VIG", "VDE", "VFH", 
         "VWO", "VHT", "VIS", "VGT", "VAW", "VNQ", "VOO", 
