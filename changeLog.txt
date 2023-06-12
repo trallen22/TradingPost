@@ -11,6 +11,9 @@ tODO# 	Status  Priority	Summary
 7 	Done		1       In get_dataframe Fix time delta for one day interval -> timedelta(300) in polygon_data.py
 8   ------      2       Work on script to editing changeLog.txt in todoLog.pl
 9   Done        5       DFPARAM can be deleted in configurationFile.py
-10  Done      5       Clean up PARAMSET. Remove ticker, client, and STRTODAY from parameters in configurationFile.py
+10  Done        5       Clean up PARAMSET. Remove ticker, client, and STRTODAY from parameters in configurationFile.py
 11  Working     1       Work to auto fill Trading Post Excel (not platform) in fillTP.py 
 12  Done        2       Remove PRINTDF as parameter in polygon_data.py
+13  ------      3       move for loop through tickers to generate_csv.py in polygon_data.py 
+14  Done        2       Use SRCPATH with generate_csv and copyExcel in configurationFile.py 
+15  ------      2       add parameters to fill_excel in copyExcel.py 

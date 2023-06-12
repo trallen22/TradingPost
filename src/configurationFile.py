@@ -26,8 +26,11 @@ PARAMSET = [[ 'minute', 1 ], # one minute time interval
                 [ 'minute', 5 ], # 5 minute time interval 
                 [ 'day', 1 ]] #one day time interval 
 
-TEMPLATEEXCELFILE = SRCPATH + 'TA.WORK.xlsx'
-OUTPUTEXCELFILE = SRCPATH + 'testOutputExcel.xlsx'
+TEMPLATEPLATFORM = SRCPATH + 'TA.WORK.xlsx'
+OUTPUTPLATFORM = SRCPATH + 'testOutputExcel.xlsx'
+
+TEMPEXCEL = SRCPATH + 'stocktradingpost2.xlsx'
+OUTPUTEXCEL = SRCPATH + 'testTradingPost.xlsx'
 
 CSVFILE = SRCPATH + 'etf.csv'
 TESTCSV = SRCPATH + 'etf3.csv'

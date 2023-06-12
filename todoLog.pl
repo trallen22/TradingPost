@@ -33,7 +33,7 @@ sub check_folder {
                     if ($logNum eq '') {
                         print "Lonesome TODO\n";
                     } else {
-                        print "$logNum\n";
+                        print "$logNum in $path\n";
                     }
                     
                 }
@@ -41,7 +41,7 @@ sub check_folder {
         }     
     }
 }
-# TODO: TEST
+
 # TODO8: Work on script to editing changeLog.txt
 
 my $cwd = `pwd`;

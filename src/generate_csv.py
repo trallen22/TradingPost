@@ -9,37 +9,35 @@ import configurationFile as config
 
 # from email_csv import send_email
 
-# This might could be used with PRINTDF in config
-# full_time = f"{from_} to {to}"
+def generate_csv():
+    
+    TICKERS = config.TESTTICKERS
+    PARAMSET = config.PARAMSET
 
-TICKERS = config.TESTTICKERS
-STRTODAY = config.STRTODAY
-PARAMSET = config.PARAMSET
-
-# TODO6: Change get_indicators return to index the list
-# uses newpoly.py
-one_minute_fifty, one_minute_two_hundred, five_minute_fifty, five_minute_two_hundred, \
-    one_day_fifty, one_day_two_hundred, close_price = get_indicators(TICKERS, PARAMSET)
+    # TODO6: Change get_indicators return to index the list
+    # uses newpoly.py
+    one_minute_fifty, one_minute_two_hundred, five_minute_fifty, five_minute_two_hundred, \
+        one_day_fifty, one_day_two_hundred, close_price = get_indicators(TICKERS, PARAMSET)
 
 
-with open(config.TESTCSV, mode='w') as csv_file:
-    fieldnames = ['ticker', 'one_day_50',
-                'one_day_200', 'five_min_50', 
-                'five_min_200','one_min_50', 
-                'one_min_200', 'last_price']
-    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-    writer.writeheader()
+    with open(config.TESTCSV, mode='w') as csv_file:
+        fieldnames = ['ticker', 'one_day_50',
+                    'one_day_200', 'five_min_50', 
+                    'five_min_200','one_min_50', 
+                    'one_min_200', 'last_price']
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
 
-    for ticker in TICKERS:
-        writer.writerow({
-            'ticker': ticker,
-            'one_day_50': one_day_fifty[ticker],
-            'one_day_200': one_day_two_hundred[ticker],
-            'five_min_50': five_minute_fifty[ticker],
-            'five_min_200': five_minute_two_hundred[ticker],
-            'one_min_50': one_minute_fifty[ticker],
-            'one_min_200': one_minute_two_hundred[ticker],
-            'last_price': close_price[ticker]
-        })
+        for ticker in TICKERS:
+            writer.writerow({
+                'ticker': ticker,
+                'one_day_50': one_day_fifty[ticker],
+                'one_day_200': one_day_two_hundred[ticker],
+                'five_min_50': five_minute_fifty[ticker],
+                'five_min_200': five_minute_two_hundred[ticker],
+                'one_min_50': one_minute_fifty[ticker],
+                'one_min_200': one_minute_two_hundred[ticker],
+                'last_price': close_price[ticker]
+            })
 
-# send_email()
+    # send_email()

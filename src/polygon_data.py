@@ -77,6 +77,7 @@ def get_indicators(tickers, paramSet):
     ticker_two_hundred_one_day = {} # dict 200 sma 1 day interval
     close_dict = {} # dict of closing prices
 
+    # TODO13: move for loop through tickers to generate_csv.py 
     for ticker in tickers:
         finalIndexes = []
 
