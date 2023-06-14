@@ -4,21 +4,16 @@ and newpoly.py
 '''
 
 import csv
+import time
 from polygon_data import get_indicators
 import configurationFile as config
 
 # from email_csv import send_email
 
 def generate_csv():
-    
+
     TICKERS = config.TESTTICKERS
     PARAMSET = config.PARAMSET
-
-    # TODO6: Change get_indicators return to index the list
-    # uses newpoly.py
-    one_minute_fifty, one_minute_two_hundred, five_minute_fifty, five_minute_two_hundred, \
-        one_day_fifty, one_day_two_hundred, close_price = get_indicators(TICKERS, PARAMSET)
-
 
     with open(config.TESTCSV, mode='w') as csv_file:
         fieldnames = ['ticker', 'one_day_50',
@@ -29,15 +24,22 @@ def generate_csv():
         writer.writeheader()
 
         for ticker in TICKERS:
+            # uses newpoly.py
+            one_minute_fifty, one_minute_two_hundred, five_minute_fifty, five_minute_two_hundred, \
+        one_day_fifty, one_day_two_hundred, close_price = get_indicators(ticker, PARAMSET)
+            
             writer.writerow({
                 'ticker': ticker,
-                'one_day_50': one_day_fifty[ticker],
-                'one_day_200': one_day_two_hundred[ticker],
-                'five_min_50': five_minute_fifty[ticker],
-                'five_min_200': five_minute_two_hundred[ticker],
-                'one_min_50': one_minute_fifty[ticker],
-                'one_min_200': one_minute_two_hundred[ticker],
-                'last_price': close_price[ticker]
+                'one_day_50': one_day_fifty,
+                'one_day_200': one_day_two_hundred,
+                'five_min_50': five_minute_fifty,
+                'five_min_200': five_minute_two_hundred,
+                'one_min_50': one_minute_fifty,
+                'one_min_200': one_minute_two_hundred,
+                'last_price': close_price
             })
+            # ensure we don't pass 5 API calls/min for polygon 
+            if not (ticker == TICKERS[-1]):
+                time.sleep(60)
 
     # send_email()
