@@ -66,7 +66,6 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
 '''
 Gets the sma values for each ticker
 '''
-# TODO4: make get_indicators script format not function 
 def get_indicators(ticker, paramSet):
 
     finalIndexes = []
