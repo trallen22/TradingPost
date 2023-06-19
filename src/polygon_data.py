@@ -98,7 +98,7 @@ def get_indicators(ticker, paramSet):
     '''
     try:
         # this needs to be run after midnight 
-        close_price = config.CLIENT.get_daily_open_close_agg(ticker=ticker, date=str(date.today() - timedelta(1))).close
+        close_price = config.CLIENT.get_daily_open_close_agg(ticker=ticker, date=str(date.today() - timedelta(3))).close
         close_dict =  close_price if not close_price == '' else -1
     except Exception as f:
         print(f)

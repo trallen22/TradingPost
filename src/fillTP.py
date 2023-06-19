@@ -9,6 +9,6 @@ import configurationFile as config
 from generate_csv import generate_csv
 from copyExcel import fill_excel, generate_tp
 
-generate_csv()
+# generate_csv()
 fill_excel()
 generate_tp()

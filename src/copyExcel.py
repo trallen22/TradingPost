@@ -9,16 +9,19 @@ import openpyxl
 import configurationFile as config
 
 # TODO19: Implement set_ranges 
-def set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, platCols, tickerRow):
+def set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, platCols, tickerRow, clearCells=False):
+    if (clearCells):
+        excelSheet[f'{tpCol}{tpRangeRow[0]}'].value = ''
+        excelSheet[f'{tpCol}{tpRangeRow[1]}'].value = ''
+        return 
     for i in range(len(tpRangeRow)):
-        # print(f'{platCols[i]}{tickerRow}')
-        # print(platformSheet[f'{platCols[i]}{tickerRow}'].value)
         excelSheet[f'{tpCol}{tpRangeRow[i]}'].value = platformSheet[f'{platCols[i]}{tickerRow}'].value
 
     return
 
 def determine_buy_sell(platformSheet, excelSheet, platRow, signalRow, tpCol):
     signalCell = excelSheet[f'{tpCol}{signalRow}']
+    tpRangeRow = [signalRow + 1, signalRow + 2]
     if (platformSheet[f'G{platRow}'].value > platformSheet[f'H{platRow}'].value):
         # Looking for sell signals 
         if (platformSheet[f'G{platRow}'].value > platformSheet[f'I{platRow}'].value):
@@ -31,8 +34,6 @@ def determine_buy_sell(platformSheet, excelSheet, platRow, signalRow, tpCol):
             else:
                 signalCell.value = 'HOLD'
                 signalCell.fill = config.HOSELLCOLOR
-            # run set_ranges()
-            tpRangeRow = [12, 13]
             rangeCols = [ 'Z', 'AA' ]
             set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, rangeCols, platRow)
             return 
@@ -48,10 +49,13 @@ def determine_buy_sell(platformSheet, excelSheet, platRow, signalRow, tpCol):
             else:
                 signalCell.value = 'HOLD'
                 signalCell.fill = config.HOBUYCOLOR
-            # run set_ranges()
+            rangeCols = [ 'X', 'Y' ]
+            set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, rangeCols, platRow)
             return 
     signalCell.value = 'HOLD'
     signalCell.fill = config.PLAINCOLOR
+    set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, [], platRow, clearCells=True)
+
 
 # TODO16: figure out coloring for output platform 
 def generate_tp():
@@ -59,10 +63,6 @@ def generate_tp():
     tickerIndex = {}
 
     # TODO21: work on getting value instead of formula 
-    # # loading platform as workbook object
-    # rawPlatform = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=True)
-    # rawPlatform.save()
-    # platformSheet = rawPlatform.active
 
     # USED FOR DEMO 
     platform = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=True)
@@ -72,7 +72,7 @@ def generate_tp():
     shutil.copyfile(config.TEMPEXCEL, config.OUTPUTEXCEL)
 
     # loading excel as workbook object
-    workbook = openpyxl.load_workbook(config.OUTPUTEXCEL, data_only=True)
+    workbook = openpyxl.load_workbook(config.OUTPUTEXCEL)
     excelSheet = workbook.active
 
     # going through each cell and getting ticker index 
@@ -86,6 +86,7 @@ def generate_tp():
         rowIndex = 6 + (i // 7) * 10
         colChar = chr(i % 7 + 67) # tp column ETF coordinate; ascii 67 is 'C' 
         excelSheet[f'{colChar}{rowIndex}'] = config.TICKERS[i] # filling etf name cell 
+        excelSheet[f'{colChar}{rowIndex + 3}'] = config.TODAYDATE # filling today date 
         excelSheet[f'{colChar}{rowIndex + 8}'] = platformSheet[f'G{tickerIndex[config.TICKERS[i]]}'].value # close price 
         determine_buy_sell(platformSheet, excelSheet, tickerIndex[config.TICKERS[i]], rowIndex + 5, colChar)
 
@@ -93,7 +94,6 @@ def generate_tp():
         print(f'saving trading post as {config.OUTPUTEXCEL}')
 
     workbook.save(config.OUTPUTEXCEL)
-
 
 # TODO15: add parameters to fill_excel
 def fill_excel():
@@ -107,11 +107,11 @@ def fill_excel():
         for row in rowReader:
             tickerDict[row['ticker']] = row
 
-    # makes a copy of the template excel file
+    # makes a copy of the template platform file
     shutil.copyfile(config.TEMPLATEPLATFORM, config.OUTPUTPLATFORM)
 
     # loading excel as workbook object
-    workbook = openpyxl.load_workbook(config.OUTPUTPLATFORM)
+    workbook = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=True)
     activeSheet = workbook.active
 
     # going through each cell and getting ticker index 
@@ -132,5 +132,4 @@ def fill_excel():
     if (config.DEBUG):
         print(f'created temp platform {config.OUTPUTPLATFORM}')
     workbook.save(config.OUTPUTPLATFORM)
-
-# generate_tp() # used for testing 
+    workbook.close()

@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 def generate_csv():
 
-    with open(config.CSVFILE, mode='a') as csv_file:
+    with open(config.CSVFILE, mode='w') as csv_file:
         fieldnames = ['ticker', 'one_day_50',
                     'one_day_200', 'five_min_50', 
                     'five_min_200','one_min_50', 
@@ -42,5 +42,10 @@ def generate_csv():
             # ensure we don't pass 5 API calls/min for polygon 
             if not (ticker == config.TICKERS[-1]):
                 time.sleep(60)
+    if (config.PBAR):
+        pBar.close()
+
+    if (config.DEBUG):
+        print(f'Generated csv as {config.CSVFILE}')
 
     # send_email()

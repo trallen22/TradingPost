@@ -17,5 +17,8 @@ tODO# 	Status  Priority	Summary
 13  Done        3       move for loop through tickers to generate_csv.py in polygon_data.py 
 14  Done        2       Use SRCPATH with generate_csv and copyExcel in configurationFile.py 
 15  ------      2       add parameters to fill_excel in copyExcel.py 
-16  ------      1       figure out coloring for output platform in copyExcel.py 
+16  ------      2       figure out coloring for output platform in copyExcel.py 
 17  Done        3       add progress bar in generate_csv.py 
+18  ------      1       Add comments everywhere 
+19  Working     1       Implement set_ranges() in copyExcel.py 
+20  Working     4       add debug messages everywhere 
