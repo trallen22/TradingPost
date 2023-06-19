@@ -4,52 +4,48 @@ and newpoly.py
 '''
 
 import csv
+import time
 from polygon_data import get_indicators
-from datetime import date, timedelta
 import configurationFile as config
+from tqdm import tqdm 
 
 # from email_csv import send_email
 
-# TODO5: Try to clean time stuff up
-to = date.today()
-days = timedelta(7)
-from_ = to - days
-to = to.strftime('%Y-%m-%d')
-from_ = from_.strftime('%Y-%m-%d')
+def generate_csv():
 
-full_time = f"{from_} to {to}"
+    with open(config.CSVFILE, mode='w') as csv_file:
+        fieldnames = ['ticker', 'one_day_50',
+                    'one_day_200', 'five_min_50', 
+                    'five_min_200','one_min_50', 
+                    'one_min_200', 'last_price']
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
+        if (config.PBAR):
+            pBar = tqdm(desc='tickers found', total=len(config.TICKERS))
+        for ticker in config.TICKERS:
+            # uses newpoly.py
+            one_minute_fifty, one_minute_two_hundred, five_minute_fifty, five_minute_two_hundred, \
+        one_day_fifty, one_day_two_hundred, close_price = get_indicators(ticker, config.PARAMSET)
+            
+            writer.writerow({
+                'ticker': ticker,
+                'one_day_50': one_day_fifty,
+                'one_day_200': one_day_two_hundred,
+                'five_min_50': five_minute_fifty,
+                'five_min_200': five_minute_two_hundred,
+                'one_min_50': one_minute_fifty,
+                'one_min_200': one_minute_two_hundred,
+                'last_price': close_price
+            })
+            if (config.PBAR):
+                pBar.update(1)
+            # ensure we don't pass 5 API calls/min for polygon 
+            if not (ticker == config.TICKERS[-1]):
+                time.sleep(60)
+    if (config.PBAR):
+        pBar.close()
 
-TICKERS = config.TESTTICKERS
-PRINTDF = config.PRINTDF
-DFPARAM = config.DFPARAM
-CLIENT = config.DFPARAM[0][0]
-STRTODAY = config.STRTODAY
-PARAMSET = config.PARAMSET
+    if (config.DEBUG):
+        print(f'Generated csv as {config.CSVFILE}')
 
-# TODO6: Change get_indicators return to index the list
-# uses newpoly.py
-one_minute_fifty, one_minute_two_hundred, five_minute_fifty, five_minute_two_hundred, \
-    one_day_fifty, one_day_two_hundred, close_price = get_indicators(TICKERS, PRINTDF, DFPARAM, CLIENT, STRTODAY, PARAMSET)
-
-
-with open(config.TESTCSV, mode='w') as csv_file:
-    fieldnames = ['ticker', 'one_day_50',
-                'one_day_200', 'five_min_50', 
-                'five_min_200','one_min_50', 
-                'one_min_200', 'last_price']
-    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-    writer.writeheader()
-
-    for ticker in TICKERS:
-        writer.writerow({
-            'ticker': ticker,
-            'one_day_50': one_day_fifty[ticker],
-            'one_day_200': one_day_two_hundred[ticker],
-            'five_min_50': five_minute_fifty[ticker],
-            'five_min_200': five_minute_two_hundred[ticker],
-            'one_min_50': one_minute_fifty[ticker],
-            'one_min_200': one_minute_two_hundred[ticker],
-            'last_price': close_price[ticker]
-        })
-
-# send_email()
+    # send_email()

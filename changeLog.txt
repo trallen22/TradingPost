@@ -5,10 +5,20 @@ tODO# 	Status  Priority	Summary
 1 	Done        2    	Add get_dataframe parameter values to configurationFile.py
 2 	Done     	2       break up try statement in polygon_data.py
 3 	Done       	2       make these errors on a case by case bases in polygon_data.py
-4 	------	    1    	make get_indicators script format not function in polygon_data.py
-5 	------	    4    	Try to clean time stuff up in configuration.py
-6 	------ 		5       Change get_indicators return to index the list in generate_csv.py
-7 	------		2       In get_dataframe Fix time delta for one day interval -> timedelta(300) in polygon_data.py
+4 	Deleted	    3    	make get_indicators script format not function in polygon_data.py
+5 	Done 	    4    	Try to clean time stuff up in generate_csv.py
+6 	Deleted 	5       Change get_indicators return to index the list in generate_csv.py
+7 	Done		1       In get_dataframe Fix time delta for one day interval -> timedelta(300) in polygon_data.py
 8   ------      2       Work on script to editing changeLog.txt in todoLog.pl
-9   ------      5       DFPARAM can be deleted in configurationFile.py
-10  ------      5       Clean up PARAMSET in configurationFile.py
+9   Done        5       DFPARAM can be deleted in configurationFile.py
+10  Done        5       Clean up PARAMSET. Remove ticker, client, and STRTODAY from parameters in configurationFile.py
+11  Working     1       Work to auto fill Trading Post Excel (not platform) in fillTP.py 
+12  Done        2       Remove PRINTDF as parameter in polygon_data.py
+13  Done        3       move for loop through tickers to generate_csv.py in polygon_data.py 
+14  Done        2       Use SRCPATH with generate_csv and copyExcel in configurationFile.py 
+15  ------      2       add parameters to fill_excel in copyExcel.py 
+16  ------      2       figure out coloring for output platform in copyExcel.py 
+17  Done        3       add progress bar in generate_csv.py 
+18  ------      1       Add comments everywhere 
+19  Working     1       Implement set_ranges() in copyExcel.py 
+20  Working     4       add debug messages everywhere 

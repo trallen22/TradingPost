@@ -8,41 +8,128 @@ import csv
 import openpyxl 
 import configurationFile as config
 
-OUTPUTFILE = config.OUTPUTEXCELFILE
-LISTTICKERS = config.TICKERS
-CURCSV = config.CSVFILE
-DATE = config.TODAYDATE
-COLUMNS = config.INPUTS
+# TODO19: Implement set_ranges 
+def set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, platCols, tickerRow, clearCells=False):
+    if (clearCells):
+        excelSheet[f'{tpCol}{tpRangeRow[0]}'].value = ''
+        excelSheet[f'{tpCol}{tpRangeRow[1]}'].value = ''
+        return 
+    for i in range(len(tpRangeRow)):
+        excelSheet[f'{tpCol}{tpRangeRow[i]}'].value = platformSheet[f'{platCols[i]}{tickerRow}'].value
 
-tickerDict = {} 
-tickerIndex = {}
+    return
 
-# Reads through csv file created by generate_csv.py
-with open(CURCSV) as csv_file:
-    rowReader = csv.DictReader(csv_file)
-    for row in rowReader:
-        tickerDict[row['ticker']] = row
+def determine_buy_sell(platformSheet, excelSheet, platRow, signalRow, tpCol):
+    signalCell = excelSheet[f'{tpCol}{signalRow}']
+    tpRangeRow = [signalRow + 1, signalRow + 2]
+    if (platformSheet[f'G{platRow}'].value > platformSheet[f'H{platRow}'].value):
+        # Looking for sell signals 
+        if (platformSheet[f'G{platRow}'].value > platformSheet[f'I{platRow}'].value):
+            minPrice = 1000000000
+            for col in [ 'J', 'K', 'L', 'M' ]:
+                minPrice = min(minPrice, platformSheet[f'{col}{platRow}'].value)
+            if (platformSheet[f'G{platRow}'].value < minPrice):
+                signalCell.value = '!SELL!'
+                signalCell.fill = config.SELLCOLOR
+            else:
+                signalCell.value = 'HOLD'
+                signalCell.fill = config.HOSELLCOLOR
+            rangeCols = [ 'Z', 'AA' ]
+            set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, rangeCols, platRow)
+            return 
+    else:
+        # Looking for buy signals 
+        if (platformSheet[f'G{platRow}'].value < platformSheet[f'I{platRow}'].value):
+            maxPrice = -1
+            for col in [ 'J', 'K', 'L', 'M' ]:
+                maxPrice = max(maxPrice, platformSheet[f'{col}{platRow}'].value)
+            if (platformSheet[f'G{platRow}'].value > maxPrice):
+                signalCell.value = '!BUY!'
+                signalCell.fill = config.BUYCOLOR
+            else:
+                signalCell.value = 'HOLD'
+                signalCell.fill = config.HOBUYCOLOR
+            rangeCols = [ 'X', 'Y' ]
+            set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, rangeCols, platRow)
+            return 
+    signalCell.value = 'HOLD'
+    signalCell.fill = config.PLAINCOLOR
+    set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, [], platRow, clearCells=True)
 
-# makes a copy of the template excel file
-shutil.copyfile(config.TEMPLATEEXCELFILE, OUTPUTFILE)
 
-# loading excel as workbook object
-workbook = openpyxl.load_workbook(OUTPUTFILE)
-activeSheet = workbook.active
+# TODO16: figure out coloring for output platform 
+def generate_tp():
 
-# going through each cell and getting ticker index 
-for row in activeSheet.iter_rows(max_row=activeSheet.max_row, max_col=1):
-    for cell in row:
-        # gets the rows with tickers in the excel 
-        if cell.value in LISTTICKERS:
-            tickerIndex[cell.coordinate[1:]] = cell.value
+    tickerIndex = {}
 
-# populates the input values for the current excel
-for index in tickerIndex:
-    curTicker = tickerIndex[index] 
-    activeSheet[f'E{index}'] = DATE # sets the date in column 'E'
-    for letterCoord in COLUMNS:
-        # autofills with column keys from INPUTS in configurationFile.py
-        activeSheet[f'{letterCoord}{index}'] = float(tickerDict[curTicker][COLUMNS[letterCoord]])
+    # TODO21: work on getting value instead of formula 
 
-workbook.save(OUTPUTFILE)
+    # USED FOR DEMO 
+    platform = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=True)
+    platformSheet = platform.active
+
+    # makes a copy of the template excel file
+    shutil.copyfile(config.TEMPEXCEL, config.OUTPUTEXCEL)
+
+    # loading excel as workbook object
+    workbook = openpyxl.load_workbook(config.OUTPUTEXCEL)
+    excelSheet = workbook.active
+
+    # going through each cell and getting ticker index 
+    for row in platformSheet.iter_rows(max_row=platformSheet.max_row, max_col=1):
+        for cell in row:
+            # gets the rows with tickers in the excel 
+            if cell.value in config.TICKERS:
+                tickerIndex[cell.value] = cell.coordinate[1:]
+
+    for i in range(len(tickerIndex)):
+        rowIndex = 6 + (i // 7) * 10
+        colChar = chr(i % 7 + 67) # tp column ETF coordinate; ascii 67 is 'C' 
+        excelSheet[f'{colChar}{rowIndex}'] = config.TICKERS[i] # filling etf name cell 
+        excelSheet[f'{colChar}{rowIndex + 3}'] = config.TODAYDATE # filling today date 
+        excelSheet[f'{colChar}{rowIndex + 8}'] = platformSheet[f'G{tickerIndex[config.TICKERS[i]]}'].value # close price 
+        determine_buy_sell(platformSheet, excelSheet, tickerIndex[config.TICKERS[i]], rowIndex + 5, colChar)
+
+    if (config.DEBUG):
+        print(f'saving trading post as {config.OUTPUTEXCEL}')
+
+    workbook.save(config.OUTPUTEXCEL)
+
+# TODO15: add parameters to fill_excel
+def fill_excel():
+
+    tickerDict = {} 
+    tickerIndex = {}
+
+    # Reads through csv file created by generate_csv.py
+    with open(config.CSVFILE) as csv_file:
+        rowReader = csv.DictReader(csv_file)
+        for row in rowReader:
+            tickerDict[row['ticker']] = row
+
+    # makes a copy of the template platform file
+    shutil.copyfile(config.TEMPLATEPLATFORM, config.OUTPUTPLATFORM)
+
+    # loading excel as workbook object
+    workbook = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=True)
+    activeSheet = workbook.active
+
+    # going through each cell and getting ticker index 
+    for row in activeSheet.iter_rows(max_row=activeSheet.max_row, max_col=1):
+        for cell in row:
+            # gets the rows with tickers in the excel 
+            if cell.value in config.TICKERS:
+                tickerIndex[cell.coordinate[1:]] = cell.value
+
+    # populates the input values for the current excel
+    for index in tickerIndex:
+        curTicker = tickerIndex[index] 
+        activeSheet[f'E{index}'] = config.TODAYDATE # sets the date in column 'E' 
+        for letterCoord in config.INPUTS: 
+            # autofills with column keys from INPUTS in configurationFile.py 
+            activeSheet[f'{letterCoord}{index}'] = float(tickerDict[curTicker][config.INPUTS[letterCoord]])
+
+    if (config.DEBUG):
+        print(f'created temp platform {config.OUTPUTPLATFORM}')
+    workbook.save(config.OUTPUTPLATFORM)
+    workbook.close()
