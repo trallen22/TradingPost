@@ -8,21 +8,72 @@ import csv
 import openpyxl 
 import configurationFile as config
 
+# TODO19: Implement set_ranges 
+def set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, platCols, tickerRow):
+    for i in range(len(tpRangeRow)):
+        # print(f'{platCols[i]}{tickerRow}')
+        # print(platformSheet[f'{platCols[i]}{tickerRow}'].value)
+        excelSheet[f'{tpCol}{tpRangeRow[i]}'].value = platformSheet[f'{platCols[i]}{tickerRow}'].value
+
+    return
+
+def determine_buy_sell(platformSheet, excelSheet, platRow, signalRow, tpCol):
+    signalCell = excelSheet[f'{tpCol}{signalRow}']
+    if (platformSheet[f'G{platRow}'].value > platformSheet[f'H{platRow}'].value):
+        # Looking for sell signals 
+        if (platformSheet[f'G{platRow}'].value > platformSheet[f'I{platRow}'].value):
+            minPrice = 1000000000
+            for col in [ 'J', 'K', 'L', 'M' ]:
+                minPrice = min(minPrice, platformSheet[f'{col}{platRow}'].value)
+            if (platformSheet[f'G{platRow}'].value < minPrice):
+                signalCell.value = '!SELL!'
+                signalCell.fill = config.SELLCOLOR
+            else:
+                signalCell.value = 'HOLD'
+                signalCell.fill = config.HOSELLCOLOR
+            # run set_ranges()
+            tpRangeRow = [12, 13]
+            rangeCols = [ 'Z', 'AA' ]
+            set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, rangeCols, platRow)
+            return 
+    else:
+        # Looking for buy signals 
+        if (platformSheet[f'G{platRow}'].value < platformSheet[f'I{platRow}'].value):
+            maxPrice = -1
+            for col in [ 'J', 'K', 'L', 'M' ]:
+                maxPrice = max(maxPrice, platformSheet[f'{col}{platRow}'].value)
+            if (platformSheet[f'G{platRow}'].value > maxPrice):
+                signalCell.value = '!BUY!'
+                signalCell.fill = config.BUYCOLOR
+            else:
+                signalCell.value = 'HOLD'
+                signalCell.fill = config.HOBUYCOLOR
+            # run set_ranges()
+            return 
+    signalCell.value = 'HOLD'
+    signalCell.fill = config.PLAINCOLOR
+
 # TODO16: figure out coloring for output platform 
 def generate_tp():
 
     tickerIndex = {}
 
-    # loading platform as workbook object
-    platform = openpyxl.load_workbook(config.OUTPUTPLATFORM)
+    # TODO21: work on getting value instead of formula 
+    # # loading platform as workbook object
+    # rawPlatform = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=True)
+    # rawPlatform.save()
+    # platformSheet = rawPlatform.active
+
+    # USED FOR DEMO 
+    platform = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=True)
     platformSheet = platform.active
 
     # makes a copy of the template excel file
     shutil.copyfile(config.TEMPEXCEL, config.OUTPUTEXCEL)
 
     # loading excel as workbook object
-    workbook = openpyxl.load_workbook(config.OUTPUTEXCEL)
-    activeSheet = workbook.active
+    workbook = openpyxl.load_workbook(config.OUTPUTEXCEL, data_only=True)
+    excelSheet = workbook.active
 
     # going through each cell and getting ticker index 
     for row in platformSheet.iter_rows(max_row=platformSheet.max_row, max_col=1):
@@ -33,11 +84,13 @@ def generate_tp():
 
     for i in range(len(tickerIndex)):
         rowIndex = 6 + (i // 7) * 10
-        colChar = chr(i % 7 + 67) # ascii 67 is 'C' 
-        activeSheet[f'{colChar}{rowIndex}'] = config.TICKERS[i] # filling etf name cell 
-        activeSheet[f'{colChar}{rowIndex + 8}'] = platformSheet[f'G{tickerIndex[config.TICKERS[i]]}'].value # close price 
-        
-    activeSheet['C11'].style = activeSheet['D11'].style
+        colChar = chr(i % 7 + 67) # tp column ETF coordinate; ascii 67 is 'C' 
+        excelSheet[f'{colChar}{rowIndex}'] = config.TICKERS[i] # filling etf name cell 
+        excelSheet[f'{colChar}{rowIndex + 8}'] = platformSheet[f'G{tickerIndex[config.TICKERS[i]]}'].value # close price 
+        determine_buy_sell(platformSheet, excelSheet, tickerIndex[config.TICKERS[i]], rowIndex + 5, colChar)
+
+    if (config.DEBUG):
+        print(f'saving trading post as {config.OUTPUTEXCEL}')
 
     workbook.save(config.OUTPUTEXCEL)
 
@@ -76,6 +129,8 @@ def fill_excel():
             # autofills with column keys from INPUTS in configurationFile.py 
             activeSheet[f'{letterCoord}{index}'] = float(tickerDict[curTicker][config.INPUTS[letterCoord]])
 
+    if (config.DEBUG):
+        print(f'created temp platform {config.OUTPUTPLATFORM}')
     workbook.save(config.OUTPUTPLATFORM)
 
 # generate_tp() # used for testing 
