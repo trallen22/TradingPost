@@ -5,8 +5,12 @@ creates the new excel for current day based on generated csv
 
 import shutil
 import csv
+import time
 import openpyxl 
 import configurationFile as config
+from koala.ExcelCompiler import ExcelCompiler
+from koala.Spreadsheet import Spreadsheet
+
 
 # TODO19: Implement set_ranges 
 def set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, platCols, tickerRow, clearCells=False):
@@ -14,8 +18,13 @@ def set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, platCols, tickerRow
         excelSheet[f'{tpCol}{tpRangeRow[0]}'].value = ''
         excelSheet[f'{tpCol}{tpRangeRow[1]}'].value = ''
         return 
-    for i in range(len(tpRangeRow)):
-        excelSheet[f'{tpCol}{tpRangeRow[i]}'].value = platformSheet[f'{platCols[i]}{tickerRow}'].value
+    # else:
+    #     if (platformSheet[f'{platCols[0]}{tickerRow}'].value < platformSheet[f'{platCols[1]}{tickerRow}'].value):
+    #         excelSheet[f'{tpCol}{tpRangeRow[0]}'].value = platformSheet[f'{platCols[0]}{tickerRow}'].value
+    #         excelSheet[f'{tpCol}{tpRangeRow[1]}'].value = platformSheet[f'{platCols[1]}{tickerRow}'].value
+    #     else:
+    #         excelSheet[f'{tpCol}{tpRangeRow[0]}'].value = platformSheet[f'{platCols[1]}{tickerRow}'].value
+    #         excelSheet[f'{tpCol}{tpRangeRow[1]}'].value = platformSheet[f'{platCols[0]}{tickerRow}'].value
 
     return
 
@@ -63,10 +72,15 @@ def generate_tp():
     tickerIndex = {}
 
     # TODO21: work on getting value instead of formula 
-
+    
     # USED FOR DEMO 
+    platform = openpyxl.load_workbook(config.OUTPUTPLATFORM)
+    platform['Sheet1']['AL1'].value = 100
+    platform.save(config.OUTPUTPLATFORM)
+    platform.close()
     platform = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=True)
     platformSheet = platform.active
+    
 
     # makes a copy of the template excel file
     shutil.copyfile(config.TEMPEXCEL, config.OUTPUTEXCEL)
@@ -83,12 +97,13 @@ def generate_tp():
                 tickerIndex[cell.value] = cell.coordinate[1:]
 
     for i in range(len(tickerIndex)):
-        rowIndex = 6 + (i // 7) * 10
+        tickerRow = 7 + (i // 7) * 10
+        signalRow = tickerRow + 5
         colChar = chr(i % 7 + 67) # tp column ETF coordinate; ascii 67 is 'C' 
-        excelSheet[f'{colChar}{rowIndex}'] = config.TICKERS[i] # filling etf name cell 
-        excelSheet[f'{colChar}{rowIndex + 3}'] = config.TODAYDATE # filling today date 
-        excelSheet[f'{colChar}{rowIndex + 8}'] = platformSheet[f'G{tickerIndex[config.TICKERS[i]]}'].value # close price 
-        determine_buy_sell(platformSheet, excelSheet, tickerIndex[config.TICKERS[i]], rowIndex + 5, colChar)
+        excelSheet[f'{colChar}{tickerRow}'] = config.TICKERS[i] # filling etf name cell 
+        excelSheet[f'{colChar}{tickerRow + 3}'] = config.TODAYDATE # filling today date 
+        excelSheet[f'{colChar}{tickerRow + 8}'] = platformSheet[f'G{tickerIndex[config.TICKERS[i]]}'].value # close price 
+        determine_buy_sell(platformSheet, excelSheet, tickerIndex[config.TICKERS[i]], signalRow, colChar)
 
     if (config.DEBUG):
         print(f'saving trading post as {config.OUTPUTEXCEL}')
@@ -111,7 +126,7 @@ def fill_excel():
     shutil.copyfile(config.TEMPLATEPLATFORM, config.OUTPUTPLATFORM)
 
     # loading excel as workbook object
-    workbook = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=True)
+    workbook = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=False)
     activeSheet = workbook.active
 
     # going through each cell and getting ticker index 
@@ -131,5 +146,38 @@ def fill_excel():
 
     if (config.DEBUG):
         print(f'created temp platform {config.OUTPUTPLATFORM}')
+
     workbook.save(config.OUTPUTPLATFORM)
     workbook.close()
+
+    # shutil.copyfile(config.OUTPUTPLATFORM, config.RAWPLATFORM)
+    # raw = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=False)
+    # print(raw['Sheet1']['X6'].value)
+    # raw.save(config.RAWPLATFORM)
+    # raw.close()
+    # raw = openpyxl.load_workbook(config.RAWPLATFORM, data_only=True)
+    # rawSheet = raw.active
+    # print(rawSheet['X6'].value)
+    # raw.save(config.RAWPLATFORM)
+    # raw.close()
+
+    print(config.OUTPUTPLATFORM)
+
+    ### Graph Generation ###
+    c = ExcelCompiler(config.OUTPUTPLATFORM)
+    # sp = c.gen_graph()
+
+    # ## Graph Serialization ###
+    # print("Serializing to disk...")
+    # sp.dump(config.OUTPUTPLATFORM.replace("xlsx", "gzip"))
+
+    # ### Graph Loading ###
+    # print("Reading from disk...")
+    # sp = Spreadsheet.load(config.OUTPUTPLATFORM.replace("xlsx", "gzip"))
+
+    # ### Graph Evaluation ###
+    # sp.set_value('Sheet1!A1', 10)
+    # print('New D1 value: %s' % str(sp.evaluate('Sheet1!D1')))
+
+
+    # workbook.close()

@@ -22,3 +22,4 @@ tODO# 	Status  Priority	Summary
 18  ------      1       Add comments everywhere 
 19  Working     1       Implement set_ranges() in copyExcel.py 
 20  Working     4       add debug messages everywhere 
+21  ------      1       make an etf class 
