@@ -4,6 +4,7 @@ This file holds all the configuraion information
 from datetime import date
 from polygon import RESTClient 
 import os
+import sys 
 import openpyxl
 
 SRCPATH = os.path.dirname(__file__) + '/'
@@ -16,9 +17,17 @@ TODAYDATE = f'{listDate[1]}/{listDate[2]}'
 
 STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data
 
-PRINTDF = 1 # prints dataframes to terminal
-PBAR = 1 # print progress bar for polygon calls in generate_csv.py 
+PRINTDF = 0 # prints dataframes to terminal
+PBAR = 0 # print progress bar for polygon calls in generate_csv.py 
 DEBUG = 1 # print debug messages # TODO20: add debug messages 
+
+for arg in sys.argv:
+        if arg == '-f':
+                PRINTDF = 1
+        if arg == '-p':
+                PBAR = 1 
+        if arg == '-d':
+                DEBUG = 1 
 
 # polygon login 
 '''Insert your key. Play around with the free tier key first.'''
