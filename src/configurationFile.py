@@ -56,9 +56,13 @@ CSVFILE = SRCPATH + 'testCsv.csv'
 TICKERS = ["JNK"] # used for testing 
 
 INDICATORS = ['one_day_50', 'one_day_200', 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200', 'close_price']
+MINDICATORS = [ 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200' ]
+DAYDICATORS = [ 'one_day_50', 'one_day_200' ]
 
 INPUTS = { 'G':'last_price', 'H':'one_day_50', 'I':'one_day_200', 'J':'five_min_50', 
         'K':'five_min_200', 'L':'one_min_50', 'M':'one_min_200' }
+
+ETFBASECELL = { 'JNK':'C7' }
 
 try: 
         # loading excel as workbook object

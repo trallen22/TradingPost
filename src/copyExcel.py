@@ -8,62 +8,93 @@ import csv
 import time
 import openpyxl 
 import configurationFile as config
-from koala.ExcelCompiler import ExcelCompiler
-from koala.Spreadsheet import Spreadsheet
+import platFormulas as formula
+# from koala.ExcelCompiler import ExcelCompiler
+# from koala.Spreadsheet import Spreadsheet
 
 
 # TODO19: Implement set_ranges 
-def set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, platCols, tickerRow, clearCells=False):
-    if (clearCells):
-        excelSheet[f'{tpCol}{tpRangeRow[0]}'].value = ''
-        excelSheet[f'{tpCol}{tpRangeRow[1]}'].value = ''
-        return 
-    # else:
-    #     if (platformSheet[f'{platCols[0]}{tickerRow}'].value < platformSheet[f'{platCols[1]}{tickerRow}'].value):
-    #         excelSheet[f'{tpCol}{tpRangeRow[0]}'].value = platformSheet[f'{platCols[0]}{tickerRow}'].value
-    #         excelSheet[f'{tpCol}{tpRangeRow[1]}'].value = platformSheet[f'{platCols[1]}{tickerRow}'].value
-    #     else:
-    #         excelSheet[f'{tpCol}{tpRangeRow[0]}'].value = platformSheet[f'{platCols[1]}{tickerRow}'].value
-    #         excelSheet[f'{tpCol}{tpRangeRow[1]}'].value = platformSheet[f'{platCols[0]}{tickerRow}'].value
+def set_ranges(rangeType, etf):
+    if rangeType == 'buy':
+        rangeMin = formula.buy_min(etf)
+        rangeMax = formula.buy_max(etf)
+    elif rangeType == 'sell':
+        rangeMin = formula.sell_min(etf)
+        rangeMax = formula.sell_max(etf)
+    else:
+        return '', ''
+    if rangeMin < rangeMax:
+        return rangeMin, rangeMax 
+    return rangeMax, rangeMin 
 
-    return
+# def determine_buy_sell(platformSheet, excelSheet, platRow, signalRow, tpCol):
+#     signalCell = excelSheet[f'{tpCol}{signalRow}']
+#     tpRangeRow = [signalRow + 1, signalRow + 2]
+#     if (platformSheet[f'G{platRow}'].value > platformSheet[f'H{platRow}'].value):
+#         # Looking for sell signals 
+#         if (platformSheet[f'G{platRow}'].value > platformSheet[f'I{platRow}'].value):
+#             minPrice = 1000000000
+#             for col in [ 'J', 'K', 'L', 'M' ]:
+#                 minPrice = min(minPrice, platformSheet[f'{col}{platRow}'].value)
+#             if (platformSheet[f'G{platRow}'].value < minPrice):
+#                 signalCell.value = '!SELL!'
+#                 signalCell.fill = config.SELLCOLOR
+#             else:
+#                 signalCell.value = 'HOLD'
+#                 signalCell.fill = config.HOSELLCOLOR
+#             rangeCols = [ 'Z', 'AA' ]
+#             set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, rangeCols, platRow)
+#             return 
+#     else:
+#         # Looking for buy signals 
+#         if (platformSheet[f'G{platRow}'].value < platformSheet[f'I{platRow}'].value):
+#             maxPrice = -1
+#             for col in [ 'J', 'K', 'L', 'M' ]:
+#                 maxPrice = max(maxPrice, platformSheet[f'{col}{platRow}'].value)
+#             if (platformSheet[f'G{platRow}'].value > maxPrice):
+#                 signalCell.value = '!BUY!'
+#                 signalCell.fill = config.BUYCOLOR
+#             else:
+#                 signalCell.value = 'HOLD'
+#                 signalCell.fill = config.HOBUYCOLOR
+#             rangeCols = [ 'X', 'Y' ]
+#             set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, rangeCols, platRow)
+#             return 
+#     signalCell.value = 'HOLD'
+#     signalCell.fill = config.PLAINCOLOR
+#     set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, [], platRow, clearCells=True)
 
-def determine_buy_sell(platformSheet, excelSheet, platRow, signalRow, tpCol):
-    signalCell = excelSheet[f'{tpCol}{signalRow}']
-    tpRangeRow = [signalRow + 1, signalRow + 2]
-    if (platformSheet[f'G{platRow}'].value > platformSheet[f'H{platRow}'].value):
+
+def determine_buy_sell(etf):
+    etfVals = etf.indicatorDict
+    if (etfVals['close_price'] > etfVals['one_day_50']):
         # Looking for sell signals 
-        if (platformSheet[f'G{platRow}'].value > platformSheet[f'I{platRow}'].value):
+        if (etfVals['close_price'] > etfVals['one_day_200']):
             minPrice = 1000000000
-            for col in [ 'J', 'K', 'L', 'M' ]:
-                minPrice = min(minPrice, platformSheet[f'{col}{platRow}'].value)
-            if (platformSheet[f'G{platRow}'].value < minPrice):
-                signalCell.value = '!SELL!'
-                signalCell.fill = config.SELLCOLOR
+            for col in config.MINDICATORS:
+                minPrice = min(minPrice, etfVals[col])
+            if (etfVals['close_price'] < minPrice):
+                return '!SELL!', config.SELLCOLOR, 'sell'
             else:
-                signalCell.value = 'HOLD'
-                signalCell.fill = config.HOSELLCOLOR
-            rangeCols = [ 'Z', 'AA' ]
-            set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, rangeCols, platRow)
-            return 
+                return 'HOLD', config.HOSELLCOLOR, 'sell'
+            # rangeCols = [ 'Z', 'AA' ]
+            # set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, rangeCols, platRow)
+            # return 
     else:
         # Looking for buy signals 
-        if (platformSheet[f'G{platRow}'].value < platformSheet[f'I{platRow}'].value):
+        if (etfVals['close_price'] < etfVals['one_day_50']):
             maxPrice = -1
-            for col in [ 'J', 'K', 'L', 'M' ]:
-                maxPrice = max(maxPrice, platformSheet[f'{col}{platRow}'].value)
-            if (platformSheet[f'G{platRow}'].value > maxPrice):
-                signalCell.value = '!BUY!'
-                signalCell.fill = config.BUYCOLOR
+            for col in config.MINDICATORS:
+                maxPrice = max(maxPrice, etfVals[col])
+            if (etfVals['close_price'] > maxPrice):
+                return '!BUY!', config.BUYCOLOR, 'buy'
             else:
-                signalCell.value = 'HOLD'
-                signalCell.fill = config.HOBUYCOLOR
-            rangeCols = [ 'X', 'Y' ]
-            set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, rangeCols, platRow)
-            return 
-    signalCell.value = 'HOLD'
-    signalCell.fill = config.PLAINCOLOR
-    set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, [], platRow, clearCells=True)
+                return 'HOLD', config.HOBUYCOLOR, 'buy'
+            # rangeCols = [ 'X', 'Y' ]
+            # set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, rangeCols, platRow)
+            # return 
+    return 'HOLD', config.PLAINCOLOR, ''
+    # set_ranges(platformSheet, excelSheet, tpCol, tpRangeRow, [], platRow, clearCells=True)
 
 
 # TODO16: figure out coloring for output platform 
@@ -161,10 +192,10 @@ def fill_excel():
     # raw.save(config.RAWPLATFORM)
     # raw.close()
 
-    print(config.OUTPUTPLATFORM)
+    # print(config.OUTPUTPLATFORM)
 
-    ### Graph Generation ###
-    c = ExcelCompiler(config.OUTPUTPLATFORM)
+    # ### Graph Generation ###
+    # c = ExcelCompiler(config.OUTPUTPLATFORM)
     # sp = c.gen_graph()
 
     # ## Graph Serialization ###
