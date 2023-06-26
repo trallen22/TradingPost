@@ -10,12 +10,12 @@ import configurationFile as config
 
 def generate_csv(etf, mode):
     etfVals = etf.indicatorDict
+    fieldnames = ['ticker', 'one_day_50',
+                'one_day_200', 'five_min_50', 
+                'five_min_200','one_min_50', 
+                'one_min_200', 'last_price']
     if (mode == 'w'):
         with open(config.CSVFILE, mode='w') as csv_file:
-            fieldnames = ['ticker', 'one_day_50',
-                        'one_day_200', 'five_min_50', 
-                        'five_min_200','one_min_50', 
-                        'one_min_200', 'last_price']
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerow({
@@ -30,6 +30,7 @@ def generate_csv(etf, mode):
             })
     else:
         with open(config.CSVFILE, mode='a') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             writer.writerow({
                 'ticker': etf.ticker,
                 'one_day_50': etfVals['one_day_50'],

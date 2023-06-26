@@ -10,9 +10,18 @@ from generate_csv import generate_csv
 etfDict = {} # { str ticker : etf object }
 csvMode = 'w'
 
+if (config.PBAR):
+            pBar = tqdm(desc='tickers found', total=len(config.TICKERS))
 for ticker in config.TICKERS:
     # creates a dictionary of Etf objects 
     etfDict[ticker] = Etf(ticker, 'name') # implement names -> 'HighYieldBonds' 
+    if (config.PBAR):
+        pBar.update(1)
+    # ensure we don't pass 5 API calls/min for polygon 
+    if not (ticker == config.TICKERS[-1]):
+        time.sleep(60)
+if (config.PBAR):
+    pBar.close()
 
 # makes a copy of the template platform file
 shutil.copyfile(config.TEMPEXCEL, config.OUTPUTEXCEL)
@@ -21,8 +30,6 @@ shutil.copyfile(config.TEMPEXCEL, config.OUTPUTEXCEL)
 workbook = openpyxl.load_workbook(config.OUTPUTEXCEL)
 activeSheet = workbook.active
 
-if (config.PBAR):
-            pBar = tqdm(desc='tickers found', total=len(config.TICKERS))
 for ticker in config.TICKERS:
     curEtf = etfDict[ticker]
     curBase = curEtf.basecell
@@ -45,13 +52,6 @@ for ticker in config.TICKERS:
         generate_csv(curEtf, csvMode)
         csvMode = 'a'
 
-    if (config.PBAR):
-        pBar.update(1)
-    # ensure we don't pass 5 API calls/min for polygon 
-    if not (ticker == config.TICKERS[-1]):
-        time.sleep(60)
-if (config.PBAR):
-        pBar.close()
 if (config.CSV):
     print(f'saving trading post as {config.CSVFILE}')
 workbook.save(config.OUTPUTEXCEL)

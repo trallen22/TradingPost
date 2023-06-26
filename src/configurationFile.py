@@ -52,13 +52,13 @@ OUTPUTEXCEL = SRCPATH + 'testTradingPost.xlsx'
 
 CSVFILE = SRCPATH + 'testCsv.csv' 
 
-# TICKERS = ["JNK", "GDX", "VCR", "VDC", "VIG", "VDE", "VFH", 
-#         "VWO", "VHT", "VIS", "VGT", "VAW", "VNQ", "VOO", 
-#         "VOX", "BND", "BNDX", "VXUS", "VTI", "VPU", "XTN"]
+TICKERS = ["JNK", "GDX", "VCR", "VDC", "VIG", "VDE", "VFH", 
+        "VWO", "VHT", "VIS", "VGT", "VAW", "VNQ", "VOO", 
+        "VOX", "BND", "BNDX", "VXUS", "VTI", "VPU", "XTN"]
 
-TICKERS = ['JNK'] # used for testing 
+# TICKERS = [ 'JNK' ] # used for testing 
 
-INDICATORS = ['one_day_50', 'one_day_200', 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200', 'close_price']
+INDICATORS = [ 'one_min_50', 'one_min_200', 'five_min_50', 'five_min_200', 'one_day_50', 'one_day_200', 'close_price' ]
 MINDICATORS = [ 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200' ]
 DAYDICATORS = [ 'one_day_50', 'one_day_200' ]
 

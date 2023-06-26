@@ -11,7 +11,7 @@ from copyExcel import fill_excel, generate_tp
 import openpyxl
 
 generate_csv()
-fill_excel()
+# fill_excel()
 # generate_tp()
 
 # x = openpyxl.load_workbook()
