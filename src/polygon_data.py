@@ -4,6 +4,7 @@ This script scrapes polygon.io and returns the 50 day sma for intervals
 and 1 day and close price 
 '''
 
+from fileinput import close
 from polygon import RESTClient
 from datetime import timedelta, date
 import pandas as pd 
@@ -57,6 +58,7 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
 
     # prints each dataframe. Used for debugging 
     if (config.PRINTDF):
+        print('--------')
         print(f'--- {intMultiplier} {timeUnit} ---')
         print(df)
         print('--------')
@@ -83,6 +85,8 @@ def get_indicators(ticker, paramSet):
             finalIndexes.append(curDF[0])
             finalIndexes.append(curDF[1])
         except Exception as e:
+            print(f'ERROR: {e}')
+            print(f'NOTICE: problem getting indicator {i} for ticker \"{ticker}\"')
             finalIndexes.append(-1)
             finalIndexes.append(-1) 
 
@@ -98,10 +102,16 @@ def get_indicators(ticker, paramSet):
     '''
     try:
         # this needs to be run after midnight 
-        close_price = config.CLIENT.get_daily_open_close_agg(ticker=ticker, date=str(date.today())).close
+        close_price = config.CLIENT.get_daily_open_close_agg(ticker=ticker, date=str(date.today() - timedelta(2))).close
+        if (config.PRINTDF):
+            print('--------')
+            print('--- CLOSE PRICE ---')
+            print('--------')
+            print(close_price)
         close_dict =  close_price if not close_price == '' else -1
     except Exception as f:
-        print(f)
+        print(f'ERROR: {f}')
+        print(f'NOTICE: problem getting closing price for ticker \"{ticker}\"')
         close_dict = -1
 
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
