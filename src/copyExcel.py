@@ -8,8 +8,8 @@ import csv
 import time
 import openpyxl 
 import configurationFile as config
-from koala.ExcelCompiler import ExcelCompiler
-from koala.Spreadsheet import Spreadsheet
+# from koala.ExcelCompiler import ExcelCompiler
+# from koala.Spreadsheet import Spreadsheet
 
 
 # TODO19: Implement set_ranges 
@@ -164,7 +164,7 @@ def fill_excel():
     print(config.OUTPUTPLATFORM)
 
     ### Graph Generation ###
-    c = ExcelCompiler(config.OUTPUTPLATFORM)
+    # c = ExcelCompiler(config.OUTPUTPLATFORM)
     # sp = c.gen_graph()
 
     # ## Graph Serialization ###

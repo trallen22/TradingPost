@@ -10,8 +10,8 @@ from generate_csv import generate_csv
 from copyExcel import fill_excel, generate_tp
 import openpyxl
 
-# generate_csv()
-fill_excel()
+generate_csv()
+# fill_excel()
 # generate_tp()
 
 # x = openpyxl.load_workbook()
