@@ -26,7 +26,7 @@ def generate_csv(etf, mode):
                 'five_min_200': etfVals['five_min_200'],
                 'one_min_50': etfVals['one_min_50'],
                 'one_min_200': etfVals['one_min_200'],
-                'last_price': etfVals['close_price']
+                'close_price': etfVals['close_price']
             })
     else:
         with open(config.CSVFILE, mode='a') as csv_file:
