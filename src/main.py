@@ -49,15 +49,13 @@ for ticker in config.TICKERS:
     activeSheet[f'{charBase}{numBase + 8}'] = curEtf.indicatorDict['close_price'] # setting close price in tp 
 
     # TODO: make a single call; make etfDict the parameter
-    fill_platform(curEtf)
+    if (config.FILLPLATFORM):
+        fill_platform(curEtf)
 
-    # TODO: Make a single call to this function; make etf dict the parameter
-    if (config.CSV):
-        generate_csv(curEtf, csvMode)
-        csvMode = 'a'
-
+# TODO: Make a single call to this function; make etf dict the parameter
 if (config.CSV):
-    print(f'saving trading post as {config.CSVFILE}')
+    generate_csv(etfDict)
+
 workbook.save(config.OUTPUTEXCEL)
 if (config.DEBUG):
     print(f'saving trading post as {config.OUTPUTEXCEL}')
