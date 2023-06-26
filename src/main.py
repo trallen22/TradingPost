@@ -5,8 +5,10 @@ from tqdm import tqdm
 from etf import Etf 
 import configurationFile as config
 from copyExcel import determine_buy_sell, set_ranges
+from generate_csv import generate_csv
 
 etfDict = {} # { str ticker : etf object }
+csvMode = 'w'
 
 for ticker in config.TICKERS:
     # creates a dictionary of Etf objects 
@@ -39,6 +41,10 @@ for ticker in config.TICKERS:
     activeSheet[f'{charBase}{numBase + 7}'] = maxTradeRange
     activeSheet[f'{charBase}{numBase + 8}'] = curEtf.indicatorDict['close_price'] # setting close price in tp 
 
+    if (config.CSV):
+        generate_csv(curEtf, csvMode)
+        csvMode = 'a'
+
     if (config.PBAR):
         pBar.update(1)
     # ensure we don't pass 5 API calls/min for polygon 
@@ -46,9 +52,10 @@ for ticker in config.TICKERS:
         time.sleep(60)
 if (config.PBAR):
         pBar.close()
-
+if (config.CSV):
+    print(f'saving trading post as {config.CSVFILE}')
 workbook.save(config.OUTPUTEXCEL)
-if config.DEBUG:
+if (config.DEBUG):
     print(f'saving trading post as {config.OUTPUTEXCEL}')
 workbook.close()
 

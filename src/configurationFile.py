@@ -20,6 +20,7 @@ STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data
 PRINTDF = 0 # prints dataframes to terminal
 PBAR = 0 # print progress bar for polygon calls in generate_csv.py 
 DEBUG = 1 # print debug messages # TODO20: add debug messages 
+CSV = 0 # outputs an excel file to CSVFILE 
 
 for arg in sys.argv:
         if arg == '-f':
@@ -28,6 +29,8 @@ for arg in sys.argv:
                 PBAR = 1 
         if arg == '-d':
                 DEBUG = 1 
+        if arg == '-c':
+                CSV = 1
 
 # polygon login 
 '''Insert your key. Play around with the free tier key first.'''
@@ -53,7 +56,7 @@ CSVFILE = SRCPATH + 'testCsv.csv'
 #         "VWO", "VHT", "VIS", "VGT", "VAW", "VNQ", "VOO", 
 #         "VOX", "BND", "BNDX", "VXUS", "VTI", "VPU", "XTN"]
 
-TICKERS = ['GDX'] # used for testing 
+TICKERS = ['JNK'] # used for testing 
 
 INDICATORS = ['one_day_50', 'one_day_200', 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200', 'close_price']
 MINDICATORS = [ 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200' ]
