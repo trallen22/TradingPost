@@ -13,7 +13,7 @@ def generate_csv(etf, mode):
     fieldnames = ['ticker', 'one_day_50',
                 'one_day_200', 'five_min_50', 
                 'five_min_200','one_min_50', 
-                'one_min_200', 'last_price']
+                'one_min_200', 'close_price']
     if (mode == 'w'):
         with open(config.CSVFILE, mode='w') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)

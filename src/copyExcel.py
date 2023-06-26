@@ -142,73 +142,37 @@ def generate_tp():
     workbook.save(config.OUTPUTEXCEL)
 
 # TODO15: add parameters to fill_excel
-def fill_excel():
+def fill_platform(etf):
 
-    tickerDict = {} 
-    tickerIndex = {}
-
-    # Reads through csv file created by generate_csv.py
-    with open(config.CSVFILE) as csv_file:
-        rowReader = csv.DictReader(csv_file)
-        for row in rowReader:
-            tickerDict[row['ticker']] = row
+    tickerRow = {}
 
     # makes a copy of the template platform file
     shutil.copyfile(config.TEMPLATEPLATFORM, config.OUTPUTPLATFORM)
 
     # loading excel as workbook object
-    workbook = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=False)
+    workbook = openpyxl.load_workbook(config.OUTPUTPLATFORM)
     activeSheet = workbook.active
 
     # going through each cell and getting ticker index 
     for row in activeSheet.iter_rows(max_row=activeSheet.max_row, max_col=1):
         for cell in row:
             # gets the rows with tickers in the excel 
-            if cell.value in config.TICKERS:
-                tickerIndex[cell.coordinate[1:]] = cell.value
+            if cell.value == etf.ticker:
+                curRow = cell.coordinate[1:]
 
-    # populates the input values for the current excel
-    for index in tickerIndex:
-        curTicker = tickerIndex[index] 
-        activeSheet[f'E{index}'] = config.TODAYDATE # sets the date in column 'E' 
-        for letterCoord in config.INPUTS: 
-            # autofills with column keys from INPUTS in configurationFile.py 
-            activeSheet[f'{letterCoord}{index}'] = float(tickerDict[curTicker][config.INPUTS[letterCoord]])
+    # # populates the input values for the current excel
+    # for row in tickerRow:
+    #     curTicker = tickerRow[row] 
+    #     activeSheet[f'E{row}'] = config.TODAYDATE # sets the date in column 'E' 
+    #     for letterCoord in config.INPUTS: 
+    #         # autofills with column keys from INPUTS in configurationFile.py 
+    #         activeSheet[f'{letterCoord}{row}'] = float(tickerDict[curTicker][config.INPUTS[letterCoord]])
+
+    for col in config.PLATFORMCOLS:
+        activeSheet[f'{config.PLATFORMCOLS[col]}{curRow}'] = etf.indicatorDict[col]
 
     if (config.DEBUG):
         print(f'created temp platform {config.OUTPUTPLATFORM}')
 
     workbook.save(config.OUTPUTPLATFORM)
     workbook.close()
-
-    # shutil.copyfile(config.OUTPUTPLATFORM, config.RAWPLATFORM)
-    # raw = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=False)
-    # print(raw['Sheet1']['X6'].value)
-    # raw.save(config.RAWPLATFORM)
-    # raw.close()
-    # raw = openpyxl.load_workbook(config.RAWPLATFORM, data_only=True)
-    # rawSheet = raw.active
-    # print(rawSheet['X6'].value)
-    # raw.save(config.RAWPLATFORM)
-    # raw.close()
-
-    # print(config.OUTPUTPLATFORM)
-
-    # ### Graph Generation ###
-    # c = ExcelCompiler(config.OUTPUTPLATFORM)
-    # sp = c.gen_graph()
-
-    # ## Graph Serialization ###
-    # print("Serializing to disk...")
-    # sp.dump(config.OUTPUTPLATFORM.replace("xlsx", "gzip"))
-
-    # ### Graph Loading ###
-    # print("Reading from disk...")
-    # sp = Spreadsheet.load(config.OUTPUTPLATFORM.replace("xlsx", "gzip"))
-
-    # ### Graph Evaluation ###
-    # sp.set_value('Sheet1!A1', 10)
-    # print('New D1 value: %s' % str(sp.evaluate('Sheet1!D1')))
-
-
-    # workbook.close()
