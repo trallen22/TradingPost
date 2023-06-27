@@ -4,48 +4,29 @@ and newpoly.py
 '''
 
 import csv
-import time
-from polygon_data import get_indicators
 import configurationFile as config
-from tqdm import tqdm 
 
-# from email_csv import send_email
-
-def generate_csv():
-
+def generate_csv(etfDict):
     with open(config.CSVFILE, mode='w') as csv_file:
         fieldnames = ['ticker', 'one_day_50',
-                    'one_day_200', 'five_min_50', 
-                    'five_min_200','one_min_50', 
-                    'one_min_200', 'last_price']
+                        'one_day_200', 'five_min_50', 
+                        'five_min_200','one_min_50', 
+                        'one_min_200', 'close_price']
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
-        if (config.PBAR):
-            pBar = tqdm(desc='tickers found', total=len(config.TICKERS))
         for ticker in config.TICKERS:
-            # uses newpoly.py
-            one_minute_fifty, one_minute_two_hundred, five_minute_fifty, five_minute_two_hundred, \
-        one_day_fifty, one_day_two_hundred, close_price = get_indicators(ticker, config.PARAMSET)
-            
+            curEtf = etfDict[ticker]
+            etfVals = curEtf.indicatorDict
             writer.writerow({
-                'ticker': ticker,
-                'one_day_50': one_day_fifty,
-                'one_day_200': one_day_two_hundred,
-                'five_min_50': five_minute_fifty,
-                'five_min_200': five_minute_two_hundred,
-                'one_min_50': one_minute_fifty,
-                'one_min_200': one_minute_two_hundred,
-                'last_price': close_price
+                'ticker': curEtf.ticker,
+                'one_day_50': etfVals['one_day_50'],
+                'one_day_200': etfVals['one_day_200'],
+                'five_min_50': etfVals['five_min_50'],
+                'five_min_200': etfVals['five_min_200'],
+                'one_min_50': etfVals['one_min_50'],
+                'one_min_200': etfVals['one_min_200'],
+                'close_price': etfVals['close_price']
             })
-            if (config.PBAR):
-                pBar.update(1)
-            # ensure we don't pass 5 API calls/min for polygon 
-            if not (ticker == config.TICKERS[-1]):
-                time.sleep(60)
-    if (config.PBAR):
-        pBar.close()
-
     if (config.DEBUG):
-        print(f'Generated csv as {config.CSVFILE}')
+        print(f'saving trading post as {config.CSVFILE}')
 
-    # send_email()

@@ -4,6 +4,7 @@ This file holds all the configuraion information
 from datetime import date
 from polygon import RESTClient 
 import os
+import sys 
 import openpyxl
 
 SRCPATH = os.path.dirname(__file__) + '/'
@@ -16,9 +17,25 @@ TODAYDATE = f'{listDate[1]}/{listDate[2]}'
 
 STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data
 
-PRINTDF = 1 # prints dataframes to terminal
+PRINTDF = 0 # prints dataframes to terminal
 PBAR = 1 # print progress bar for polygon calls in generate_csv.py 
 DEBUG = 1 # print debug messages # TODO20: add debug messages 
+CSV = 1 # outputs an excel file to CSVFILE 
+FILLPLATFORM = 1
+
+for arg in sys.argv:
+        if arg == '-h':
+                print('Need to work on help menu')
+        if arg == '-f':
+                PRINTDF = 1
+        if arg == '-p':
+                PBAR = 1 
+        if arg == '-d':
+                DEBUG = 1 
+        if arg == '-c':
+                CSV = 1
+        if arg == '-m':
+                FILLPLATFORM = 1 
 
 # polygon login 
 '''Insert your key. Play around with the free tier key first.'''
@@ -29,12 +46,12 @@ PARAMSET = [[ 'minute', 1 ], # one minute time interval
                 [ 'minute', 5 ], # 5 minute time interval 
                 [ 'day', 1 ]] #one day time interval 
 
-# Platform variables 
+# Platform files 
 TEMPLATEPLATFORM = SRCPATH + 'TA.WORK.xlsx'
 OUTPUTPLATFORM = SRCPATH + 'testPlatform.xlsx'
 RAWPLATFORM = SRCPATH + 'rawPlatform.xlsx'
 
-# Trading Post variables 
+# Trading Post files
 TEMPEXCEL = SRCPATH + 'stocktradingpost2.xlsx'
 OUTPUTEXCEL = SRCPATH + 'testTradingPost.xlsx'
 
@@ -44,12 +61,26 @@ CSVFILE = SRCPATH + 'testCsv.csv'
 #         "VWO", "VHT", "VIS", "VGT", "VAW", "VNQ", "VOO", 
 #         "VOX", "BND", "BNDX", "VXUS", "VTI", "VPU", "XTN"]
 
-TICKERS = ["JNK"] # used for testing 
+# TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
+#         'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
+#         'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
 
-INDICATORS = ['one_day_50', 'one_day_200', 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200', 'close_price']
+TICKERS = [ 'JNK' ] # used for testing 
 
-INPUTS = { 'G':'last_price', 'H':'one_day_50', 'I':'one_day_200', 'J':'five_min_50', 
+INDICATORS = [ 'one_min_50', 'one_min_200', 'five_min_50', 'five_min_200', 'one_day_50', 'one_day_200', 'close_price' ]
+MINDICATORS = [ 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200' ]
+DAYDICATORS = [ 'one_day_50', 'one_day_200' ]
+
+INPUTS = { 'G':'close_price', 'H':'one_day_50', 'I':'one_day_200', 'J':'five_min_50', 
         'K':'five_min_200', 'L':'one_min_50', 'M':'one_min_200' }
+
+PLATFORMCOLS = { 'close_price':'G', 'one_day_50':'H', 'one_day_200':'I', 'five_min_50':'J', 
+        'five_min_200':'K', 'one_min_50':'L', 'one_min_200':'M' }
+
+ETFBASECELL = { 'JNK':'C7', 'GDX':'D7', 'VCR':'E7', 'VDC':'F7', 'VIG':'G7', 
+        'VDE':'H7', 'VFH':'I7', 'VWO':'C17', 'VHT':'D17', 'VIS':'E17', 'VGT':'F17', 
+        'VAW':'G17', 'VNQ':'H17', 'VOO':'I17', 'VOX':'C27', 'BND':'D27', 
+        'BNDX':'E27', 'VXUS':'F27', 'VTI':'G27', 'VPU':'H27', 'XTN':'I27' }
 
 try: 
         # loading excel as workbook object
