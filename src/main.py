@@ -51,7 +51,7 @@ if (config.CSV):
     generate_csv(etfDict)
 
 if (config.FILLPLATFORM):
-    fill_platform(curEtf)    
+    fill_platform(etfDict)    
 
 workbook.save(config.OUTPUTEXCEL)
 if (config.DEBUG):

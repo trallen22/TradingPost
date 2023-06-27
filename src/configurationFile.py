@@ -21,6 +21,7 @@ PRINTDF = 0 # prints dataframes to terminal
 PBAR = 1 # print progress bar for polygon calls in generate_csv.py 
 DEBUG = 1 # print debug messages # TODO20: add debug messages 
 CSV = 1 # outputs an excel file to CSVFILE 
+FILLPLATFORM = 1
 
 for arg in sys.argv:
         if arg == '-h':
@@ -33,6 +34,8 @@ for arg in sys.argv:
                 DEBUG = 1 
         if arg == '-c':
                 CSV = 1
+        if arg == '-m':
+                FILLPLATFORM = 1 
 
 # polygon login 
 '''Insert your key. Play around with the free tier key first.'''
@@ -43,12 +46,12 @@ PARAMSET = [[ 'minute', 1 ], # one minute time interval
                 [ 'minute', 5 ], # 5 minute time interval 
                 [ 'day', 1 ]] #one day time interval 
 
-# Platform variables 
+# Platform files 
 TEMPLATEPLATFORM = SRCPATH + 'TA.WORK.xlsx'
 OUTPUTPLATFORM = SRCPATH + 'testPlatform.xlsx'
 RAWPLATFORM = SRCPATH + 'rawPlatform.xlsx'
 
-# Trading Post variables 
+# Trading Post files
 TEMPEXCEL = SRCPATH + 'stocktradingpost2.xlsx'
 OUTPUTEXCEL = SRCPATH + 'testTradingPost.xlsx'
 

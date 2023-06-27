@@ -53,52 +53,6 @@ def determine_buy_sell(etf):
 
     return 'HOLD', config.PLAINCOLOR, ''
 
-
-# # TODO16: figure out coloring for output platform 
-# def generate_tp():
-
-#     tickerIndex = {}
-
-#     # TODO21: work on getting value instead of formula 
-    
-#     # USED FOR DEMO 
-#     platform = openpyxl.load_workbook(config.OUTPUTPLATFORM)
-#     platform['Sheet1']['AL1'].value = 100
-#     platform.save(config.OUTPUTPLATFORM)
-#     platform.close()
-#     platform = openpyxl.load_workbook(config.OUTPUTPLATFORM, data_only=True)
-#     platformSheet = platform.active
-    
-
-#     # makes a copy of the template excel file
-#     shutil.copyfile(config.TEMPEXCEL, config.OUTPUTEXCEL)
-
-#     # loading excel as workbook object
-#     workbook = openpyxl.load_workbook(config.OUTPUTEXCEL)
-#     excelSheet = workbook.active
-
-#     # going through each cell and getting ticker index 
-#     for row in platformSheet.iter_rows(max_row=platformSheet.max_row, max_col=1):
-#         for cell in row:
-#             # gets the rows with tickers in the excel 
-#             if cell.value in config.TICKERS:
-#                 tickerIndex[cell.value] = cell.coordinate[1:]
-
-#     for i in range(len(tickerIndex)):
-#         tickerRow = 7 + (i // 7) * 10
-#         signalRow = tickerRow + 5
-#         colChar = chr(i % 7 + 67) # tp column ETF coordinate; ascii 67 is 'C' 
-#         excelSheet[f'{colChar}{tickerRow}'] = config.TICKERS[i] # filling etf name cell 
-#         excelSheet[f'{colChar}{tickerRow + 3}'] = config.TODAYDATE # filling today date 
-#         excelSheet[f'{colChar}{tickerRow + 8}'] = platformSheet[f'G{tickerIndex[config.TICKERS[i]]}'].value # close price 
-#         determine_buy_sell(platformSheet, excelSheet, tickerIndex[config.TICKERS[i]], signalRow, colChar)
-
-#     if (config.DEBUG):
-#         print(f'saving trading post as {config.OUTPUTEXCEL}')
-
-#     workbook.save(config.OUTPUTEXCEL)
-
-# TODO15: add parameters to fill_excel
 def fill_platform(etfDict):
 
     tickerRowDict = {} # { 'JNK': 6 }
@@ -114,7 +68,7 @@ def fill_platform(etfDict):
     for row in activeSheet.iter_rows(max_row=activeSheet.max_row, max_col=1):
         for cell in row:
             # gets the rows with tickers in the excel 
-            if cell.value == etf.ticker:
+            if cell.value in config.TICKERS:
                 tickerRowDict[cell.value] = cell.coordinate[1:]
 
     for ticker in config.TICKERS:
