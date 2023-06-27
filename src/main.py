@@ -8,10 +8,9 @@ from copyExcel import determine_buy_sell, set_ranges, fill_platform
 from generate_csv import generate_csv
 
 etfDict = {} # { str ticker : etf object }
-csvMode = 'w'
 
 if (config.PBAR):
-            pBar = tqdm(desc='tickers found', total=len(config.TICKERS))
+    pBar = tqdm(desc='tickers found', total=len(config.TICKERS))
 for ticker in config.TICKERS:
     # creates a dictionary of Etf objects 
     etfDict[ticker] = Etf(ticker, 'name') # implement names -> 'HighYieldBonds' 
@@ -48,13 +47,11 @@ for ticker in config.TICKERS:
     activeSheet[f'{charBase}{numBase + 7}'] = maxTradeRange
     activeSheet[f'{charBase}{numBase + 8}'] = curEtf.indicatorDict['close_price'] # setting close price in tp 
 
-    # TODO: make a single call; make etfDict the parameter
-    if (config.FILLPLATFORM):
-        fill_platform(curEtf)
-
-# TODO: Make a single call to this function; make etf dict the parameter
 if (config.CSV):
     generate_csv(etfDict)
+
+if (config.FILLPLATFORM):
+    fill_platform(curEtf)    
 
 workbook.save(config.OUTPUTEXCEL)
 if (config.DEBUG):
