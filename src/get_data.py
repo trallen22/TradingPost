@@ -4,11 +4,11 @@ This script scrapes polygon.io and returns the 50 day sma for intervals
 and 1 day and close price 
 '''
 
-from fileinput import close
-from polygon import RESTClient
-from datetime import timedelta, date
+from datetime import timedelta
+import time
 import pandas as pd 
 import numpy as np
+import yfinance as yf
 
 import configurationFile as config
 
@@ -20,7 +20,7 @@ get_dataframe - Called by get_indicators(), Gets the dataframe for the given tic
 '''
 def get_dataframe(curTicker, timeUnit, intMultiplier):
 
-    endDay = date.today()
+    endDay = config.today
 
     if timeUnit == 'minute':
         days = timedelta(7)
@@ -80,8 +80,15 @@ def get_indicators(ticker, paramSet):
         curTimeInterval = paramSet[i][0] # time interval (minute, day) 
         curMultiplier = paramSet[i][1] # multiplier for time interval 
 
+        apiLimit = 1
         try: 
-            curDF = get_dataframe(ticker, curTimeInterval, curMultiplier)
+            # Loop while too many api calls per minute
+            while (apiLimit):
+                try:
+                    curDF = get_dataframe(ticker, curTimeInterval, curMultiplier)
+                    apiLimit = 0
+                except Exception:
+                    time.sleep(2)
             finalIndexes.append(curDF[0])
             finalIndexes.append(curDF[1])
         except Exception as e:
@@ -100,20 +107,10 @@ def get_indicators(ticker, paramSet):
     '''
     Generate closing price by date 
     '''
-    try:
-        # this needs to be run after midnight 
-        print(date.today())
-        close_price = config.CLIENT.get_daily_open_close_agg(ticker=ticker, date=str(date.today())).close
-        if (config.PRINTDF):
-            print('--------')
-            print('--- CLOSE PRICE ---')
-            print('--------')
-            print(close_price)
-        close_dict =  close_price if not close_price == '' else -1
-    except Exception as f:
-        print(f'ERROR: {f}')
-        print(f'NOTICE: problem getting closing price for ticker \"{ticker}\"')
-        close_dict = -1
+
+    etf = yf.Ticker(ticker)
+    info = etf.history()
+    close_price = round(info['Close'][f'{config.today} 00:00:00-04:00'], 2)
 
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
-    ticker_two_hundred_five_minute, ticker_fifty_one_day, ticker_two_hundred_one_day, close_dict
+    ticker_two_hundred_five_minute, ticker_fifty_one_day, ticker_two_hundred_one_day, close_price

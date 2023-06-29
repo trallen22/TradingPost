@@ -1,7 +1,7 @@
 '''
 This file holds all the configuraion information
 '''
-from datetime import date
+from datetime import date, timedelta
 from polygon import RESTClient 
 import os
 import sys 
@@ -10,7 +10,7 @@ import openpyxl
 SRCPATH = os.path.dirname(__file__) + '/'
 
 # convert todays date to mm/dd form 
-today = date.today()
+today = date.today() - timedelta(1)
 
 listDate = str(today).split('-')
 TODAYDATE = f'{listDate[1]}/{listDate[2]}' 
@@ -61,11 +61,11 @@ CSVFILE = SRCPATH + 'testCsv.csv'
 #         "VWO", "VHT", "VIS", "VGT", "VAW", "VNQ", "VOO", 
 #         "VOX", "BND", "BNDX", "VXUS", "VTI", "VPU", "XTN"]
 
-# TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
-#         'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
-#         'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
+TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
+        'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
+        'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
 
-TICKERS = [ 'JNK' ] # used for testing 
+# TICKERS = [ 'JNK', 'GDX', 'VCR' ] # used for testing 
 
 INDICATORS = [ 'one_min_50', 'one_min_200', 'five_min_50', 'five_min_200', 'one_day_50', 'one_day_200', 'close_price' ]
 MINDICATORS = [ 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200' ]

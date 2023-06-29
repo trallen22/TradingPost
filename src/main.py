@@ -16,9 +16,6 @@ for ticker in config.TICKERS:
     etfDict[ticker] = Etf(ticker, 'name') # implement names -> 'HighYieldBonds' 
     if (config.PBAR):
         pBar.update(1)
-    # ensure we don't pass 5 API calls/min for polygon 
-    if not (ticker == config.TICKERS[-1]):
-        time.sleep(60)
 if (config.PBAR):
     pBar.close()
 

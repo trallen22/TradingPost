@@ -1,6 +1,6 @@
 from openpyxl import Workbook
 from openpyxl import load_workbook
-from barchart_scrape import get_one_day_avgs
+from old_code.barchart_scrape import get_one_day_avgs
 from newpoly import get_minute_indicator
 from datetime import datetime, timedelta
 

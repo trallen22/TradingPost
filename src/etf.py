@@ -1,4 +1,4 @@
-import polygon_data
+import get_data
 import configurationFile as config 
 
 class Etf:
@@ -11,7 +11,7 @@ class Etf:
         self.rowbase = int(self.basecell[1:]) # row num of basecell -> '7'
 
         self.indicatorDict = {} # { indicator: value from polygon }
-        indicators = polygon_data.get_indicators(ticker, config.PARAMSET)
+        indicators = get_data.get_indicators(ticker, config.PARAMSET)
         for i in range(len(config.INDICATORS)):
             self.indicatorDict[config.INDICATORS[i]] = indicators[i]
         
