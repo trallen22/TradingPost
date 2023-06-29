@@ -45,10 +45,18 @@ for ticker in config.TICKERS:
     activeSheet[f'{charBase}{numBase + 8}'] = curEtf.indicatorDict['close_price'] # setting close price in tp 
 
 if (config.CSV):
-    generate_csv(etfDict)
+    try:
+        generate_csv(etfDict)
+    except Exception as e:
+        print(f'ERROR: {e}')
+        print('NOTICE: unable to generate CSV')
 
 if (config.FILLPLATFORM):
-    fill_platform(etfDict)    
+    try:
+        fill_platform(etfDict) 
+    except Exception as e:
+        print(f'ERROR: {e}')
+        print('NOTICE: unable to generate Platform')
 
 workbook.save(config.OUTPUTEXCEL)
 if (config.DEBUG):
