@@ -36,10 +36,10 @@ for ticker in config.TICKERS:
     activeSheet[f'{charBase}{numBase + 1}'].value = curEtf.name # setting etf name in tp 
     activeSheet[f'{charBase}{numBase + 3}'] = config.TODAYDATE # setting today date in tp 
 
-    signal, sigColor, rangeType = determine_buy_sell(curEtf)
+    signal, sigColor, minTradeRange, maxTradeRange = determine_buy_sell(curEtf)
     activeSheet[f'{charBase}{numBase + 5}'] = signal # Buy/Sell/Hold signal 
     activeSheet[f'{charBase}{numBase + 5}'].fill = sigColor # Buy/Sell/Hold color 
-    minTradeRange, maxTradeRange = set_ranges(rangeType, curEtf)
+    
     activeSheet[f'{charBase}{numBase + 6}'] = minTradeRange
     activeSheet[f'{charBase}{numBase + 7}'] = maxTradeRange
     activeSheet[f'{charBase}{numBase + 8}'] = curEtf.indicatorDict['close_price'] # setting close price in tp 

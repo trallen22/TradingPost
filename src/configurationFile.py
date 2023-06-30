@@ -17,15 +17,17 @@ TODAYDATE = f'{listDate[1]}/{listDate[2]}'
 
 STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data
 
-PRINTDF = 0 # prints dataframes to terminal
+PRINTDF = 1 # prints dataframes to terminal
 PBAR = 1 # print progress bar for polygon calls in generate_csv.py 
 DEBUG = 1 # print debug messages # TODO20: add debug messages 
+DEBUGDATA = 0 # print debug messages from get_data.py
 CSV = 1 # outputs an excel file to CSVFILE 
 FILLPLATFORM = 1
 
 for arg in sys.argv:
         if arg == '-h':
                 print('Need to work on help menu')
+                exit(0)
         if arg == '-f':
                 PRINTDF = 1
         if arg == '-p':
@@ -65,7 +67,7 @@ TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH',
         'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
         'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
 
-# TICKERS = [ 'JNK', 'GDX', 'VCR' ] # used for testing 
+# TICKERS = [ 'JNK' ] # used for testing 
 
 INDICATORS = [ 'one_min_50', 'one_min_200', 'five_min_50', 'five_min_200', 'one_day_50', 'one_day_200', 'close_price' ]
 MINDICATORS = [ 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200' ]
@@ -74,7 +76,7 @@ DAYDICATORS = [ 'one_day_50', 'one_day_200' ]
 INPUTS = { 'G':'close_price', 'H':'one_day_50', 'I':'one_day_200', 'J':'five_min_50', 
         'K':'five_min_200', 'L':'one_min_50', 'M':'one_min_200' }
 
-PLATFORMCOLS = { 'close_price':'G', 'one_day_50':'H', 'one_day_200':'I', 'five_min_50':'J', 
+PLATFORMCOLS = { 'date':'E', 'close_price':'G', 'one_day_50':'H', 'one_day_200':'I', 'five_min_50':'J', 
         'five_min_200':'K', 'one_min_50':'L', 'one_min_200':'M' }
 
 ETFBASECELL = { 'JNK':'C7', 'GDX':'D7', 'VCR':'E7', 'VDC':'F7', 'VIG':'G7', 
@@ -90,7 +92,7 @@ except Exception as e:
         print(f'ERROR: {e}')
         exit(4)
 
-COLORROW = 5
+COLORROW = 5 # row on trading post excel with template color
 plainRGB = 'FFFFFFFF'
 PLAINCOLOR = openpyxl.styles.PatternFill(start_color=plainRGB, end_color=plainRGB, fill_type='solid')
 

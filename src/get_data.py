@@ -49,7 +49,7 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
     df = df[df["time_of_day"] <= market_close]
     if (timeUnit == 'minute'):
         df = df[df["time_of_day"] >= market_open]
-    
+
     # assigns value of ticker to simple moving average of last 50mins of before market close and rounds to two decimal
     fifty_interval = round(np.mean(df[["close"]].head(50),axis=0).values[0],2)
 
@@ -68,27 +68,35 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
 '''
 Gets the sma values for each ticker
 '''
-def get_indicators(ticker, paramSet):
+def get_indicators(ticker):
 
     finalIndexes = []
 
     '''
     Generate 50 and 200 for given time interval(s) in paramSet
     '''
-    for i in range(len(paramSet)): 
+    for i in range(len(config.PARAMSET)): 
 
-        curTimeInterval = paramSet[i][0] # time interval (minute, day) 
-        curMultiplier = paramSet[i][1] # multiplier for time interval 
+        curTimeInterval = config.PARAMSET[i][0] # time interval (minute, day) 
+        curMultiplier = config.PARAMSET[i][1] # multiplier for time interval 
 
         apiLimit = 1
+        downTime = 0
         try: 
             # Loop while too many api calls per minute
             while (apiLimit):
                 try:
                     curDF = get_dataframe(ticker, curTimeInterval, curMultiplier)
                     apiLimit = 0
+                    downTime = 0
                 except Exception:
-                    time.sleep(2)
+                    time.sleep(5)
+                    if (config.DEBUGDATA or config.DEBUG):
+                        print(f'DEBUG: api call failed for {downTime} seconds')
+                        downTime += 5
+                    if (downTime > 70):
+                        print(f'ERROR: get_data failed after {downTime} seconds')
+                        exit(9)
             finalIndexes.append(curDF[0])
             finalIndexes.append(curDF[1])
         except Exception as e:
@@ -107,10 +115,14 @@ def get_indicators(ticker, paramSet):
     '''
     Generate closing price by date 
     '''
-
-    etf = yf.Ticker(ticker)
-    info = etf.history()
-    close_price = round(info['Close'][f'{config.today} 00:00:00-04:00'], 2)
+    try: 
+        # you just gotta look up how this works 
+        etf = yf.Ticker(ticker)
+        info = etf.history()
+        close_price = round(info['Close'][f'{config.today} 00:00:00-04:00'], 2)
+    except KeyError as keyErr:
+        print(f'ERROR in get_daat(): {keyErr}')
+        exit(3)
 
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
     ticker_two_hundred_five_minute, ticker_fifty_one_day, ticker_two_hundred_one_day, close_price
