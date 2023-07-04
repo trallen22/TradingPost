@@ -9,8 +9,6 @@ import time
 import openpyxl 
 import configurationFile as config
 import platFormulas as formula
-# from koala.ExcelCompiler import ExcelCompiler
-# from koala.Spreadsheet import Spreadsheet
 
 
 # TODO19: Implement set_ranges 

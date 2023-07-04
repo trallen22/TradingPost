@@ -1,11 +1,14 @@
 '''
-This script generates a csv from scraping barchart_scrape.py
-and newpoly.py
+This script generates a csv from a dictionary of etf objects
 '''
 
 import csv
 import configurationFile as config
 
+# generate_csv: generates a csv file with path config.CSVFILE
+# parameters: 
+#       etfDict - a dictionary of etf objects 
+# returns: no return value. generates a csv file to given path
 def generate_csv(etfDict):
     with open(config.CSVFILE, mode='w') as csv_file:
         fieldnames = ['ticker', 'one_day_50',
@@ -28,5 +31,5 @@ def generate_csv(etfDict):
                 'close_price': etfVals['close_price']
             })
     if (config.DEBUG):
-        print(f'saving trading post as {config.CSVFILE}')
+        print(f'saving csv file as {config.CSVFILE}')
 

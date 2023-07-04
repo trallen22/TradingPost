@@ -1,0 +1,11 @@
+# avoid csv and xlsx and numbers
+############
+*.csv
+*.xlsx
+*.numbers
+
+# compiled python
+*.pyc 
+
+# os file 
+.DS_Store

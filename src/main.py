@@ -1,11 +1,11 @@
 import openpyxl 
 import shutil 
-import time
 from tqdm import tqdm
 from etf import Etf 
 import configurationFile as config
-from copyExcel import determine_buy_sell, set_ranges, fill_platform
+from copyExcel import determine_buy_sell, fill_platform
 from generate_csv import generate_csv
+from send_email import send_email
 
 etfDict = {} # { str ticker : etf object }
 
@@ -63,3 +63,5 @@ if (config.DEBUG):
     print(f'saving trading post as {config.OUTPUTEXCEL}')
 workbook.close()
 
+if (config.SENDEMAIL):
+    send_email(config.EMAILLIST, )

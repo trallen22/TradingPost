@@ -7,22 +7,30 @@ import os
 import sys 
 import openpyxl
 
+
+# Email variables 
+EMAILADDRESS = 'etfsender@gmail.com'
+EMAILPASSWORD = 'egztwpmmkbicpjfd' #'P@55w0rd123' 
+
+EMAILLIST = [ 'trallen@davidson.edu' ]
+
 SRCPATH = os.path.dirname(__file__) + '/'
 
 # convert todays date to mm/dd form 
-today = date.today() - timedelta(1)
+today = date.today() 
 
 listDate = str(today).split('-')
 TODAYDATE = f'{listDate[1]}/{listDate[2]}' 
 
 STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data
 
-PRINTDF = 1 # prints dataframes to terminal
+PRINTDF = 0 # prints dataframes to terminal
 PBAR = 1 # print progress bar for polygon calls in generate_csv.py 
 DEBUG = 1 # print debug messages # TODO20: add debug messages 
 DEBUGDATA = 0 # print debug messages from get_data.py
 CSV = 1 # outputs an excel file to CSVFILE 
 FILLPLATFORM = 1
+SENDEMAIL = 1
 
 for arg in sys.argv:
         if arg == '-h':
@@ -38,6 +46,8 @@ for arg in sys.argv:
                 CSV = 1
         if arg == '-m':
                 FILLPLATFORM = 1 
+        if arg == '-e':
+                SENDEMAIL = 1
 
 # polygon login 
 '''Insert your key. Play around with the free tier key first.'''
@@ -58,10 +68,6 @@ TEMPEXCEL = SRCPATH + 'stocktradingpost2.xlsx'
 OUTPUTEXCEL = SRCPATH + 'testTradingPost.xlsx'
 
 CSVFILE = SRCPATH + 'testCsv.csv' 
-
-# TICKERS = ["JNK", "GDX", "VCR", "VDC", "VIG", "VDE", "VFH", 
-#         "VWO", "VHT", "VIS", "VGT", "VAW", "VNQ", "VOO", 
-#         "VOX", "BND", "BNDX", "VXUS", "VTI", "VPU", "XTN"]
 
 TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
         'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
