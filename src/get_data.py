@@ -50,6 +50,8 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
     if (timeUnit == 'minute'):
         df = df[df["time_of_day"] >= market_open]
 
+    df = df[df["transactions"].notnull()]
+
     # assigns value of ticker to simple moving average of last 50mins of before market close and rounds to two decimal
     fifty_interval = round(np.mean(df[["close"]].head(50),axis=0).values[0],2)
 
@@ -58,10 +60,10 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
 
     # prints each dataframe. Used for debugging 
     if (config.PRINTDF):
-        print('--------')
+        print('#################')
         print(f'--- {intMultiplier} {timeUnit} ---')
+        print('#################')
         print(df)
-        print('--------')
 
     return fifty_interval, two_hundred_interval
 
@@ -92,11 +94,12 @@ def get_indicators(ticker):
                 except Exception:
                     time.sleep(5)
                     if (config.DEBUGDATA or config.DEBUG):
-                        print(f'DEBUG: api call failed for {downTime} seconds')
+                        if (not downTime % 10):
+                            print(f'DEBUG: api call failed for {downTime} seconds')
                         downTime += 5
-                    if (downTime > 70):
-                        print(f'ERROR: get_data failed after {downTime} seconds')
-                        exit(9)
+                        if (downTime > 70):
+                            print(f'ERROR: get_data failed after {downTime} seconds')
+                            exit(9)
             finalIndexes.append(curDF[0])
             finalIndexes.append(curDF[1])
         except Exception as e:
@@ -121,7 +124,7 @@ def get_indicators(ticker):
         info = etf.history()
         close_price = round(info['Close'][f'{config.today} 00:00:00-04:00'], 2)
     except KeyError as keyErr:
-        print(f'ERROR in get_daat(): {keyErr}')
+        print(f'ERROR in get_indicators(): {keyErr}')
         exit(3)
 
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
