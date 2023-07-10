@@ -4,8 +4,6 @@ creates the new excel for current day based on generated csv
 '''
 
 import shutil
-import csv
-import time
 import openpyxl 
 import configurationFile as config
 import platFormulas as formula
