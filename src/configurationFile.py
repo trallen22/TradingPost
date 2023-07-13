@@ -10,14 +10,13 @@ import openpyxl
 
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
-EMAILPASSWORD = 'egztwpmmkbicpjfd' #'P@55w0rd123' 
-
+EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
 EMAILLIST = [ 'trallen@davidson.edu' ]
 
 SRCPATH = os.path.dirname(__file__) + '/'
 
 # convert todays date to mm/dd form 
-today = date.today() 
+today = date.today() - timedelta(1)
 
 listDate = str(today).split('-')
 TODAYDATE = f'{listDate[1]}/{listDate[2]}' 
@@ -52,7 +51,15 @@ for arg in sys.argv:
 # polygon login 
 '''Insert your key. Play around with the free tier key first.'''
 key = "nGJdIcDOy3hzWwn6X6gritFJkgDWTpRJ"
-CLIENT = RESTClient(key)
+try:
+        winebagle = 1
+        while (winebagle):
+                print(winebagle)
+                CLIENT = RESTClient(key)
+                print(f'no win')
+                winebagle = 0
+except Exception:
+        print('failed to connect to Polygon rest client')
 
 PARAMSET = [[ 'minute', 1 ], # one minute time interval 
                 [ 'minute', 5 ], # 5 minute time interval 
@@ -60,20 +67,20 @@ PARAMSET = [[ 'minute', 1 ], # one minute time interval
 
 # Platform files 
 TEMPLATEPLATFORM = SRCPATH + 'TA.WORK.xlsx'
-OUTPUTPLATFORM = SRCPATH + 'testPlatform.xlsx'
+OUTPUTPLATFORM = f'/Users/tristanallen/Desktop/TradingPost/testTP/{listDate[1]}-{listDate[2]}_testPlatform.xlsx'
 RAWPLATFORM = SRCPATH + 'rawPlatform.xlsx'
 
 # Trading Post files
-TEMPEXCEL = SRCPATH + 'stocktradingpost2.xlsx'
-OUTPUTEXCEL = SRCPATH + 'testTradingPost.xlsx'
+TEMPEXCEL = SRCPATH + 'stocktradingpost.xlsx'
+OUTPUTEXCEL = f'/Users/tristanallen/Desktop/TradingPost/testTP/{listDate[1]}-{listDate[2]}_testTradingPost.xlsx'
 
 CSVFILE = SRCPATH + 'testCsv.csv' 
 
-TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
-        'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
-        'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
+# TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
+#         'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
+#         'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
 
-# TICKERS = [ 'JNK' ] # used for testing 
+TICKERS = [ 'JNK' ] # used for testing 
 
 INDICATORS = [ 'one_min_50', 'one_min_200', 'five_min_50', 'five_min_200', 'one_day_50', 'one_day_200', 'close_price' ]
 MINDICATORS = [ 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200' ]
@@ -89,6 +96,8 @@ ETFBASECELL = { 'JNK':'C7', 'GDX':'D7', 'VCR':'E7', 'VDC':'F7', 'VIG':'G7',
         'VDE':'H7', 'VFH':'I7', 'VWO':'C17', 'VHT':'D17', 'VIS':'E17', 'VGT':'F17', 
         'VAW':'G17', 'VNQ':'H17', 'VOO':'I17', 'VOX':'C27', 'BND':'D27', 
         'BNDX':'E27', 'VXUS':'F27', 'VTI':'G27', 'VPU':'H27', 'XTN':'I27' }
+
+PLATDATECELL = 'B3'
 
 try: 
         # loading excel as workbook object

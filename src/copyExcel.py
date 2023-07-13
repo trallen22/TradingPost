@@ -76,6 +76,8 @@ def fill_platform(etfDict):
     workbook = openpyxl.load_workbook(config.OUTPUTPLATFORM)
     activeSheet = workbook.active
 
+    activeSheet[config.PLATDATECELL] = f'{config.TODAYDATE}/{config.listDate[0]}'
+
     # going through each cell and getting ticker index 
     for row in activeSheet.iter_rows(max_row=activeSheet.max_row, max_col=1):
         for cell in row:
