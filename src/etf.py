@@ -11,7 +11,9 @@ class Etf:
         self.rowbase = int(self.basecell[1:]) # row num of basecell -> '7'
 
         self.indicatorDict = {} # { indicator: value from polygon }
+
         indicators = get_data.get_indicators(ticker)
+
         for i in range(len(config.INDICATORS)):
             self.indicatorDict[config.INDICATORS[i]] = indicators[i]
         

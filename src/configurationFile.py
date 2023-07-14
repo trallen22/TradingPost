@@ -13,10 +13,15 @@ EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
 EMAILLIST = [ 'trallen@davidson.edu' ]
 
+curDir = os.path.abspath(__file__)
+dirList = curDir.split('/')
+topList = dirList[:-2]
+TPROOT = '/'.join(topList)
+
 SRCPATH = os.path.dirname(__file__) + '/'
 
 # convert todays date to mm/dd form 
-today = date.today() - timedelta(1)
+today = date.today() - timedelta(3)
 
 listDate = str(today).split('-')
 TODAYDATE = f'{listDate[1]}/{listDate[2]}' 
@@ -28,8 +33,9 @@ PBAR = 1 # print progress bar for polygon calls in generate_csv.py
 DEBUG = 1 # print debug messages # TODO20: add debug messages 
 DEBUGDATA = 0 # print debug messages from get_data.py
 CSV = 1 # outputs an excel file to CSVFILE 
-FILLPLATFORM = 1
-SENDEMAIL = 1
+FILLPLATFORM = 1 # outputs a platform 
+SENDEMAIL = 1 # sends an email to email list 
+GETVALUE = 0 # gets a specific value from given date 
 
 for arg in sys.argv:
         if arg == '-h':
@@ -47,6 +53,8 @@ for arg in sys.argv:
                 FILLPLATFORM = 1 
         if arg == '-e':
                 SENDEMAIL = 1
+        if arg == '-v':
+                GETVALUE = 1
 
 # polygon login 
 '''Insert your key. Play around with the free tier key first.'''
@@ -67,20 +75,20 @@ PARAMSET = [[ 'minute', 1 ], # one minute time interval
 
 # Platform files 
 TEMPLATEPLATFORM = SRCPATH + 'TA.WORK.xlsx'
-OUTPUTPLATFORM = f'/Users/tristanallen/Desktop/TradingPost/testTP/{listDate[1]}-{listDate[2]}_testPlatform.xlsx'
+OUTPUTPLATFORM = f'{TPROOT}/testTP/{listDate[1]}-{listDate[2]}_testPlatform.xlsx'
 RAWPLATFORM = SRCPATH + 'rawPlatform.xlsx'
 
 # Trading Post files
 TEMPEXCEL = SRCPATH + 'stocktradingpost.xlsx'
-OUTPUTEXCEL = f'/Users/tristanallen/Desktop/TradingPost/testTP/{listDate[1]}-{listDate[2]}_testTradingPost.xlsx'
+OUTPUTEXCEL = f'{TPROOT}/testTP/{listDate[1]}-{listDate[2]}_testTradingPost.xlsx'
 
 CSVFILE = SRCPATH + 'testCsv.csv' 
 
-# TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
-#         'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
-#         'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
+TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
+        'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
+        'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
 
-TICKERS = [ 'JNK' ] # used for testing 
+# TICKERS = [ 'JNK' ] # used for testing 
 
 INDICATORS = [ 'one_min_50', 'one_min_200', 'five_min_50', 'five_min_200', 'one_day_50', 'one_day_200', 'close_price' ]
 MINDICATORS = [ 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200' ]
