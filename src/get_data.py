@@ -4,11 +4,11 @@ This script scrapes polygon.io and returns the 50 day sma for intervals
 and 1 day and close price 
 '''
 
-from fileinput import close
-from polygon import RESTClient
-from datetime import timedelta, date
+from datetime import timedelta
+import time
 import pandas as pd 
 import numpy as np
+import yfinance as yf
 
 import configurationFile as config
 
@@ -20,7 +20,7 @@ get_dataframe - Called by get_indicators(), Gets the dataframe for the given tic
 '''
 def get_dataframe(curTicker, timeUnit, intMultiplier):
 
-    endDay = date.today()
+    endDay = config.today
 
     if timeUnit == 'minute':
         days = timedelta(7)
@@ -49,7 +49,9 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
     df = df[df["time_of_day"] <= market_close]
     if (timeUnit == 'minute'):
         df = df[df["time_of_day"] >= market_open]
-    
+
+    df = df[df["transactions"].notnull()]
+
     # assigns value of ticker to simple moving average of last 50mins of before market close and rounds to two decimal
     fifty_interval = round(np.mean(df[["close"]].head(50),axis=0).values[0],2)
 
@@ -58,30 +60,46 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
 
     # prints each dataframe. Used for debugging 
     if (config.PRINTDF):
-        print('--------')
+        print('#################')
         print(f'--- {intMultiplier} {timeUnit} ---')
+        print('#################')
         print(df)
-        print('--------')
 
     return fifty_interval, two_hundred_interval
 
 '''
 Gets the sma values for each ticker
 '''
-def get_indicators(ticker, paramSet):
+def get_indicators(ticker):
 
     finalIndexes = []
 
     '''
     Generate 50 and 200 for given time interval(s) in paramSet
     '''
-    for i in range(len(paramSet)): 
+    for i in range(len(config.PARAMSET)): 
 
-        curTimeInterval = paramSet[i][0] # time interval (minute, day) 
-        curMultiplier = paramSet[i][1] # multiplier for time interval 
+        curTimeInterval = config.PARAMSET[i][0] # time interval (minute, day) 
+        curMultiplier = config.PARAMSET[i][1] # multiplier for time interval 
 
+        apiLimit = 1
+        downTime = 0
         try: 
-            curDF = get_dataframe(ticker, curTimeInterval, curMultiplier)
+            # Loop while too many api calls per minute
+            while (apiLimit):
+                try:
+                    curDF = get_dataframe(ticker, curTimeInterval, curMultiplier)
+                    apiLimit = 0
+                    downTime = 0
+                except Exception:
+                    time.sleep(5)
+                    if (config.DEBUGDATA or config.DEBUG):
+                        if (not downTime % 10):
+                            print(f'DEBUG: api call failed for {downTime} seconds')
+                        downTime += 5
+                        if (downTime > 70):
+                            print(f'ERROR: get_data failed after {downTime} seconds')
+                            exit(9)
             finalIndexes.append(curDF[0])
             finalIndexes.append(curDF[1])
         except Exception as e:
@@ -100,20 +118,14 @@ def get_indicators(ticker, paramSet):
     '''
     Generate closing price by date 
     '''
-    try:
-        # this needs to be run after midnight 
-        print(date.today())
-        close_price = config.CLIENT.get_daily_open_close_agg(ticker=ticker, date=str(date.today())).close
-        if (config.PRINTDF):
-            print('--------')
-            print('--- CLOSE PRICE ---')
-            print('--------')
-            print(close_price)
-        close_dict =  close_price if not close_price == '' else -1
-    except Exception as f:
-        print(f'ERROR: {f}')
-        print(f'NOTICE: problem getting closing price for ticker \"{ticker}\"')
-        close_dict = -1
+    try: 
+        # you just gotta look up how this works 
+        etf = yf.Ticker(ticker)
+        info = etf.history()
+        close_price = round(info['Close'][f'{config.today} 00:00:00-04:00'], 2)
+    except KeyError as keyErr:
+        print(f'ERROR in get_indicators(): {keyErr}')
+        exit(3)
 
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
-    ticker_two_hundred_five_minute, ticker_fifty_one_day, ticker_two_hundred_one_day, close_dict
+    ticker_two_hundred_five_minute, ticker_fifty_one_day, ticker_two_hundred_one_day, close_price

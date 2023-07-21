@@ -73,4 +73,4 @@ def get_one_day_avgs(tickers):
     return ticker_fifty, ticker_two_hundred
 
 
-# get_one_day_avgs(['VOO','SPY'])
+print(get_one_day_avgs(['JNK']))

@@ -4,13 +4,9 @@ creates the new excel for current day based on generated csv
 '''
 
 import shutil
-import csv
-import time
 import openpyxl 
 import configurationFile as config
 import platFormulas as formula
-# from koala.ExcelCompiler import ExcelCompiler
-# from koala.Spreadsheet import Spreadsheet
 
 
 # TODO19: Implement set_ranges 
@@ -22,13 +18,18 @@ def set_ranges(rangeType, etf):
         rangeMin = formula.sell_min(etf)
         rangeMax = formula.sell_max(etf)
     else:
-        return '', ''
-    if rangeMin < rangeMax:
-        return rangeMin, rangeMax 
-    return rangeMax, rangeMin 
+        return '', '', 1
+    if rangeMin > rangeMax:
+        return '', '', 1
+    return rangeMin, rangeMax, 0
 
 def determine_buy_sell(etf):
     etfVals = etf.indicatorDict
+    signal = None
+    color = None
+    minTradeRange = None
+    maxTradeRange = None 
+
     if (etfVals['close_price'] > etfVals['one_day_50']):
         # Looking for sell signals 
         if (etfVals['close_price'] > etfVals['one_day_200']):
@@ -36,10 +37,14 @@ def determine_buy_sell(etf):
             for col in config.MINDICATORS:
                 minPrice = min(minPrice, etfVals[col])
             if (etfVals['close_price'] < minPrice):
-                return '!SELL!', config.SELLCOLOR, 'sell'
+                signal = '!SELL!' 
+                color = config.SELLCOLOR
             else:
-                return 'HOLD', config.HOSELLCOLOR, 'sell'
-
+                signal = 'HOLD' 
+                color = config.HOSELLCOLOR
+            minTradeRange, maxTradeRange, clearTP = set_ranges('sell', etf)
+            if (not clearTP):
+                return signal, color, minTradeRange, maxTradeRange
     else:
         # Looking for buy signals 
         if (etfVals['close_price'] < etfVals['one_day_50']):
@@ -47,11 +52,18 @@ def determine_buy_sell(etf):
             for col in config.MINDICATORS:
                 maxPrice = max(maxPrice, etfVals[col])
             if (etfVals['close_price'] > maxPrice):
-                return '!BUY!', config.BUYCOLOR, 'buy'
+                signal = '!BUY!' 
+                color = config.BUYCOLOR 
             else:
-                return 'HOLD', config.HOBUYCOLOR, 'buy'
-
-    return 'HOLD', config.PLAINCOLOR, ''
+                signal = 'HOLD' 
+                color = config.HOBUYCOLOR 
+            minTradeRange, maxTradeRange, clearTP = set_ranges('buy', etf)
+            if (not clearTP):
+                return signal, color, minTradeRange, maxTradeRange
+    signal = 'HOLD' 
+    color = config.PLAINCOLOR 
+    minTradeRange, maxTradeRange, clearTP = set_ranges('', etf)
+    return signal, color, minTradeRange, maxTradeRange
 
 def fill_platform(etfDict):
 
@@ -64,6 +76,8 @@ def fill_platform(etfDict):
     workbook = openpyxl.load_workbook(config.OUTPUTPLATFORM)
     activeSheet = workbook.active
 
+    activeSheet[config.PLATDATECELL] = f'{config.TODAYDATE}/{config.listDate[0]}'
+
     # going through each cell and getting ticker index 
     for row in activeSheet.iter_rows(max_row=activeSheet.max_row, max_col=1):
         for cell in row:
@@ -73,7 +87,10 @@ def fill_platform(etfDict):
 
     for ticker in config.TICKERS:
         for col in config.PLATFORMCOLS:
-            activeSheet[f'{config.PLATFORMCOLS[col]}{tickerRowDict[ticker]}'] = etfDict[ticker].indicatorDict[col]
+            if col == 'date':
+                activeSheet[f'{config.PLATFORMCOLS[col]}{tickerRowDict[ticker]}'] = config.TODAYDATE
+            else:
+                activeSheet[f'{config.PLATFORMCOLS[col]}{tickerRowDict[ticker]}'] = etfDict[ticker].indicatorDict[col]
 
     workbook.save(config.OUTPUTPLATFORM)
     if (config.DEBUG):
