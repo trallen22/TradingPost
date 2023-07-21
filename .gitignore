@@ -1,8 +1,9 @@
-# avoid csv and xlsx and numbers
+# avoid csv, pdf and xlsx and numbers
 ############
 *.csv
 *.xlsx
 *.numbers
+*.pdf
 
 # compiled python
 *.pyc 
