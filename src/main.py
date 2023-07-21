@@ -1,3 +1,4 @@
+import multiprocessing
 import openpyxl 
 import shutil 
 from tqdm import tqdm
@@ -7,9 +8,23 @@ from copyExcel import determine_buy_sell, fill_platform
 from generate_csv import generate_csv
 from send_email import send_email
 import os
+import sys
+from sys import exit
 
+multiprocessing.freeze_support() # prevents multithreading in pyinstaller --onedir
 os.system('clear')
+
 etfDict = {} # { str ticker : etf object }
+
+print(f'TPROOT: {config.TPROOT}')
+# if (config.GETVALUE):
+#     if (len(sys.argv) != 6): # USAGE: main.py -v 'ticker' 'interval' 'timefram' 'date'
+#         print('Error: usage')
+#         exit(21)
+#     etfDict[sys.argv[2]] = Etf(sys.argv[2], 'value')
+#     curDir = config.TPROOT
+
+#     exit(90)
 
 if (config.PBAR):
     pBar = tqdm(desc='tickers found', total=len(config.TICKERS))
@@ -22,7 +37,13 @@ if (config.PBAR):
     pBar.close()
 
 # makes a copy of the template platform file
-shutil.copyfile(config.TEMPEXCEL, config.OUTPUTEXCEL)
+try:
+    shutil.copyfile(config.TEMPEXCEL, config.OUTPUTEXCEL)
+except FileNotFoundError as e:
+    if (config.DEBUG):
+        print(e)
+        print(f'creating file {config.OUTPUTEXCEL}')
+        exit(9)
 
 # loading excel as workbook object
 workbook = openpyxl.load_workbook(config.OUTPUTEXCEL)

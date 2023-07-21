@@ -9,6 +9,7 @@ import time
 import pandas as pd 
 import numpy as np
 import yfinance as yf
+from sys import exit
 
 import configurationFile as config
 
@@ -95,10 +96,10 @@ def get_indicators(ticker):
                     time.sleep(5)
                     if (config.DEBUGDATA or config.DEBUG):
                         if (not downTime % 10):
-                            print(f'DEBUG: api call failed for {downTime} seconds')
+                            print(f'DEBUG:{ticker}: api call failed for {downTime} seconds')
                         downTime += 5
                         if (downTime > 70):
-                            print(f'ERROR: get_data failed after {downTime} seconds')
+                            print(f'ERROR:{ticker} get_data failed after {downTime} seconds')
                             exit(9)
             finalIndexes.append(curDF[0])
             finalIndexes.append(curDF[1])

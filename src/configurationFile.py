@@ -5,6 +5,7 @@ from datetime import date, timedelta
 from polygon import RESTClient 
 import os
 import sys 
+from sys import exit
 import openpyxl
 
 
@@ -18,15 +19,21 @@ dirList = curDir.split('/')
 topList = dirList[:-2]
 TPROOT = '/'.join(topList)
 
-SRCPATH = os.path.dirname(__file__) + '/'
+path_to_dat = os.path.abspath(os.path.join(os.path.dirname(__file__), 'file.dat'))
 
 # convert todays date to mm/dd form 
-today = date.today() - timedelta(3)
+today = date.today() - timedelta(1)
 
 listDate = str(today).split('-')
 TODAYDATE = f'{listDate[1]}/{listDate[2]}' 
 
 STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data
+
+TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
+        'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
+        'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
+
+# TICKERS = [ 'JNK' ] # used for testing 
 
 PRINTDF = 0 # prints dataframes to terminal
 PBAR = 1 # print progress bar for polygon calls in generate_csv.py 
@@ -35,6 +42,7 @@ DEBUGDATA = 0 # print debug messages from get_data.py
 CSV = 1 # outputs an excel file to CSVFILE 
 FILLPLATFORM = 1 # outputs a platform 
 SENDEMAIL = 1 # sends an email to email list 
+### Don't change these values 
 GETVALUE = 0 # gets a specific value from given date 
 
 for arg in sys.argv:
@@ -55,40 +63,31 @@ for arg in sys.argv:
                 SENDEMAIL = 1
         if arg == '-v':
                 GETVALUE = 1
+        if arg == '-t': # used for testing
+                TICKERS = [ 'JNK' ]
 
 # polygon login 
 '''Insert your key. Play around with the free tier key first.'''
 key = "nGJdIcDOy3hzWwn6X6gritFJkgDWTpRJ"
 try:
-        winebagle = 1
-        while (winebagle):
-                print(winebagle)
-                CLIENT = RESTClient(key)
-                print(f'no win')
-                winebagle = 0
+        CLIENT = RESTClient(key)
 except Exception:
         print('failed to connect to Polygon rest client')
+        exit(70)
 
 PARAMSET = [[ 'minute', 1 ], # one minute time interval 
                 [ 'minute', 5 ], # 5 minute time interval 
                 [ 'day', 1 ]] #one day time interval 
 
 # Platform files 
-TEMPLATEPLATFORM = SRCPATH + 'TA.WORK.xlsx'
+TEMPLATEPLATFORM = f'{TPROOT}/src/TA.WORK.xlsx'
 OUTPUTPLATFORM = f'{TPROOT}/testTP/{listDate[1]}-{listDate[2]}_testPlatform.xlsx'
-RAWPLATFORM = SRCPATH + 'rawPlatform.xlsx'
 
 # Trading Post files
-TEMPEXCEL = SRCPATH + 'stocktradingpost.xlsx'
+TEMPEXCEL = f'{TPROOT}/src/stocktradingpost.xlsx'
 OUTPUTEXCEL = f'{TPROOT}/testTP/{listDate[1]}-{listDate[2]}_testTradingPost.xlsx'
 
-CSVFILE = SRCPATH + 'testCsv.csv' 
-
-TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
-        'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
-        'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
-
-# TICKERS = [ 'JNK' ] # used for testing 
+CSVFILE = f'{TPROOT}/src/testCsv.csv' 
 
 INDICATORS = [ 'one_min_50', 'one_min_200', 'five_min_50', 'five_min_200', 'one_day_50', 'one_day_200', 'close_price' ]
 MINDICATORS = [ 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200' ]
@@ -116,7 +115,7 @@ except Exception as e:
         exit(4)
 
 COLORROW = 5 # row on trading post excel with template color
-plainRGB = 'FFFFFFFF'
+plainRGB = 'FFFFFFFF' # color white 
 PLAINCOLOR = openpyxl.styles.PatternFill(start_color=plainRGB, end_color=plainRGB, fill_type='solid')
 
 # Cell color templates 
