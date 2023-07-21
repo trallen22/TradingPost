@@ -1,5 +1,7 @@
 import smtplib
 from email.message import EmailMessage
+import mimetypes
+import os
 import configurationFile as config 
 
 def send_email(to, subject, message):
@@ -15,6 +17,12 @@ def send_email(to, subject, message):
     msg['From'] = config.EMAILADDRESS
     msg['To'] = to
     msg.set_content(message)
+
+    mime_str, _ = mimetypes.guess_type(config.OUTPUTEXCEL) # full MIME type string -> type/subtype
+    mime_type, mime_subtype = mime_str.split('/', 1)
+    with open(config.OUTPUTEXCEL, 'rb') as ap:
+        msg.add_attachment(ap.read(), maintype=mime_type, subtype=mime_subtype,
+        filename=os.path.basename(config.OUTPUTEXCEL))
 
     try:
         # send email
@@ -35,4 +43,4 @@ def send_email(to, subject, message):
 
     return False
 
-send_email(config.EMAILLIST[0], 'test email', 'this is a test')
+# send_email(config.EMAILLIST[0], 'test email', 'this is a test')
