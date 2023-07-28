@@ -1,6 +1,8 @@
 '''
 This script copies the template excel file from configurationFile.py and 
 creates the new excel for current day based on generated csv
+
+log numbers 300-399
 '''
 
 import shutil
@@ -65,20 +67,34 @@ def determine_buy_sell(etf):
     minTradeRange, maxTradeRange, clearTP = set_ranges('', etf)
     return signal, color, minTradeRange, maxTradeRange
 
-def fill_platform(etfDict):
+# TODO: move this function to generate_files.py 
+def fill_platform(etfDict, outputPlatform):
 
     tickerRowDict = {} # { 'JNK': 6 }
-
+    
     # makes a copy of the template platform file
-    shutil.copyfile(config.TEMPLATEPLATFORM, config.OUTPUTPLATFORM)
+    try:
+        shutil.copyfile(config.TEMPLATEPLATFORM, outputPlatform)
+        config.logmsg('DEBUG', 300, f'copied template platform to {outputPlatform}')
+    except Exception as e:
+        config.logmsg('ERROR', 301, f'{e}')
+        return 1
 
     # loading excel as workbook object
-    workbook = openpyxl.load_workbook(config.OUTPUTPLATFORM)
+    try:
+        workbook = openpyxl.load_workbook(outputPlatform)
+        config.logmsg('DEBUG', 302, f'loaded output platform as excel')
+    except Exception as e:
+        config.logmsg('ERROR', 303, f'{e}')
+        return 1
+
     activeSheet = workbook.active
 
+    # setting the platform date cell 
     activeSheet[config.PLATDATECELL] = f'{config.TODAYDATE}/{config.listDate[0]}'
 
     # going through each cell and getting ticker index 
+    config.logmsg('DEBUG', 305, 'getting platform rows for each ticker')
     for row in activeSheet.iter_rows(max_row=activeSheet.max_row, max_col=1):
         for cell in row:
             # gets the rows with tickers in the excel 
@@ -86,14 +102,20 @@ def fill_platform(etfDict):
                 tickerRowDict[cell.value] = cell.coordinate[1:]
 
     for ticker in config.TICKERS:
+        curRow = tickerRowDict[ticker]
+        config.logmsg('DEBUG', 330 + config.TICKERS.index(ticker), f'filling platform, row: {curRow} for ticker: {ticker}')
         for col in config.PLATFORMCOLS:
             if col == 'date':
-                activeSheet[f'{config.PLATFORMCOLS[col]}{tickerRowDict[ticker]}'] = config.TODAYDATE
+                activeSheet[f'{config.PLATFORMCOLS[col]}{curRow}'] = config.TODAYDATE
             else:
-                activeSheet[f'{config.PLATFORMCOLS[col]}{tickerRowDict[ticker]}'] = etfDict[ticker].indicatorDict[col]
+                activeSheet[f'{config.PLATFORMCOLS[col]}{curRow}'] = etfDict[ticker].indicatorDict[col]
 
-    workbook.save(config.OUTPUTPLATFORM)
-    if (config.DEBUG):
-        print(f'created temp platform {config.OUTPUTPLATFORM}')
+    try:
+        workbook.save(outputPlatform)
+        workbook.close()
+        config.logmsg('DEBUG', 304, 'saving output platform')
+    except Exception as e:
+        config.logmsg('ERROR', 305, f'{e}')
+        return 1
 
-    workbook.close()
+    return 0
