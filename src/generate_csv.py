@@ -3,7 +3,7 @@ This script generates a csv from a dictionary of etf objects
 '''
 
 import csv
-import configurationFile as config
+import configuration_file as config
 
 # generate_csv: generates a csv file with path config.CSVFILE
 # parameters: 

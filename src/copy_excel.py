@@ -5,8 +5,8 @@ creates the new excel for current day based on generated csv
 
 import shutil
 import openpyxl 
-import configurationFile as config
-import platFormulas as formula
+import configuration_file as config
+import plat_formulas as formula
 
 
 # TODO19: Implement set_ranges 

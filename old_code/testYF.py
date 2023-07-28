@@ -2,7 +2,7 @@ import yfinance as yf
 import numpy as np
 import pandas as pd
 from datetime import date, datetime, time
-import configurationFile as config
+import configuration_file as config
 
 print(config.today)
 

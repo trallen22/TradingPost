@@ -3,8 +3,8 @@ import openpyxl
 import shutil 
 from tqdm import tqdm
 from etf import Etf 
-import configurationFile as config
-from copyExcel import determine_buy_sell, fill_platform
+import configuration_file as config
+from copy_excel import determine_buy_sell, fill_platform
 from generate_csv import generate_csv
 from send_email import send_email
 import os
@@ -16,7 +16,6 @@ os.system('clear')
 
 etfDict = {} # { str ticker : etf object }
 
-print(f'TPROOT: {config.TPROOT}')
 # if (config.GETVALUE):
 #     if (len(sys.argv) != 6): # USAGE: main.py -v 'ticker' 'interval' 'timefram' 'date'
 #         print('Error: usage')
@@ -68,23 +67,22 @@ for ticker in config.TICKERS:
     activeSheet[f'{charBase}{numBase + 8}'] = curEtf.indicatorDict['close_price'] # setting close price in tp 
 
 if (config.CSV):
-    try:
-        generate_csv(etfDict)
-    except Exception as e:
-        print(f'ERROR: {e}')
-        print('NOTICE: unable to generate CSV')
+    if(generate_csv(etfDict, config.CSVFILE)):
+        config.logmsg('ERROR', 103, 'unable to generate CSV')
+    else:
+        config.logmsg('INFO', 104, f'saved csv file to {config.CSVFILE}')
 
 if (config.FILLPLATFORM):
     try:
         fill_platform(etfDict) 
     except Exception as e:
-        print(f'ERROR: {e}')
-        print('NOTICE: unable to generate Platform')
+        config.logmsg('ERROR', 101, f'{e}')
+        config.logmsg('NOTICE', 102, 'unable to generate Platform')
 
 workbook.save(config.OUTPUTEXCEL)
 if (config.DEBUG):
     print(f'saving trading post as {config.OUTPUTEXCEL}')
 workbook.close()
 
-# if (config.SENDEMAIL):
-#     send_email(config.EMAILLIST, )
+if (config.SENDEMAIL):
+    send_email(config.EMAILLIST[0], 'Todays Trading Post', 'This is for the demo')

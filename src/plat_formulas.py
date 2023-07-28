@@ -1,5 +1,5 @@
 import openpyxl 
-import configurationFile as config
+import configuration_file as config
 
 
 def buy_min(etf):

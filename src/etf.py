@@ -1,9 +1,10 @@
 import get_data
-import configurationFile as config 
+import configuration_file as config 
 
 class Etf:
     
     def __init__(self, ticker, name):
+        config.logmsg('DEBUG', 200, f'started creating etf object for {ticker}')
         self.ticker = ticker # ticker -> 'JNK'
         self.name = name # name -> 'HighYieldBonds'
         self.basecell = config.ETFBASECELL[ticker] # ticker cell in tp -> 'C7' 
@@ -16,6 +17,7 @@ class Etf:
 
         for i in range(len(config.INDICATORS)):
             self.indicatorDict[config.INDICATORS[i]] = indicators[i]
+        config.logmsg('DEBUG', 201, f'done creating etf object for {ticker}')
         
     def __str__(self):
         return { 'ticker':self.ticker, 

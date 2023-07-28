@@ -11,7 +11,7 @@ import numpy as np
 import yfinance as yf
 from sys import exit
 
-import configurationFile as config
+import configuration_file as config
 
 def ts_to_time_of_day(ts) -> timedelta:
     return timedelta(seconds=ts.second,minutes=ts.minute,hours=ts.hour)

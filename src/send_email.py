@@ -2,7 +2,7 @@ import smtplib
 from email.message import EmailMessage
 import mimetypes
 import os
-import configurationFile as config 
+import configuration_file as config 
 
 def send_email(to, subject, message):
     if config.EMAILADDRESS is None or config.EMAILPASSWORD is None:
@@ -42,5 +42,3 @@ def send_email(to, subject, message):
         print(f'ERROR: {e}')
 
     return False
-
-# send_email(config.EMAILLIST[0], 'test email', 'this is a test')

@@ -8,46 +8,69 @@ import sys
 from sys import exit
 import openpyxl
 
+def logmsg(level, logNum, message):
+        if not (level == 'DEBUG' and not DEBUG):
+                print(f'{level}:{logNum}:{message}')
+
+# convert todays date to mm/dd form 
+today = date.today() - timedelta(1)
+
+listDate = str(today).split('-')
+TODAYDATE = f'{listDate[1]}/{listDate[2]}'  # mm/yy
+
+STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
 
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
 EMAILLIST = [ 'trallen@davidson.edu' ]
 
-curDir = os.path.abspath(__file__)
+# determine if application is a script file or frozen exe
+if getattr(sys, 'frozen', False):
+    curDir = os.path.dirname(sys.executable)
+elif __file__:
+    curDir = os.path.abspath(__file__)
 dirList = curDir.split('/')
-topList = dirList[:-2]
+dirIndex = dirList.index('TradingPost')
+topList = dirList[:dirIndex+1]
+
 TPROOT = '/'.join(topList)
+SRCROOT = f'{TPROOT}/src'
+OUTROOT = f'{TPROOT}/testTP'
 
-path_to_dat = os.path.abspath(os.path.join(os.path.dirname(__file__), 'file.dat'))
+# Platform files 
+TEMPLATEPLATFORM = f'{SRCROOT}/TA.WORK.xlsx'
 
-# convert todays date to mm/dd form 
-today = date.today() - timedelta(1)
+# Trading Post files
+TEMPEXCEL = f'{SRCROOT}/stocktradingpost.xlsx'
 
-listDate = str(today).split('-')
-TODAYDATE = f'{listDate[1]}/{listDate[2]}' 
-
-STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data
-
-TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
-        'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
-        'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
-
-# TICKERS = [ 'JNK' ] # used for testing 
+# Output files 
+OUTPUTPLATFORM = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testPlatform.xlsx'
+OUTPUTEXCEL = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testTradingPost.xlsx'
+CSVFILE = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_csv.csv' 
 
 PRINTDF = 0 # prints dataframes to terminal
 PBAR = 1 # print progress bar for polygon calls in generate_csv.py 
-DEBUG = 1 # print debug messages # TODO20: add debug messages 
+DEBUG = 0 # print debug messages # TODO20: add debug messages 
 DEBUGDATA = 0 # print debug messages from get_data.py
-CSV = 1 # outputs an excel file to CSVFILE 
-FILLPLATFORM = 1 # outputs a platform 
-SENDEMAIL = 1 # sends an email to email list 
-### Don't change these values 
+CSV = 0 # outputs an excel file to CSVFILE 
+FILLPLATFORM = 0 # outputs a platform 
+SENDEMAIL = 0 # sends an email to email list 
 GETVALUE = 0 # gets a specific value from given date 
+
+helpMenu = 'Usage: main.py [-options]\n \
+        -h,  Opens this help menu\n \
+        -f,  Print dataframes to the terminal\n \
+        -p,  Show progress bar\n \
+        -d,  Print Debug messages\n \
+        -c,  Generate a CSV file with ticker data\n \
+        -m,  Generate a Platform file with ticker data\n \
+        -e,  Send email to addresses in email list\n \
+        -v,  Get specific value by date, interval and ticker\n'
 
 for arg in sys.argv:
         if arg == '-h':
-                print('Need to work on help menu')
+                print(helpMenu)
                 exit(0)
         if arg == '-f':
                 PRINTDF = 1
@@ -63,31 +86,29 @@ for arg in sys.argv:
                 SENDEMAIL = 1
         if arg == '-v':
                 GETVALUE = 1
-        if arg == '-t': # used for testing
-                TICKERS = [ 'JNK' ]
 
 # polygon login 
 '''Insert your key. Play around with the free tier key first.'''
 key = "nGJdIcDOy3hzWwn6X6gritFJkgDWTpRJ"
 try:
-        CLIENT = RESTClient(key)
+        winebagle = 1
+        while (winebagle):
+                print(winebagle)
+                CLIENT = RESTClient(key)
+                print(f'NOTICE: Loading RESTClient taking longer than expected')
+                winebagle = 0
 except Exception:
         print('failed to connect to Polygon rest client')
-        exit(70)
+
+TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
+        'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
+        'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
+
+# TICKERS = [ 'JNK' ] # used for testing 
 
 PARAMSET = [[ 'minute', 1 ], # one minute time interval 
                 [ 'minute', 5 ], # 5 minute time interval 
                 [ 'day', 1 ]] #one day time interval 
-
-# Platform files 
-TEMPLATEPLATFORM = f'{TPROOT}/src/TA.WORK.xlsx'
-OUTPUTPLATFORM = f'{TPROOT}/testTP/{listDate[1]}-{listDate[2]}_testPlatform.xlsx'
-
-# Trading Post files
-TEMPEXCEL = f'{TPROOT}/src/stocktradingpost.xlsx'
-OUTPUTEXCEL = f'{TPROOT}/testTP/{listDate[1]}-{listDate[2]}_testTradingPost.xlsx'
-
-CSVFILE = f'{TPROOT}/src/testCsv.csv' 
 
 INDICATORS = [ 'one_min_50', 'one_min_200', 'five_min_50', 'five_min_200', 'one_day_50', 'one_day_200', 'close_price' ]
 MINDICATORS = [ 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200' ]
