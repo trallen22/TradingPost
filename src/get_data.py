@@ -2,6 +2,8 @@
 This script scrapes polygon.io and returns the 50 day sma for intervals 
 1 min, 5 min and 1 day as well as the 200 day sma for intervals 1 min, 5 min 
 and 1 day and close price 
+
+log numbers 200-299
 '''
 
 from datetime import timedelta
@@ -51,6 +53,7 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
     if (timeUnit == 'minute'):
         df = df[df["time_of_day"] >= market_open]
 
+    # in case the market closes early and values get skewed
     df = df[df["transactions"].notnull()]
 
     # assigns value of ticker to simple moving average of last 50mins of before market close and rounds to two decimal
@@ -72,18 +75,15 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
 Gets the sma values for each ticker
 '''
 def get_indicators(ticker):
-
     finalIndexes = []
 
-    '''
-    Generate 50 and 200 for given time interval(s) in paramSet
-    '''
+    # Generate 50 and 200 for given time interval(s) in paramSet
     for i in range(len(config.PARAMSET)): 
 
         curTimeInterval = config.PARAMSET[i][0] # time interval (minute, day) 
         curMultiplier = config.PARAMSET[i][1] # multiplier for time interval 
 
-        apiLimit = 1
+        apiLimit = 1 # need this for free version 
         downTime = 0
         try: 
             # Loop while too many api calls per minute
@@ -96,16 +96,16 @@ def get_indicators(ticker):
                     time.sleep(5)
                     if (config.DEBUGDATA or config.DEBUG):
                         if (not downTime % 10):
-                            print(f'DEBUG:{ticker}: api call failed for {downTime} seconds')
+                            config.logmsg('DEBUG', 200 + 2 * i, f'api call failed for {downTime} seconds')
                         downTime += 5
-                        if (downTime > 70):
-                            print(f'ERROR:{ticker} get_data failed after {downTime} seconds')
-                            exit(9)
+                        if (downTime > 80):
+                            config.logmsg('ERROR', 201 + 2 * i, f'failed to call api for {downTime} seconds')
+                            exit(1)
             finalIndexes.append(curDF[0])
             finalIndexes.append(curDF[1])
         except Exception as e:
-            print(f'ERROR: {e}')
-            print(f'NOTICE: problem getting indicator {i} for ticker \"{ticker}\"')
+            config.logmsg('ERROR', 220, f'{e}')
+            config.logmsg('NOTICE', 221, f'problem getting indicator {config.PARAMSET[i]} for ticker \'{ticker}\'')
             finalIndexes.append(-1)
             finalIndexes.append(-1) 
 
@@ -115,18 +115,14 @@ def get_indicators(ticker):
     ticker_two_hundred_five_minute = finalIndexes[3]
     ticker_fifty_one_day = finalIndexes[4]
     ticker_two_hundred_one_day = finalIndexes[5]
-
-    '''
-    Generate closing price by date 
-    '''
+    
+    # generate closing price 
     try: 
-        # you just gotta look up how this works 
-        etf = yf.Ticker(ticker)
-        info = etf.history()
-        close_price = round(info['Close'][f'{config.today} 00:00:00-04:00'], 2)
-    except KeyError as keyErr:
-        print(f'ERROR in get_indicators(): {keyErr}')
-        exit(3)
+        close_price = config.CLIENT.get_daily_open_close_agg(ticker=ticker, date=str(config.today)).close
+    except Exception as e:
+        config.logmsg('ERROR', 239, f'{e}')
+        config.logmsg('NOTICE', 240, f'problem getting close price for \'{ticker}\' on \'{config.today}\'')
+        close_price = -1
 
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
     ticker_two_hundred_five_minute, ticker_fifty_one_day, ticker_two_hundred_one_day, close_price

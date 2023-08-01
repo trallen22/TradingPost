@@ -1,10 +1,16 @@
+'''
+This is the Etf object class module. 
+
+log numbers 180-199
+'''
+
 import get_data
 import configuration_file as config 
 
 class Etf:
     
     def __init__(self, ticker, name):
-        config.logmsg('DEBUG', 200, f'started creating etf object for {ticker}')
+        config.logmsg('DEBUG', 180, f'started creating etf object for \'{ticker}\'')
         self.ticker = ticker # ticker -> 'JNK'
         self.name = name # name -> 'HighYieldBonds'
         self.basecell = config.ETFBASECELL[ticker] # ticker cell in tp -> 'C7' 
@@ -13,11 +19,12 @@ class Etf:
 
         self.indicatorDict = {} # { indicator: value from polygon }
 
+        config.logmsg('DEBUG', 181, f'getting indicators for ticker \'{ticker}\'')
         indicators = get_data.get_indicators(ticker)
 
         for i in range(len(config.INDICATORS)):
             self.indicatorDict[config.INDICATORS[i]] = indicators[i]
-        config.logmsg('DEBUG', 201, f'done creating etf object for {ticker}')
+        config.logmsg('DEBUG', 182, f'done creating etf object for \'{ticker}\'')
         
     def __str__(self):
         return { 'ticker':self.ticker, 

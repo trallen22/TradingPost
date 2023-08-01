@@ -1,53 +1,29 @@
 '''
 This file holds all the configuraion information
+
+log numbers 001-099
 '''
 from datetime import date, timedelta
+from tkinter import E
 from polygon import RESTClient 
 import os
 import sys 
 from sys import exit
 import openpyxl
 
+
 def logmsg(level, logNum, message):
-        if not (level == 'DEBUG' and not DEBUG):
-                print(f'{level}:{logNum}:{message}')
-
-# convert todays date to mm/dd form 
-today = date.today() - timedelta(1)
-
-listDate = str(today).split('-')
-TODAYDATE = f'{listDate[1]}/{listDate[2]}'  # mm/yy
-
-STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
-
-# Email variables 
-EMAILADDRESS = 'etfsender@gmail.com'
-EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
-EMAILLIST = [ 'trallen@davidson.edu' ]
-
-# determine if application is a script file or frozen exe
-if getattr(sys, 'frozen', False):
-    curDir = os.path.dirname(sys.executable)
-elif __file__:
-    curDir = os.path.abspath(__file__)
-dirList = curDir.split('/')
-dirIndex = dirList.index('TradingPost')
-topList = dirList[:dirIndex+1]
-
-TPROOT = '/'.join(topList)
-SRCROOT = f'{TPROOT}/src'
-OUTROOT = f'{TPROOT}/testTP'
-
-# Platform files 
-TEMPLATEPLATFORM = f'{SRCROOT}/TA.WORK.xlsx'
-
-# Trading Post files
-TEMPEXCEL = f'{SRCROOT}/stocktradingpost.xlsx'
-
-# Output files 
-OUTPUTPLATFORM = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testPlatform.xlsx'
-OUTPUTEXCEL = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testTradingPost.xlsx'
-CSVFILE = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_csv.csv' 
+        logMessage = f'{date.today()}::{level}::{logNum}::{message}'
+        if not (level == 'DEBUG'): 
+                print(logMessage)
+        try: 
+                with open(LOGFILE, mode='a') as logFile:
+                        if not (level == 'DEBUG' and not DEBUG):
+                                logFile.write(f'{logMessage}\n')
+        except FileNotFoundError:
+                os.mkdir(LOGROOT)
+        except Exception as e:
+                print(f'{e}')
 
 PRINTDF = 0 # prints dataframes to terminal
 PBAR = 1 # print progress bar for polygon calls in generate_csv.py 
@@ -57,6 +33,8 @@ CSV = 0 # outputs an excel file to CSVFILE
 FILLPLATFORM = 0 # outputs a platform 
 SENDEMAIL = 0 # sends an email to email list 
 GETVALUE = 0 # gets a specific value from given date 
+# convert todays date to mm/dd form 
+today = date.today() # TODO: add command argument to change this 
 
 helpMenu = 'Usage: main.py [-options]\n \
         -h,  Opens this help menu\n \
@@ -68,37 +46,101 @@ helpMenu = 'Usage: main.py [-options]\n \
         -e,  Send email to addresses in email list\n \
         -v,  Get specific value by date, interval and ticker\n'
 
-for arg in sys.argv:
+for arg in sys.argv[1:]: # skip main.py
         if arg == '-h':
                 print(helpMenu)
                 exit(0)
-        if arg == '-f':
+        elif arg == '-f':
                 PRINTDF = 1
-        if arg == '-p':
+        elif arg == '-p':
                 PBAR = 1 
-        if arg == '-d':
+        elif arg == '-d':
                 DEBUG = 1 
-        if arg == '-c':
+        elif arg == '-c':
                 CSV = 1
-        if arg == '-m':
+        elif arg == '-m':
                 FILLPLATFORM = 1 
-        if arg == '-e':
+        elif arg == '-e':
                 SENDEMAIL = 1
-        if arg == '-v':
+        elif arg == '-v':
                 GETVALUE = 1
+        elif arg == '-g':
+                CSV = 1
+                FILLPLATFORM = 1
+        elif arg == '-t':
+                index = sys.argv.index('-t')
+
+        else:
+                print(f'NOTICE::003::bad argument given \'{arg}\'')
+                # logmsg('NOTICE', '003', f'bad argument given \'{arg}\'')
+
+listDate = str(today).split('-')
+TODAYDATE = f'{listDate[1]}/{listDate[2]}'  # mm/yy
+
+STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
+
+# Email variables 
+EMAILADDRESS = 'etfsender@gmail.com'
+EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
+# EMAILLIST = [ 'trallen@davidson.edu' ]
+EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu' ]
+
+# determine if application is a script file or frozen exe
+if getattr(sys, 'frozen', False):
+    curDir = os.path.dirname(sys.executable)
+elif __file__:
+    curDir = os.path.abspath(__file__)
+dirList = curDir.split('/')
+dirIndex = dirList.index('TradingPost')
+topList = dirList[:dirIndex+1]
+
+TPROOT = '/'.join(topList)
+
+# Debug files 
+LOGROOT = f'{TPROOT}/debug'
+LOGFILE = f'{LOGROOT}/logfile.txt'
+try:
+        os.mkdir(f'{LOGROOT}')
+        logmsg('DEBUG', '008', f'created src directory \'{LOGROOT}\'')
+except FileExistsError:
+        with open(LOGFILE, mode='r+') as lf:
+                lastLines = lf.readlines()[-100:]
+        with open(LOGFILE, mode='w') as lf:
+                for line in lastLines:
+                        lf.write(line)
+        logmsg('DEBUG', '009', f'debug directory already created at \'{LOGROOT}\'')
+
+
+
+# Template files 
+SRCROOT = f'{TPROOT}/src'
+TEMPLATEPLATFORM = f'{SRCROOT}/TA.WORK.xlsx' 
+TEMPEXCEL = f'{SRCROOT}/stocktradingpost.xlsx' 
+try:
+        os.mkdir(f'{SRCROOT}')
+        logmsg('DEBUG', '004', f'created src directory \'{SRCROOT}\'')
+except FileExistsError:
+        logmsg('DEBUG', '005', f'src directory already created at \'{SRCROOT}\'')
+
+# Output files 
+OUTROOT = f'{TPROOT}/testTP'
+OUTPUTPLATFORM = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testPlatform.xlsx'
+OUTPUTEXCEL = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testTradingPost.xlsx'
+CSVFILE = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_csv.csv' 
+try:
+        os.mkdir(f'{OUTROOT}')
+        logmsg('DEBUG', '006', f'created src directory \'{OUTROOT}\'')
+except FileExistsError:
+        logmsg('DEBUG', '007', f'output directory already created at \'{OUTROOT}\'')
 
 # polygon login 
 '''Insert your key. Play around with the free tier key first.'''
-key = "nGJdIcDOy3hzWwn6X6gritFJkgDWTpRJ"
+key = "CP1nN_q8W8C4eG7phIPNgLNCyPEyDZPe" # paid standard version 
 try:
-        winebagle = 1
-        while (winebagle):
-                print(winebagle)
-                CLIENT = RESTClient(key)
-                print(f'NOTICE: Loading RESTClient taking longer than expected')
-                winebagle = 0
-except Exception:
-        print('failed to connect to Polygon rest client')
+        CLIENT = RESTClient(key)
+        logmsg('DEBUG', '001', 'loading RESTClient')
+except Exception as e:
+        logmsg('ERROR', '002', f'{e}')
 
 TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
         'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
