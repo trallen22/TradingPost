@@ -1,5 +1,5 @@
 import openpyxl 
-import configurationFile as config
+import configuration_file as config
 
 
 def buy_min(etf):
@@ -45,4 +45,3 @@ def sell_max(etf):
         return dayMin - 0.01
     else:
         return minuteMin - 0.01
-

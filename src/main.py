@@ -1,69 +1,62 @@
+import multiprocessing
 import openpyxl 
 import shutil 
 from tqdm import tqdm
 from etf import Etf 
-import configurationFile as config
-from copyExcel import determine_buy_sell, fill_platform
-from generate_csv import generate_csv
+import configuration_file as config
+from tp_helper import determine_buy_sell
+from generate_files import generate_csv, fill_platform, generate_tp
 from send_email import send_email
 import os
+import sys
+from sys import exit
 
-os.system('clear')
+multiprocessing.freeze_support() # prevents multithreading in pyinstaller --onedir
+# os.system('clear')
+
 etfDict = {} # { str ticker : etf object }
+
+# if (config.GETVALUE):
+#     if (len(sys.argv) != 6): # USAGE: main.py -v 'ticker' 'interval' 'timefram' 'date'
+#         print('Error: usage')
+#         exit(21)
+#     etfDict[sys.argv[2]] = Etf(sys.argv[2], 'value')
+#     curDir = config.TPROOT
+
+#     exit(90)
 
 if (config.PBAR):
     pBar = tqdm(desc='tickers found', total=len(config.TICKERS))
 for ticker in config.TICKERS:
-    # creates a dictionary of Etf objects 
+    # creates a dictionary of Etf objects { ticker: Etf object }
     etfDict[ticker] = Etf(ticker, 'name') # implement names -> 'HighYieldBonds' 
     if (config.PBAR):
         pBar.update(1)
 if (config.PBAR):
     pBar.close()
 
-# makes a copy of the template platform file
-shutil.copyfile(config.TEMPEXCEL, config.OUTPUTEXCEL)
+# generate the Trading Post 
+if (generate_tp(etfDict, config.OUTPUTEXCEL)):
+    config.logmsg('ERROR', 108, 'unable to generate TP')
+else:
+    config.logmsg('INFO', 109, f'saved TP file to {config.OUTPUTEXCEL}')
 
-# loading excel as workbook object
-workbook = openpyxl.load_workbook(config.OUTPUTEXCEL)
-activeSheet = workbook.active
+if (config.CSV): # generate CSV 
+    if (generate_csv(etfDict, config.CSVFILE)):
+        config.logmsg('ERROR', 101, 'unable to generate CSV')
+    else:
+        config.logmsg('INFO', 102, f'saved csv file to {config.CSVFILE}')
 
-for ticker in config.TICKERS:
-    curEtf = etfDict[ticker]
-    curBase = curEtf.basecell
-    charBase = curBase[0]
-    numBase = int(curBase[1:])
+if (config.FILLPLATFORM): # generate Platform 
+    if (fill_platform(etfDict, config.OUTPUTPLATFORM)):
+        config.logmsg('ERROR', 103, 'unable to generate Platform')
+    else:
+        config.logmsg('INFO', 104, f'saved platform to {config.OUTPUTPLATFORM}')
 
-    activeSheet[curBase] = curEtf.ticker # setting ticker name in tp
-    activeSheet[f'{charBase}{numBase + 1}'].value = curEtf.name # setting etf name in tp 
-    activeSheet[f'{charBase}{numBase + 3}'] = config.TODAYDATE # setting today date in tp 
-
-    signal, sigColor, minTradeRange, maxTradeRange = determine_buy_sell(curEtf)
-    activeSheet[f'{charBase}{numBase + 5}'] = signal # Buy/Sell/Hold signal 
-    activeSheet[f'{charBase}{numBase + 5}'].fill = sigColor # Buy/Sell/Hold color 
-    
-    activeSheet[f'{charBase}{numBase + 6}'] = minTradeRange
-    activeSheet[f'{charBase}{numBase + 7}'] = maxTradeRange
-    activeSheet[f'{charBase}{numBase + 8}'] = curEtf.indicatorDict['close_price'] # setting close price in tp 
-
-if (config.CSV):
-    try:
-        generate_csv(etfDict)
-    except Exception as e:
-        print(f'ERROR: {e}')
-        print('NOTICE: unable to generate CSV')
-
-if (config.FILLPLATFORM):
-    try:
-        fill_platform(etfDict) 
-    except Exception as e:
-        print(f'ERROR: {e}')
-        print('NOTICE: unable to generate Platform')
-
-workbook.save(config.OUTPUTEXCEL)
-if (config.DEBUG):
-    print(f'saving trading post as {config.OUTPUTEXCEL}')
-workbook.close()
-
-# if (config.SENDEMAIL):
-#     send_email(config.EMAILLIST, )
+if (config.SENDEMAIL): # send email to email list 
+    for address in config.EMAILLIST:
+        config.logmsg('DEBUG', 107, f'sending email to \'{address}\'')
+        if (send_email(address, 'Todays Trading Post', 'Today\'s Trading Post')):
+            config.logmsg('ERROR', 105, f'unable to send email to \'{address}\'')
+        else:
+            config.logmsg('INFO', 106, f'successfully sent email to \'{address}\'')
