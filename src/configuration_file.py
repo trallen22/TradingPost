@@ -10,6 +10,8 @@ import sys
 from sys import exit
 import openpyxl
 
+test =1
+
 # logmsg: logs a given message to the log file at LOGFILE
 # parameters: 
 #       level - string, log level for message urgency -> 'ERROR', 'INFO', 'NOTICE', 'DEBUG' 
