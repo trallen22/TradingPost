@@ -41,7 +41,7 @@ def generate_tp(etfDict, outputExcel):
         activeSheet[f'{charBase}{numBase + 7}'] = maxTradeRange # max for trade range 
         activeSheet[f'{charBase}{numBase + 8}'] = curEtf.indicatorDict['close_price'] # setting close price in tp 
 
-    config.logmsg('INFO', 100, f'saving Trading Post as {outputExcel}')
+    config.logmsg('DEBUG', 100, f'saving Trading Post as {outputExcel}')
     workbook.save(outputExcel)
     workbook.close()
     

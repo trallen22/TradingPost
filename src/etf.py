@@ -9,6 +9,11 @@ import configuration_file as config
 
 class Etf:
     
+    # __init__: creates etf object 
+    # parameters: 
+    #       ticker - string, etf ticker -> 'JNK' 
+    #       name - string, etf name -> 'High Yield Bonds' 
+    # returns:  no return 
     def __init__(self, ticker, name):
         config.logmsg('DEBUG', 180, f'started creating etf object for \'{ticker}\'')
         self.ticker = ticker # ticker -> 'JNK'
@@ -20,7 +25,7 @@ class Etf:
         self.indicatorDict = {} # { indicator: value from polygon }
 
         config.logmsg('DEBUG', 181, f'getting indicators for ticker \'{ticker}\'')
-        indicators = get_data.get_indicators(ticker)
+        indicators = get_data.get_indicators(ticker) 
 
         for i in range(len(config.INDICATORS)):
             self.indicatorDict[config.INDICATORS[i]] = indicators[i]

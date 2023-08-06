@@ -1,15 +1,9 @@
 import multiprocessing
-import openpyxl 
-import shutil 
 from tqdm import tqdm
 from etf import Etf 
 import configuration_file as config
-from tp_helper import determine_buy_sell
 from generate_files import generate_csv, fill_platform, generate_tp
 from send_email import send_email
-import os
-import sys
-from sys import exit
 
 multiprocessing.freeze_support() # prevents multithreading in pyinstaller --onedir
 # os.system('clear')
@@ -17,7 +11,7 @@ multiprocessing.freeze_support() # prevents multithreading in pyinstaller --oned
 etfDict = {} # { str ticker : etf object }
 
 # if (config.GETVALUE):
-#     if (len(sys.argv) != 6): # USAGE: main.py -v 'ticker' 'interval' 'timefram' 'date'
+#     if (len(sys.argv) != 6): # USAGE: main.py -v 'ticker' 'interval' 'timeframe' 'date'
 #         print('Error: usage')
 #         exit(21)
 #     etfDict[sys.argv[2]] = Etf(sys.argv[2], 'value')
@@ -26,10 +20,10 @@ etfDict = {} # { str ticker : etf object }
 #     exit(90)
 
 if (config.PBAR):
-    pBar = tqdm(desc='tickers found', total=len(config.TICKERS))
+    pBar = tqdm(desc='tickers found', total=len(config.TICKERS)) # progress bar 
 for ticker in config.TICKERS:
     # creates a dictionary of Etf objects { ticker: Etf object }
-    etfDict[ticker] = Etf(ticker, 'name') # implement names -> 'HighYieldBonds' 
+    etfDict[ticker] = Etf(ticker, '') # TODO: implement names -> 'HighYieldBonds' 
     if (config.PBAR):
         pBar.update(1)
 if (config.PBAR):
@@ -41,19 +35,22 @@ if (generate_tp(etfDict, config.OUTPUTEXCEL)):
 else:
     config.logmsg('INFO', 109, f'saved TP file to {config.OUTPUTEXCEL}')
 
-if (config.CSV): # generate CSV 
+# generate CSV 
+if (config.CSV): 
     if (generate_csv(etfDict, config.CSVFILE)):
         config.logmsg('ERROR', 101, 'unable to generate CSV')
     else:
         config.logmsg('INFO', 102, f'saved csv file to {config.CSVFILE}')
 
-if (config.FILLPLATFORM): # generate Platform 
+# generate Platform 
+if (config.FILLPLATFORM): 
     if (fill_platform(etfDict, config.OUTPUTPLATFORM)):
         config.logmsg('ERROR', 103, 'unable to generate Platform')
     else:
         config.logmsg('INFO', 104, f'saved platform to {config.OUTPUTPLATFORM}')
 
-if (config.SENDEMAIL): # send email to email list 
+# send email to email list 
+if (config.SENDEMAIL): 
     for address in config.EMAILLIST:
         config.logmsg('DEBUG', 107, f'sending email to \'{address}\'')
         if (send_email(address, 'Todays Trading Post', 'Today\'s Trading Post')):

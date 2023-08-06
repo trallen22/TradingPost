@@ -10,7 +10,6 @@ from datetime import timedelta
 import time
 import pandas as pd 
 import numpy as np
-import yfinance as yf
 from sys import exit
 
 import configuration_file as config
@@ -94,7 +93,7 @@ def get_indicators(ticker):
                     downTime = 0
                 except Exception:
                     time.sleep(5)
-                    if (config.DEBUGDATA or config.DEBUG):
+                    if (config.DEBUG):
                         if (not downTime % 10):
                             config.logmsg('DEBUG', 200 + 2 * i, f'api call failed for {downTime} seconds')
                         downTime += 5

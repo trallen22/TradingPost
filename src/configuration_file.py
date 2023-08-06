@@ -10,12 +10,21 @@ import sys
 from sys import exit
 import openpyxl
 
+test =1
 
+# logmsg: logs a given message to the log file at LOGFILE
+# parameters: 
+#       level - string, log level for message urgency -> 'ERROR', 'INFO', 'NOTICE', 'DEBUG' 
+#       logNum - int/string, log ID number for current message
+#       message - string, message to log 
+# returns:  No returns 
 def logmsg(level, logNum, message):
     logMessage = f'{date.today()}::{level}::{logNum}::{message}'
+    # prints messages that aren't DEBUG 
     if not (level == 'DEBUG'): 
         print(logMessage)
     try: 
+        # writes output to LOGFILE, checks if DEBUG is enabled 
         with open(LOGFILE, mode='a') as logFile:
             if not (level == 'DEBUG' and not DEBUG):
                 logFile.write(f'{logMessage}\n')
@@ -23,14 +32,14 @@ def logmsg(level, logNum, message):
         print(f'{e}')
 
 PRINTDF = 0 # prints dataframes to terminal
-PBAR = 1 # print progress bar for polygon calls in generate_csv.py 
+PBAR = 1 # print progress bar for polygon calls in main.py
 DEBUG = 0 # print debug messages # TODO20: add debug messages 
-DEBUGDATA = 0 # print debug messages from get_data.py
 CSV = 0 # outputs an excel file to CSVFILE 
-FILLPLATFORM = 0 # outputs a platform 
-SENDEMAIL = 0 # sends an email to email list 
+FILLPLATFORM = 0 # outputs a platform to OUTPUTPLATFORM 
+SENDEMAIL = 0 # sends an email to EMAILLIST 
 GETVALUE = 0 # gets a specific value from given date 
-# convert todays date to mm/dd form 
+
+# TODO: convert todays date to mm/dd form 
 today = date.today() # TODO: add command argument to change this 
 
 helpMenu = 'Usage: main.py [-options]\n \
@@ -79,19 +88,21 @@ STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
-# EMAILLIST = [ 'trallen@davidson.edu' ]
-EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu' ]
+# EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu' ] 
+EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing 
 
 # determine if application is a script file or frozen exe
+# not sure what this means, found it on stack overflow 
 if getattr(sys, 'frozen', False):
     curDir = os.path.dirname(sys.executable)
 elif __file__:
     curDir = os.path.abspath(__file__)
+
 dirList = curDir.split('/')
 dirIndex = dirList.index('TradingPost')
 topList = dirList[:dirIndex+1]
 
-TPROOT = '/'.join(topList)
+TPROOT = '/'.join(topList) # root directory for trading post execution 
 
 # Debug files 
 LOGROOT = f'{TPROOT}/debug'
@@ -129,7 +140,6 @@ except FileExistsError:
     logmsg('DEBUG', '007', f'output directory already created at \'{OUTROOT}\'')
 
 # polygon login 
-'''Insert your key. Play around with the free tier key first.'''
 key = "CP1nN_q8W8C4eG7phIPNgLNCyPEyDZPe" # paid standard version 
 try:
     CLIENT = RESTClient(key)
@@ -137,11 +147,11 @@ try:
 except Exception as e:
     logmsg('ERROR', '002', f'{e}')
 
-TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
-        'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
-        'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
+# TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
+#         'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
+#         'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
 
-# TICKERS = [ 'JNK' ] # used for testing 
+TICKERS = [ 'JNK' ] # used for testing 
 
 PARAMSET = [[ 'minute', 1 ], # one minute time interval 
             [ 'minute', 5 ], # 5 minute time interval 
@@ -151,17 +161,20 @@ INDICATORS = [ 'one_min_50', 'one_min_200', 'five_min_50', 'five_min_200', 'one_
 MINDICATORS = [ 'five_min_50', 'five_min_200', 'one_min_50', 'one_min_200' ]
 DAYDICATORS = [ 'one_day_50', 'one_day_200' ]
 
+# this is { platform column: indicator }
 INPUTS = { 'G':'close_price', 'H':'one_day_50', 'I':'one_day_200', 'J':'five_min_50', 
             'K':'five_min_200', 'L':'one_min_50', 'M':'one_min_200' }
 
 PLATFORMCOLS = { 'date':'E', 'close_price':'G', 'one_day_50':'H', 'one_day_200':'I', 'five_min_50':'J', 
             'five_min_200':'K', 'one_min_50':'L', 'one_min_200':'M' }
 
+# base cell for each ticker in Trading Post excel 
 ETFBASECELL = { 'JNK':'C7', 'GDX':'D7', 'VCR':'E7', 'VDC':'F7', 'VIG':'G7', 
             'VDE':'H7', 'VFH':'I7', 'VWO':'C17', 'VHT':'D17', 'VIS':'E17', 'VGT':'F17', 
             'VAW':'G17', 'VNQ':'H17', 'VOO':'I17', 'VOX':'C27', 'BND':'D27', 
             'BNDX':'E27', 'VXUS':'F27', 'VTI':'G27', 'VPU':'H27', 'XTN':'I27' }
 
+# cell with date in Trading Post 
 PLATDATECELL = 'B3'
 
 try: 
@@ -201,4 +214,3 @@ try:
 except Exception:
     HOSELLCOLOR = PLAINCOLOR
     print(f'NOTICE: Hold to Sell Color set as plain')
-

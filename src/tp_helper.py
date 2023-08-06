@@ -5,8 +5,6 @@ creates the new excel for current day based on generated csv
 log numbers 400-499
 '''
 
-import shutil
-import openpyxl 
 import configuration_file as config
 
 def buy_min(etf):
