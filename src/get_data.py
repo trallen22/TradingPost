@@ -59,7 +59,7 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
     fifty_interval = round(np.mean(df[["close"]].head(50),axis=0).values[0],2)
 
     # assigns value of ticker to simple moving average of last 200mins of before market close and rounds to two decimal
-    two_hundred_interval = round(np.mean(df[["close"]].head(200)).values[0],2)
+    two_hundred_interval = round(np.mean(df[["close"]].head(200), axis=0).values[0],2)
 
     # prints each dataframe. Used for debugging 
     if (config.PRINTDF):
@@ -120,8 +120,10 @@ def get_indicators(ticker):
         close_price = config.CLIENT.get_daily_open_close_agg(ticker=ticker, date=str(config.today)).close
     except Exception as e:
         config.logmsg('ERROR', 239, f'{e}')
+        config.logmsg('NOTICE', 241, f"make sure it isn\'t a weekend")
         config.logmsg('NOTICE', 240, f'problem getting close price for \'{ticker}\' on \'{config.today}\'')
         close_price = -1
+        config.logmsg('DEBUG', 242, f'close price set to -1 for \'{ticker}\'')
 
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
     ticker_two_hundred_five_minute, ticker_fifty_one_day, ticker_two_hundred_one_day, close_price
