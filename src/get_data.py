@@ -14,12 +14,17 @@ from sys import exit
 
 import configuration_file as config
 
+# I didn't create this function and I honestly don't know what it means 
 def ts_to_time_of_day(ts) -> timedelta:
     return timedelta(seconds=ts.second,minutes=ts.minute,hours=ts.hour)
 
-'''
-get_dataframe - Called by get_indicators(), Gets the dataframe for the given ticker and time interval 
-'''
+# get_dataframe: helper function for get_indicators(). Gets the 50 and 
+#                   200 values for a given index. (ex: 1 min, 5 min, 1 day) 
+# parameters: 
+#       curTicker - string, etf ticker -> 'JNK' 
+#       timeUnit - string, time interval (minute, day) 
+#       intMultiplier - integer, interval multiplier (1, 5) 
+# returns: returns the 50 and 200 sma values for a given ticker and time interval 
 def get_dataframe(curTicker, timeUnit, intMultiplier):
 
     endDay = config.today
@@ -70,9 +75,11 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
 
     return fifty_interval, two_hundred_interval
 
-'''
-Gets the sma values for each ticker
-'''
+# get_indicators: gets the indices for a given ticker   
+# parameters: 
+#       ticker - string, etf ticker -> 'JNK'  
+# returns: integers for each index. Variable names are pretty 
+#           self explanatory 
 def get_indicators(ticker):
     finalIndexes = []
 
@@ -85,7 +92,7 @@ def get_indicators(ticker):
         apiLimit = 1 # need this for free version 
         downTime = 0
         try: 
-            # Loop while too many api calls per minute
+            # Loop while unable to get api call 
             while (apiLimit):
                 try:
                     curDF = get_dataframe(ticker, curTimeInterval, curMultiplier)
@@ -105,6 +112,7 @@ def get_indicators(ticker):
         except Exception as e:
             config.logmsg('ERROR', 220, f'{e}')
             config.logmsg('NOTICE', 221, f'problem getting indicator {config.PARAMSET[i]} for ticker \'{ticker}\'')
+            config.logmsg('DEBUG', 243, f'indicator {config.PARAMSET[i]} set to -1 for \'{ticker}\'')
             finalIndexes.append(-1)
             finalIndexes.append(-1) 
 
