@@ -48,6 +48,7 @@ helpMenu = 'Usage: main.py [-options]\n \
         -d,  logs Debug messages to LOGFILE\n \
         -c,  Generate a CSV file with ticker data\n \
         -m,  Generate a Platform file with ticker data\n \
+        -g,  Geneartes CSV and Platform files\n \
         -e,  Send email to addresses in email list\n \
         -v,  Get specific value by date, interval and ticker\n'
 
