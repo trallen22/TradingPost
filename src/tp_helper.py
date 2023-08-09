@@ -7,6 +7,11 @@ log numbers 400-499
 
 import configuration_file as config
 
+# buy_min: determines the buy range minimum value. Helper function 
+#           for set_ranges.  
+# parameters: 
+#       etf - Etf object, current etf to get range for 
+# returns: integer, the buy range minimum value 
 def buy_min(etf):
     etfVals = etf.indicatorDict
     maxPrice = -1
@@ -14,6 +19,11 @@ def buy_min(etf):
         maxPrice = max(maxPrice, etfVals[col])
     return maxPrice + 0.01 
 
+# buy_max: determines the buy range maximum value. Helper function 
+#           for set_ranges.  
+# parameters: 
+#       etf - Etf object, current etf to get range for 
+# returns: integer, the buy range maximum value 
 def buy_max(etf):
     etfVals = etf.indicatorDict
     dayMin = 100000
@@ -29,6 +39,11 @@ def buy_max(etf):
     else:
         return minuteMin - 0.01
 
+# sell_min: determines the sell range minimum value. Helper function 
+#           for set_ranges.  
+# parameters: 
+#       etf - Etf object, current etf to get range for 
+# returns: integer, the sell range minimum value 
 def sell_min(etf):
     etfVals = etf.indicatorDict
     maxVal = -1 
@@ -36,6 +51,11 @@ def sell_min(etf):
         maxVal = max(maxVal, etfVals[col])
     return maxVal + 0.01
 
+# sell_max: determines the sell range maximum value. Helper function 
+#           for set_ranges. 
+# parameters: 
+#       etf - Etf object, current etf to get range for 
+# returns: integer, the sell range maximum value 
 def sell_max(etf):
     etfVals = etf.indicatorDict
     dayMin = 100000
@@ -51,7 +71,11 @@ def sell_max(etf):
     else:
         return minuteMin - 0.01
 
-# TODO19: Implement set_ranges 
+# set_ranges: determines the trade ranges in the Trading Post excel 
+# parameters: 
+#       etf - Etf object, current etf to get range for 
+# returns: returns the current ranges minimum, maximum and 
+#           if the cells should be cleared 
 def set_ranges(rangeType, etf):
     if rangeType == 'buy':
         rangeMin = buy_min(etf)
@@ -65,6 +89,14 @@ def set_ranges(rangeType, etf):
         return '', '', 1
     return rangeMin, rangeMax, 0
 
+# determine_buy_sell: determines the Buy, Sell, or Hold signal for a given etf 
+# parameters: 
+#       etf - Etf object, current etf to determine signal for  
+# returns: 
+#       signal - string, BUY/SELL/HOLD signal 
+#       color - color (not sure class or type), cell color for determined signal 
+#       minTradeRange - integer/string, minimum value for current etf trade range 
+#       maxTradeRange - integer/string, maximum value for current etf trade range 
 def determine_buy_sell(etf):
     etfVals = etf.indicatorDict
     signal = None
@@ -102,6 +134,7 @@ def determine_buy_sell(etf):
             minTradeRange, maxTradeRange, clearTP = set_ranges('buy', etf)
             if (not clearTP):
                 return signal, color, minTradeRange, maxTradeRange
+    # if it can't choose a Buy or Sell signal, chooses Hold 
     signal = 'HOLD' 
     color = config.PLAINCOLOR 
     minTradeRange, maxTradeRange, clearTP = set_ranges('', etf)

@@ -1,3 +1,9 @@
+'''
+This is the main execution. Generates 
+
+log numbers 100-199
+'''
+
 import multiprocessing
 from tqdm import tqdm
 from etf import Etf 

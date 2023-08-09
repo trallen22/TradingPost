@@ -1,5 +1,5 @@
 '''
-This file is used to generate the csv or platform files 
+This file is used to generate the Trading Post, csv or platform files 
 
 log numbers 300-399 
 '''
@@ -10,14 +10,21 @@ import shutil
 import configuration_file as config
 from tp_helper import determine_buy_sell
 
+# generate_tp: generates the Trading Post output excel 
+# parameters: 
+#       etfDict - dictionary, a dictionary of etf objects 
+#       outputExcel - string, the path to the output Trading Post excel file 
+# returns:  0 - successfully generated Trading Post 
+#           1 - failed 
 def generate_tp(etfDict, outputExcel):
     # makes a copy of the template Trading Post file
     try:
         shutil.copyfile(config.TEMPEXCEL, outputExcel)
     except FileNotFoundError as e:
         config.logmsg('ERROR', 107, f'{e}')
+        # not sure what I meant right here, don't know what this error would mean either 
         config.logmsg('NOTICE', 108, f'creating file {outputExcel}')
-        print(f'creating file {outputExcel}') # TODO: Actually create the missing path 
+        print(f'creating file {outputExcel}') # TODO: Actually create the missing path; I don't remember what this means 
         return 1
 
     # loading excel as workbook object
@@ -49,8 +56,8 @@ def generate_tp(etfDict, outputExcel):
 
 # generate_csv: generates a csv file with path config.CSVFILE
 # parameters: 
-#       etfDict - a dictionary of etf objects 
-#       csvFile - the output csv file 
+#       etfDict - dictionary, a dictionary of etf objects 
+#       csvFile - string, the path to the output csv file 
 # returns:  0 - successfully generated csv file
 #           1 - failed 
 def generate_csv(etfDict, csvFile):
@@ -61,7 +68,7 @@ def generate_csv(etfDict, csvFile):
                             'five_min_200','one_min_50', 
                             'one_min_200', 'close_price']
             writer = csv.DictWriter(curCsv, fieldnames=fieldnames)
-            writer.writeheader()
+            writer.writeheader() # creates the csv header from fieldnames 
             for ticker in config.TICKERS:
                 curEtf = etfDict[ticker]
                 etfVals = curEtf.indicatorDict
@@ -82,6 +89,12 @@ def generate_csv(etfDict, csvFile):
         return 1
     return 0
 
+# fill_platform: fills the excel platform with values  
+# parameters: 
+#       etfDict - dictionary, a dictionary of etf objects 
+#       outputPlatform - string, the path to the output platform excel file 
+# returns:  0 - successfully generated the output platform 
+#           1 - failed 
 def fill_platform(etfDict, outputPlatform):
     tickerRowDict = {} # { 'JNK': 6 }
     
@@ -114,10 +127,12 @@ def fill_platform(etfDict, outputPlatform):
             if cell.value in config.TICKERS:
                 tickerRowDict[cell.value] = cell.coordinate[1:]
 
+    # fills the index values in platform row for each ticker 
     for ticker in config.TICKERS:
         curRow = tickerRowDict[ticker]
         config.logmsg('DEBUG', 330 + config.TICKERS.index(ticker), f'filling platform, row: {curRow} for ticker: {ticker}')
         for col in config.PLATFORMCOLS:
+            # TODO: maybe could remove 'date' from PLATFORMCOLS 
             if col == 'date':
                 activeSheet[f'{config.PLATFORMCOLS[col]}{curRow}'] = config.TODAYDATE
             else:

@@ -14,12 +14,17 @@ from sys import exit
 
 import configuration_file as config
 
+# I didn't create this function and I honestly don't know what it means 
 def ts_to_time_of_day(ts) -> timedelta:
     return timedelta(seconds=ts.second,minutes=ts.minute,hours=ts.hour)
 
-'''
-get_dataframe - Called by get_indicators(), Gets the dataframe for the given ticker and time interval 
-'''
+# get_dataframe: helper function for get_indicators(). Gets the 50 and 
+#                   200 values for a given index. (ex: 1 min, 5 min, 1 day) 
+# parameters: 
+#       curTicker - string, etf ticker -> 'JNK' 
+#       timeUnit - string, time interval (minute, day) 
+#       intMultiplier - integer, interval multiplier (1, 5) 
+# returns: returns the 50 and 200 sma values for a given ticker and time interval 
 def get_dataframe(curTicker, timeUnit, intMultiplier):
 
     endDay = config.today
@@ -59,7 +64,7 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
     fifty_interval = round(np.mean(df[["close"]].head(50),axis=0).values[0],2)
 
     # assigns value of ticker to simple moving average of last 200mins of before market close and rounds to two decimal
-    two_hundred_interval = round(np.mean(df[["close"]].head(200)).values[0],2)
+    two_hundred_interval = round(np.mean(df[["close"]].head(200), axis=0).values[0],2)
 
     # prints each dataframe. Used for debugging 
     if (config.PRINTDF):
@@ -70,9 +75,11 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
 
     return fifty_interval, two_hundred_interval
 
-'''
-Gets the sma values for each ticker
-'''
+# get_indicators: gets the indices for a given ticker   
+# parameters: 
+#       ticker - string, etf ticker -> 'JNK'  
+# returns: integers for each index. Variable names are pretty 
+#           self explanatory 
 def get_indicators(ticker):
     finalIndexes = []
 
@@ -85,7 +92,7 @@ def get_indicators(ticker):
         apiLimit = 1 # need this for free version 
         downTime = 0
         try: 
-            # Loop while too many api calls per minute
+            # Loop while unable to get api call 
             while (apiLimit):
                 try:
                     curDF = get_dataframe(ticker, curTimeInterval, curMultiplier)
@@ -105,6 +112,7 @@ def get_indicators(ticker):
         except Exception as e:
             config.logmsg('ERROR', 220, f'{e}')
             config.logmsg('NOTICE', 221, f'problem getting indicator {config.PARAMSET[i]} for ticker \'{ticker}\'')
+            config.logmsg('DEBUG', 243, f'indicator {config.PARAMSET[i]} set to -1 for \'{ticker}\'')
             finalIndexes.append(-1)
             finalIndexes.append(-1) 
 
@@ -120,8 +128,10 @@ def get_indicators(ticker):
         close_price = config.CLIENT.get_daily_open_close_agg(ticker=ticker, date=str(config.today)).close
     except Exception as e:
         config.logmsg('ERROR', 239, f'{e}')
+        config.logmsg('NOTICE', 241, f"make sure it isn\'t a weekend")
         config.logmsg('NOTICE', 240, f'problem getting close price for \'{ticker}\' on \'{config.today}\'')
         close_price = -1
+        config.logmsg('DEBUG', 242, f'close price set to -1 for \'{ticker}\'')
 
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
     ticker_two_hundred_five_minute, ticker_fifty_one_day, ticker_two_hundred_one_day, close_price

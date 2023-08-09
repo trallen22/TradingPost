@@ -3,14 +3,13 @@ This file holds all the configuraion information
 
 log numbers 001-099
 '''
+
 from datetime import date, timedelta
 from polygon import RESTClient 
 import os
 import sys 
 from sys import exit
 import openpyxl
-
-test =1
 
 # logmsg: logs a given message to the log file at LOGFILE
 # parameters: 
@@ -33,22 +32,23 @@ def logmsg(level, logNum, message):
 
 PRINTDF = 0 # prints dataframes to terminal
 PBAR = 1 # print progress bar for polygon calls in main.py
-DEBUG = 0 # print debug messages # TODO20: add debug messages 
+DEBUG = 0 # log debug messages to LOGFILE 
 CSV = 0 # outputs an excel file to CSVFILE 
 FILLPLATFORM = 0 # outputs a platform to OUTPUTPLATFORM 
 SENDEMAIL = 0 # sends an email to EMAILLIST 
 GETVALUE = 0 # gets a specific value from given date 
 
-# TODO: convert todays date to mm/dd form 
+# TODO: convert todays date to mm/dd form; I don't remember what this means 
 today = date.today() # TODO: add command argument to change this 
 
 helpMenu = 'Usage: main.py [-options]\n \
         -h,  Opens this help menu\n \
         -f,  Print dataframes to the terminal\n \
         -p,  Show progress bar\n \
-        -d,  Print Debug messages\n \
+        -d,  logs Debug messages to LOGFILE\n \
         -c,  Generate a CSV file with ticker data\n \
         -m,  Generate a Platform file with ticker data\n \
+        -g,  Geneartes CSV and Platform files\n \
         -e,  Send email to addresses in email list\n \
         -v,  Get specific value by date, interval and ticker\n'
 
@@ -88,8 +88,8 @@ STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
-# EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu' ] 
-EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing 
+EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
+# EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing 
 
 # determine if application is a script file or frozen exe
 # not sure what this means, found it on stack overflow 
@@ -147,11 +147,11 @@ try:
 except Exception as e:
     logmsg('ERROR', '002', f'{e}')
 
-# TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
-#         'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
-#         'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
+TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
+        'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
+        'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
 
-TICKERS = [ 'JNK' ] # used for testing 
+# TICKERS = [ 'JNK' ] # used for testing 
 
 PARAMSET = [[ 'minute', 1 ], # one minute time interval 
             [ 'minute', 5 ], # 5 minute time interval 
