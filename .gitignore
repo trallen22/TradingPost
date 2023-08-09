@@ -1,0 +1,15 @@
+# avoid csv, pdf and xlsx and numbers
+############
+*.csv
+*.xlsx
+*.numbers
+*.pdf
+
+# compiled python
+*.pyc 
+
+# os file 
+.DS_Store
+
+# txt files
+*.txt
