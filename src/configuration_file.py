@@ -147,11 +147,11 @@ try:
 except Exception as e:
     logmsg('ERROR', '002', f'{e}')
 
-TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
-        'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
-        'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
+# TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
+#         'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
+#         'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
 
-# TICKERS = [ 'JNK' ] # used for testing 
+TICKERS = [ 'JNK' ] # used for testing 
 
 PARAMSET = [[ 'minute', 1 ], # one minute time interval 
             [ 'minute', 5 ], # 5 minute time interval 
@@ -190,27 +190,59 @@ plainRGB = 'FFFFFFFF' # color white
 PLAINCOLOR = openpyxl.styles.PatternFill(start_color=plainRGB, end_color=plainRGB, fill_type='solid')
 
 # Cell color templates 
-try:
-    buyRGB = excelSheet[f'A{COLORROW}'].fill.fgColor
-    BUYCOLOR = openpyxl.styles.PatternFill(start_color=buyRGB, end_color=buyRGB, fill_type='solid')
-except Exception:
-    BUYCOLOR = PLAINCOLOR
-    print(f'NOTICE: Buy Color set as plain')
-try:
-    hoBuyRGB = excelSheet[F'C{COLORROW}'].fill.fgColor
-    HOBUYCOLOR = openpyxl.styles.PatternFill(start_color=hoBuyRGB, end_color=hoBuyRGB, fill_type='solid')
-except Exception:
-    HOBUYCOLOR = PLAINCOLOR
-    print(f'NOTICE: Hold to Buy Color set as plain')
-try:
-    sellRGB = excelSheet[f'E{COLORROW}'].fill.fgColor
-    SELLCOLOR = openpyxl.styles.PatternFill(start_color=sellRGB, end_color=sellRGB, fill_type='solid')
-except Exception:
-    SELLCOLOR = PLAINCOLOR
-    print(f'NOTICE: Sell Color set as plain')
-try:
-    hoSellRGB = excelSheet[f'F{COLORROW}'].fill.fgColor
-    HOSELLCOLOR = openpyxl.styles.PatternFill(start_color=hoSellRGB, end_color=hoSellRGB, fill_type='solid')
-except Exception:
-    HOSELLCOLOR = PLAINCOLOR
-    print(f'NOTICE: Hold to Sell Color set as plain')
+dark_green = '064A23' # Buy Signal HexColor
+light_green = '87C94B' # Hold-Buy Signal HexColor
+brown_yellow = 'A28818' # Sell Signal HexColor
+bright_yellow ='F6DD58' # Hold-Sell Signal HexColor
+
+def apply_signal_color(sheet, cell_location, color):
+    try: 
+        color_fill = openpyxl.styles.PatternFill(start_color=color, end_color=color, fill_type="solid")
+        sheet[cell_location].fill = color_fill
+        logmsg('DEBUG', '010', f'Color applied to {cell_location}')
+    except Exception:
+        logmsg('ERROR', '011', f'Error applyiing color to {cell_location}') 
+        excelSheet[cell_location].fill = PLAINCOLOR
+apply_signal_color(excelSheet, 'A5', dark_green)
+apply_signal_color(excelSheet, 'C5', light_green)
+apply_signal_color(excelSheet, 'E5', brown_yellow)
+apply_signal_color(excelSheet, 'F5', bright_yellow)
+
+BUYCOLOR = openpyxl.styles.PatternFill(start_color = dark_green, end_color = dark_green, fill_type = 'solid')
+HOBUYCOLOR = openpyxl.styles.PatternFill(start_color = light_green, end_color = light_green, fill_type = 'solid')
+SELLCOLOR = openpyxl.styles.PatternFill(start_color = brown_yellow, end_color = brown_yellow, fill_type = 'solid')
+HOSELLCOLOR = openpyxl.styles.PatternFill(start_color = bright_yellow, end_color = bright_yellow, fill_type = 'solid')
+
+# This block of code should work, i hope this is what you were looking for
+# try:
+#     BUY_cell_location = 'A5'
+#     BUYCOLOR = openpyxl.styles.PatternFill(start_color = dark_green, end_color = dark_green, fill_type = 'solid')
+#     excelSheet[BUY_cell_location].fill = BUYCOLOR
+#     logmsg('DEBUG', '010', 'Buy Signal Color Template')
+# except Exception:
+#     BUYCOLOR = PLAINCOLOR
+#     logmsg('ERROR', '011', 'NOTICE: Buy Color Signal set as plain')
+# try:
+#     HOBUY_cell_location = 'C5'
+#     HOBUYCOLOR = openpyxl.styles.PatternFill(start_color = light_green, end_color = light_green, fill_type = 'solid')
+#     excelSheet[HOBUY_cell_location].fill = HOBUYCOLOR
+#     logmsg('DEBUG', '012', 'HOBuy Signal Color Template')
+# except Exception:
+#     HOBUYCOLOR = PLAINCOLOR
+#     logmsg('ERROR', '013', 'NOTICE: HOBuy Color Signal set as plain')
+# try:
+#     SELL_cell_location = 'E5'
+#     SELLCOLOR = openpyxl.styles.PatternFill(start_color = brown_yellow, end_color = brown_yellow, fill_type = 'solid')
+#     excelSheet[SELL_cell_location].fill = SELLCOLOR
+#     logmsg('DEBUG', '014', 'Sell Signal Color Template')
+# except Exception:
+#     SELLCOLOR = PLAINCOLOR
+#     logmsg('ERROR', '015', 'NOTICE: Sell Color Signal set as plain')
+# try:
+#     HOSELL_cell_location = 'F5'
+#     HOSELLCOLOR = openpyxl.styles.PatternFill(start_color = bright_yellow, end_color = bright_yellow, fill_type = 'solid')
+#     excelSheet[HOSELL_cell_location].fill = HOSELLCOLOR
+#     logmsg('DEBUG', '012', 'HOSELL Signal Color Template')
+# except Exception:
+#     HOSELLCOLOR = PLAINCOLOR
+#     logmsg('ERROR', '013', 'NOTICE: HOSELL Color Signal set as plain')
