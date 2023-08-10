@@ -4,7 +4,8 @@ This file holds all the configuraion information
 log numbers 001-099
 '''
 
-from datetime import date, timedelta
+from datetime import date
+import time 
 from polygon import RESTClient 
 import os
 import sys 
@@ -18,7 +19,9 @@ import openpyxl
 #       message - string, message to log 
 # returns:  No returns 
 def logmsg(level, logNum, message):
-    logMessage = f'{date.today()}::{level}::{logNum}::{message}'
+    curTime = time.localtime()
+    strTime = time.strftime("%H:%M:%S", curTime)
+    logMessage = f'{date.today()}::{strTime}::{level}::{logNum}::{message}'
     # prints messages that aren't DEBUG 
     if not (level == 'DEBUG'): 
         print(logMessage)
@@ -88,8 +91,8 @@ STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
-# EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
-EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing 
+EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
+# EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing 
 
 # determine if application is a script file or frozen exe
 # not sure what this means, found it on stack overflow 
@@ -147,11 +150,11 @@ try:
 except Exception as e:
     logmsg('ERROR', '002', f'{e}')
 
-# TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
-#         'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
-#         'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
+TICKERS = [ 'JNK', 'GDX', 'VCR', 'VDC', 'VIG', 'VDE', 'VFH', 
+        'VWO', 'VHT', 'VIS', 'VGT', 'VAW', 'VNQ', 'VOO', 
+        'VOX', 'BND', 'BNDX', 'VXUS', 'VTI', 'VPU', 'XTN' ]
 
-TICKERS = [ 'JNK' ] # used for testing 
+# TICKERS = [ 'JNK' ] # used for testing 
 
 PARAMSET = [[ 'minute', 1 ], # one minute time interval 
             [ 'minute', 5 ], # 5 minute time interval 
