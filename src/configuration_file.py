@@ -9,8 +9,8 @@ import time
 from polygon import RESTClient 
 import os
 import sys 
-from sys import exit
 import openpyxl
+import argparse 
 
 # logmsg: logs a given message to the log file at LOGFILE
 # parameters: 
@@ -33,55 +33,42 @@ def logmsg(level, logNum, message):
     except Exception as e:
         print(f'{e}')
 
-PRINTDF = 0 # prints dataframes to terminal
-PBAR = 1 # print progress bar for polygon calls in main.py
-DEBUG = 0 # log debug messages to LOGFILE 
-CSV = 0 # outputs an excel file to CSVFILE 
-FILLPLATFORM = 0 # outputs a platform to OUTPUTPLATFORM 
-SENDEMAIL = 0 # sends an email to EMAILLIST 
-GETVALUE = 0 # gets a specific value from given date 
+# get_args: gets the command line arguments that were given 
+# parameters: no parameters 
+# returns: returns a dictionary of command line constants and their values 
+def get_args():
+    parser = argparse.ArgumentParser(description='generates a Trading Post')
+    # TODO: add help messages for each argument 
+    parser.add_argument('-f', '--PRINTDF', action='store_true', help='prints dataframes to terminal') 
+    parser.add_argument('-p', '--PBAR', action='store_true', default=True, help='print progress bar for polygon calls in main.py') 
+    parser.add_argument('-d', '--DEBUG', action='store_true', help='log debug messages to LOGFILE')
+    parser.add_argument('-c', '--CSV', action='store_true', help='outputs an excel file to CSVFILE') 
+    parser.add_argument('-m', '--FILLPLATFORM', action='store_true', help='outputs a platform to OUTPUTPLATFORM')
+    parser.add_argument('-e', '--SENDEMAIL', action='store_true', help='sends an email to EMAILLIST')
+    parser.add_argument('-v', '--GETVALUE', action='store_true', help='gets a specific value from given date') # TODO: implement this
+    parser.add_argument('-g', action='store_true', help='generates csv and platform') # TODO: add long option for CSV and FILLPLATFOR 
+    parser.add_argument('-t', nargs=1, help='get Trading Post for specific date') # TODO: add argument to chage today date
+
+    return vars(parser.parse_args()) 
+
+argDict = get_args()
+print(argDict)
+# print(f"test arg: {argDict['t']}")
+
+PRINTDF = argDict['PRINTDF'] # prints dataframes to terminal
+PBAR = argDict['PBAR'] # print progress bar for polygon calls in main.py
+DEBUG = argDict['DEBUG'] # log debug messages to LOGFILE 
+CSV = argDict['CSV'] # outputs an excel file to CSVFILE 
+FILLPLATFORM = argDict['FILLPLATFORM'] # outputs a platform to OUTPUTPLATFORM 
+SENDEMAIL = argDict['SENDEMAIL'] # sends an email to EMAILLIST 
+GETVALUE = argDict['GETVALUE'] # gets a specific value from given date
+
+
 
 # TODO: convert todays date to mm/dd form; I don't remember what this means 
 today = date.today() # TODO: add command argument to change this 
-
-helpMenu = 'Usage: main.py [-options]\n \
-        -h,  Opens this help menu\n \
-        -f,  Print dataframes to the terminal\n \
-        -p,  Show progress bar\n \
-        -d,  logs Debug messages to LOGFILE\n \
-        -c,  Generate a CSV file with ticker data\n \
-        -m,  Generate a Platform file with ticker data\n \
-        -g,  Geneartes CSV and Platform files\n \
-        -e,  Send email to addresses in email list\n \
-        -v,  Get specific value by date, interval and ticker\n'
-
-for arg in sys.argv[1:]: # skip main.py
-    if arg == '-h':
-        print(helpMenu)
-        exit(0)
-    elif arg == '-f':
-        PRINTDF = 1
-    elif arg == '-p':
-        PBAR = 1 
-    elif arg == '-d':
-        DEBUG = 1 
-    elif arg == '-c':
-        CSV = 1
-    elif arg == '-m':
-        FILLPLATFORM = 1 
-    elif arg == '-e':
-        SENDEMAIL = 1
-    elif arg == '-v':
-        GETVALUE = 1
-    elif arg == '-g':
-        CSV = 1
-        FILLPLATFORM = 1
-    elif arg == '-t':
-        index = sys.argv.index('-t')
-
-    else:
-        print(f'NOTICE::003::bad argument given \'{arg}\'')
-        # logmsg('NOTICE', '003', f'bad argument given \'{arg}\'')
+print(f'today: {type(today)}')
+sys.exit(1)
 
 listDate = str(today).split('-')
 TODAYDATE = f'{listDate[1]}/{listDate[2]}'  # mm/yy
@@ -91,8 +78,8 @@ STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
-EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
-# EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing 
+# EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
+EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing 
 
 # determine if application is a script file or frozen exe
 # not sure what this means, found it on stack overflow 
@@ -186,7 +173,7 @@ try:
     excelSheet = workbook.active
 except Exception as e:
     print(f'ERROR: {e}')
-    exit(4)
+    sys.exit(4)
 
 COLORROW = 5 # row on trading post excel with template color
 plainRGB = 'FFFFFFFF' # color white 
