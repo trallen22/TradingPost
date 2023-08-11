@@ -19,9 +19,9 @@ import argparse
 #       message - string, message to log 
 # returns:  No returns 
 def logmsg(level, logNum, message):
-    curTime = time.localtime()
-    strTime = time.strftime("%H:%M:%S", curTime)
-    logMessage = f'{date.today()}::{strTime}::{level}::{logNum}::{message}'
+    localTime = time.localtime()
+    curTime = time.strftime("%H:%M:%S", localTime)
+    logMessage = f'{date.today()}::{curTime}::{level}::{logNum}::{message}'
     # prints messages that aren't DEBUG 
     if not (level == 'DEBUG'): 
         print(logMessage)
@@ -38,7 +38,7 @@ def logmsg(level, logNum, message):
 # returns: returns a dictionary of command line constants and their values 
 def get_args():
     parser = argparse.ArgumentParser(description='generates a Trading Post')
-    # TODO: add help messages for each argument 
+    # adding each argument to the parser 
     parser.add_argument('-f', '--PRINTDF', action='store_true', help='prints dataframes to terminal') 
     parser.add_argument('-p', '--PBAR', action='store_true', default=True, help='print progress bar for polygon calls in main.py') 
     parser.add_argument('-d', '--DEBUG', action='store_true', help='log debug messages to LOGFILE')
@@ -47,13 +47,15 @@ def get_args():
     parser.add_argument('-e', '--SENDEMAIL', action='store_true', help='sends an email to EMAILLIST')
     parser.add_argument('-v', '--GETVALUE', action='store_true', help='gets a specific value from given date') # TODO: implement this
     parser.add_argument('-g', action='store_true', help='generates csv and platform') # TODO: add long option for CSV and FILLPLATFOR 
-    parser.add_argument('-t', nargs=1, help='get Trading Post for specific date') # TODO: add argument to chage today date
+    parser.add_argument('-t', '--ALTTODAY', nargs=1, action='store', default='', help='get Trading Post for specific date') # TODO: figure out how to make help menu look better
 
     return vars(parser.parse_args()) 
 
+##############################
+# Main Execution begins here 
+##############################
+
 argDict = get_args()
-print(argDict)
-# print(f"test arg: {argDict['t']}")
 
 PRINTDF = argDict['PRINTDF'] # prints dataframes to terminal
 PBAR = argDict['PBAR'] # print progress bar for polygon calls in main.py
@@ -62,13 +64,15 @@ CSV = argDict['CSV'] # outputs an excel file to CSVFILE
 FILLPLATFORM = argDict['FILLPLATFORM'] # outputs a platform to OUTPUTPLATFORM 
 SENDEMAIL = argDict['SENDEMAIL'] # sends an email to EMAILLIST 
 GETVALUE = argDict['GETVALUE'] # gets a specific value from given date
+ALTTODAY = argDict['ALTTODAY'] # stores the input date yyyy-mm-dd 
 
-
-
-# TODO: convert todays date to mm/dd form; I don't remember what this means 
-today = date.today() # TODO: add command argument to change this 
-print(f'today: {type(today)}')
-sys.exit(1)
+# setting date used throughout execution 
+if (ALTTODAY == ''):
+    today = date.today()
+else:
+    # set today date to command line argument value 
+    todayList = ALTTODAY[0].split('-')
+    today = date(int(todayList[0]), int(todayList[1]), int(todayList[2]))
 
 listDate = str(today).split('-')
 TODAYDATE = f'{listDate[1]}/{listDate[2]}'  # mm/yy
@@ -101,8 +105,9 @@ try:
     os.mkdir(f'{LOGROOT}')
     logmsg('DEBUG', '008', f'created src directory \'{LOGROOT}\'')
 except FileExistsError:
+    # trims the log file to preserve space 
     with open(LOGFILE, mode='r+') as lf:
-        lastLines = lf.readlines()[-100:]
+        lastLines = lf.readlines()[-200:] # how many lines to save from previous log file 
     with open(LOGFILE, mode='w') as lf:
         for line in lastLines:
             lf.write(line)
