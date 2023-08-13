@@ -14,10 +14,10 @@ class Etf:
     #       ticker - string, etf ticker -> 'JNK' 
     #       name - string, etf name -> 'High Yield Bonds' 
     # returns:  no return 
-    def __init__(self, ticker, name):
+    def __init__(self, ticker):
         config.logmsg('DEBUG', 180, f'started creating etf object for \'{ticker}\'')
         self.ticker = ticker # ticker -> 'JNK'
-        self.name = name # name -> 'HighYieldBonds'
+        self.name = config.CLIENT.get_ticker_details(ticker).name # name -> 'HighYieldBonds'
         self.basecell = config.ETFBASECELL[ticker] # ticker cell in tp -> 'C7' 
         self.colbase = self.basecell[0] # letter of basecell -> 'C' 
         self.rowbase = int(self.basecell[1:]) # row num of basecell -> '7'
