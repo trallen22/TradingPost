@@ -185,8 +185,10 @@ plainRGB = 'FFFFFFFF' # color white
 PLAINCOLOR = openpyxl.styles.PatternFill(start_color=plainRGB, end_color=plainRGB, fill_type='solid')
 
 # Cell color templates 
-
-
+dark_green = '064A23' # Buy Signal HexColor
+light_green = '87C94B' # Hold-Buy Signal HexColor
+brown_yellow = 'A28818' # Sell Signal HexColor
+bright_yellow ='F6DD58' # Hold-Sell Signal HexColor
 try: 
     BUYCOLOR = openpyxl.styles.PatternFill(start_color = dark_green, end_color = dark_green, fill_type = 'solid')
     logmsg('DEBUG', '010', 'Buy Signal Color Template')
