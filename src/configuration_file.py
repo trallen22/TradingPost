@@ -185,27 +185,33 @@ plainRGB = 'FFFFFFFF' # color white
 PLAINCOLOR = openpyxl.styles.PatternFill(start_color=plainRGB, end_color=plainRGB, fill_type='solid')
 
 # Cell color templates 
-try:
-    buyRGB = excelSheet[f'A{COLORROW}'].fill.fgColor
-    BUYCOLOR = openpyxl.styles.PatternFill(start_color=buyRGB, end_color=buyRGB, fill_type='solid')
+
+
+try: 
+    BUYCOLOR = openpyxl.styles.PatternFill(start_color = dark_green, end_color = dark_green, fill_type = 'solid')
+    logmsg('DEBUG', '010', 'Buy Signal Color Template')
 except Exception:
-    BUYCOLOR = PLAINCOLOR
-    print(f'NOTICE: Buy Color set as plain')
+     BUYCOLOR = PLAINCOLOR
+     except Exception as e:
+     logmsg('NOTICE', '011', 'Buy Color Signal set as plain')
 try:
-    hoBuyRGB = excelSheet[F'C{COLORROW}'].fill.fgColor
-    HOBUYCOLOR = openpyxl.styles.PatternFill(start_color=hoBuyRGB, end_color=hoBuyRGB, fill_type='solid')
+    HOBUYCOLOR = openpyxl.styles.PatternFill(start_color = light_green, end_color = light_green, fill_type = 'solid')
+    logmsg('DEBUG', '012', 'HOBuy Signal Color Template')
 except Exception:
     HOBUYCOLOR = PLAINCOLOR
-    print(f'NOTICE: Hold to Buy Color set as plain')
+    except Exception as e:
+    logmsg('NOTICE', '013', 'HOBUY Color Signal set as plain')
 try:
-    sellRGB = excelSheet[f'E{COLORROW}'].fill.fgColor
-    SELLCOLOR = openpyxl.styles.PatternFill(start_color=sellRGB, end_color=sellRGB, fill_type='solid')
+    SELLCOLOR = openpyxl.styles.PatternFill(start_color = brown_yellow, end_color = brown_yellow, fill_type = 'solid')
+    logmsg('DEBUG', '014', 'Sell Signal Color Template')
 except Exception:
-    SELLCOLOR = PLAINCOLOR
-    print(f'NOTICE: Sell Color set as plain')
+     SELLCOLOR = PLAINCOLOR
+     except Exception as e:
+     logmsg('NOTICE', '015', 'Sell Color Signal set as plain')
 try:
-    hoSellRGB = excelSheet[f'F{COLORROW}'].fill.fgColor
-    HOSELLCOLOR = openpyxl.styles.PatternFill(start_color=hoSellRGB, end_color=hoSellRGB, fill_type='solid')
+    HOSELLCOLOR = openpyxl.styles.PatternFill(start_color = bright_yellow, end_color = bright_yellow, fill_type = 'solid')
+    logmsg('DEBUG', '016', 'HOSELL Signal Color Template')
 except Exception:
-    HOSELLCOLOR = PLAINCOLOR
-    print(f'NOTICE: Hold to Sell Color set as plain')
+     HOSELLCOLOR = PLAINCOLOR
+     except Exception as e:
+     logmsg('NOTICE', '017', 'HOSELL Color Signal set as plain')
