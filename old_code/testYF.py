@@ -15,3 +15,4 @@ for ticker in config.TICKERS:
         print(i)
     print(round(etf.info['fiftyDayAverage'], 2))
     print(round(etf.info['twoHundredDayAverage'], 2))
+    break 

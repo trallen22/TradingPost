@@ -45,9 +45,9 @@ def get_args():
     parser.add_argument('-c', '--CSV', action='store_true', help='outputs an excel file to CSVFILE') 
     parser.add_argument('-m', '--FILLPLATFORM', action='store_true', help='outputs a platform to OUTPUTPLATFORM')
     parser.add_argument('-e', '--SENDEMAIL', action='store_true', help='sends an email to EMAILLIST')
-    parser.add_argument('-v', '--GETVALUE', action='store_true', help='gets a specific value from given date') # TODO: implement this
+    parser.add_argument('-v', '--GETVALUE', action='store_true', help='gets a specific value from given date. NEED TO IMPLEMENT ') # TODO: implement this
     parser.add_argument('-g', action='store_true', help='generates csv and platform') # TODO: add long option for CSV and FILLPLATFOR 
-    parser.add_argument('-t', '--ALTTODAY', nargs=1, action='store', default='', help='get Trading Post for specific date') # TODO: figure out how to make help menu look better
+    parser.add_argument('-t', '--ALTTODAY', metavar='<date>', nargs=1, action='store', default='', help='get Trading Post for specific date. yyyy-mm-dd') 
 
     return vars(parser.parse_args()) 
 
@@ -82,8 +82,8 @@ STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
-# EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
-EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing 
+EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
+# EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing 
 
 # determine if application is a script file or frozen exe
 # not sure what this means, found it on stack overflow 
@@ -116,7 +116,7 @@ except FileExistsError:
 # Template files 
 SRCROOT = f'{TPROOT}/src'
 TEMPLATEPLATFORM = f'{SRCROOT}/TA.WORK.xlsx' 
-TEMPEXCEL = f'{SRCROOT}/stocktradingpost.xlsx' 
+TEMPEXCEL = f'{SRCROOT}/stocktradingpostdemo.xlsx' 
 try:
     os.mkdir(f'{SRCROOT}')
     logmsg('DEBUG', '004', f'created src directory \'{SRCROOT}\'')
