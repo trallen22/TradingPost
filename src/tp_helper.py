@@ -117,6 +117,7 @@ def determine_buy_sell(etf):
                 signal = 'HOLD' 
                 color = config.HOSELLCOLOR
             minTradeRange, maxTradeRange, clearTP = set_ranges('sell', etf)
+            config.logmsg('DEBUG', '412', 'Exiting determine_buy_sell function')
             if (not clearTP):
                 return signal, color, minTradeRange, maxTradeRange
     else:
@@ -132,10 +133,12 @@ def determine_buy_sell(etf):
                 signal = 'HOLD' 
                 color = config.HOBUYCOLOR 
             minTradeRange, maxTradeRange, clearTP = set_ranges('buy', etf)
+            config.logmsg('DEBUG', '412', 'Exiting determine_buy_sell function')
             if (not clearTP):
                 return signal, color, minTradeRange, maxTradeRange
     # if it can't choose a Buy or Sell signal, chooses Hold 
     signal = 'HOLD' 
     color = config.PLAINCOLOR 
     minTradeRange, maxTradeRange, clearTP = set_ranges('', etf)
+    config.logmsg('DEBUG', '412', 'Exiting determine_buy_sell function')
     return signal, color, minTradeRange, maxTradeRange

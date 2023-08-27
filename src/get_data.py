@@ -27,6 +27,8 @@ def ts_to_time_of_day(ts) -> timedelta:
 # returns: returns the 50 and 200 sma values for a given ticker and time interval 
 def get_dataframe(curTicker, timeUnit, intMultiplier):
 
+    config.logmsg('DEBUG', 200, f"Retrieving data for {curTicker} - {intMultiplier} {timeUnit}")
+
     endDay = config.today
 
     if timeUnit == 'minute':
@@ -72,7 +74,7 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
         print(f'--- {intMultiplier} {timeUnit} ---')
         print('#################')
         print(df)
-
+    config.logmsg('DEBUG', 201, f"Data retrieved for {curTicker} - {intMultiplier} {timeUnit}")
     return fifty_interval, two_hundred_interval
 
 # get_indicators: gets the indices for a given ticker   
@@ -82,10 +84,11 @@ def get_dataframe(curTicker, timeUnit, intMultiplier):
 #           self explanatory 
 def get_indicators(ticker):
     finalIndexes = []
-
+    config.logmsg('DEBUG', 203, f'Starting indicator retrieval for ticker \'{ticker}\'')
     # Generate 50 and 200 for given time interval(s) in paramSet
-    for i in range(len(config.PARAMSET)): 
+    for i in range(len(config.PARAMSET)):
 
+        config.logmsg('DEBUG', 204, f'Processing iteration {i + 1}/{len(config.PARAMSET)}')
         curTimeInterval = config.PARAMSET[i][0] # time interval (minute, day) 
         curMultiplier = config.PARAMSET[i][1] # multiplier for time interval 
 
@@ -126,6 +129,7 @@ def get_indicators(ticker):
     # generate closing price 
     try: 
         close_price = config.CLIENT.get_daily_open_close_agg(ticker=ticker, date=str(config.today)).close
+        config.logmsg('DEBUG', 205, f'Successfully retrieved close price for \'{ticker}\': {close_price}')
     except Exception as e:
         config.logmsg('ERROR', 239, f'{e}')
         config.logmsg('NOTICE', 241, f"make sure it isn\'t a weekend")
@@ -133,5 +137,6 @@ def get_indicators(ticker):
         close_price = -1
         config.logmsg('DEBUG', 242, f'close price set to -1 for \'{ticker}\'')
 
+    config.logmsg('DEBUG', 206, f'Indicator retrieval completed for ticker \'{ticker}\'')
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
     ticker_two_hundred_five_minute, ticker_fifty_one_day, ticker_two_hundred_one_day, close_price
