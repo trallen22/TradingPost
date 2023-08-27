@@ -164,10 +164,10 @@ PLATFORMCOLS = { 'date':'E', 'close_price':'G', 'one_day_50':'H', 'one_day_200':
             'five_min_200':'K', 'one_min_50':'L', 'one_min_200':'M' }
 
 # base cell for each ticker in Trading Post excel 
-ETFBASECELL = { 'JNK':'C7', 'GDX':'D7', 'VCR':'E7', 'VDC':'F7', 'VIG':'G7', 
-            'VDE':'H7', 'VFH':'I7', 'VWO':'C17', 'VHT':'D17', 'VIS':'E17', 'VGT':'F17', 
-            'VAW':'G17', 'VNQ':'H17', 'VOO':'I17', 'VOX':'C27', 'BND':'D27', 
-            'BNDX':'E27', 'VXUS':'F27', 'VTI':'G27', 'VPU':'H27', 'XTN':'I27' }
+ETFBASECELL = { 'JNK':'B3', 'GDX':'C3', 'VCR':'D3', 'VDC':'E3', 'VIG':'F3', 
+            'VDE':'G3', 'VFH':'H3', 'VWO':'B13', 'VHT':'C13', 'VIS':'D13', 'VGT':'E13', 
+            'VAW':'F13', 'VNQ':'G13', 'VOO':'H13', 'VOX':'B23', 'BND':'C23', 
+            'BNDX':'D23', 'VXUS':'E23', 'VTI':'F23', 'VPU':'G23', 'XTN':'H23' }
 
 # cell with date in Trading Post 
 PLATDATECELL = 'B3'
