@@ -191,29 +191,29 @@ brown_yellow = 'A28818' # Sell Signal HexColor
 bright_yellow ='F6DD58' # Hold-Sell Signal HexColor
 try: 
     BUYCOLOR = openpyxl.styles.PatternFill(start_color = dark_green, end_color = dark_green, fill_type = 'solid')
-    logmsg('DEBUG', '010', 'Buy Signal Color Template')
-except Exception:
-     BUYCOLOR = PLAINCOLOR
-     except Exception as e:
-     logmsg('NOTICE', '011', 'Buy Color Signal set as plain')
+    logmsg('DEBUG', '010', 'BUY Signal Color Template')
+except Exception as e:
+    BUYCOLOR = PLAINCOLOR
+    logmsg('ERROR', '011', f'{e}')
+    logmsg('NOTICE', '011', 'BUY Color Signal set as plain')
 try:
     HOBUYCOLOR = openpyxl.styles.PatternFill(start_color = light_green, end_color = light_green, fill_type = 'solid')
-    logmsg('DEBUG', '012', 'HOBuy Signal Color Template')
-except Exception:
+    logmsg('DEBUG', '012', 'HOBUY Signal Color Template')
+except Exception as e:
     HOBUYCOLOR = PLAINCOLOR
-    except Exception as e:
+    logmsg('ERROR', '013', f'{e}')
     logmsg('NOTICE', '013', 'HOBUY Color Signal set as plain')
 try:
     SELLCOLOR = openpyxl.styles.PatternFill(start_color = brown_yellow, end_color = brown_yellow, fill_type = 'solid')
-    logmsg('DEBUG', '014', 'Sell Signal Color Template')
-except Exception:
-     SELLCOLOR = PLAINCOLOR
-     except Exception as e:
-     logmsg('NOTICE', '015', 'Sell Color Signal set as plain')
+    logmsg('DEBUG', '014', 'SELL Signal Color Template')
+except Exception as e:
+    SELLCOLOR = PLAINCOLOR
+    logmsg('ERROR', '015', f'{e}')
+    logmsg('NOTICE', '015', 'SELL Color Signal set as plain')
 try:
     HOSELLCOLOR = openpyxl.styles.PatternFill(start_color = bright_yellow, end_color = bright_yellow, fill_type = 'solid')
     logmsg('DEBUG', '016', 'HOSELL Signal Color Template')
-except Exception:
-     HOSELLCOLOR = PLAINCOLOR
-     except Exception as e:
-     logmsg('NOTICE', '017', 'HOSELL Color Signal set as plain')
+except Exception as e:
+    HOSELLCOLOR = PLAINCOLOR
+    logmsg('ERROR', '017', f'{e}')
+    logmsg('NOTICE', '017', 'HOSELL Color Signal set as plain')
