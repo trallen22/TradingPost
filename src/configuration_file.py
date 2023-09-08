@@ -96,7 +96,8 @@ dirList = curDir.split('/')
 dirIndex = dirList.index('TradingPost')
 topList = dirList[:dirIndex+1]
 
-TPROOT = '/'.join(topList) # root directory for trading post execution 
+main_directory = os.path.dirname(os.path.abspath(__file__))
+TPROOT = main_directory
 
 # TODO Change tproot to index for main.py instead of searching for exact trading post / add date attribute to etf class
 
