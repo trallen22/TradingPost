@@ -98,6 +98,8 @@ topList = dirList[:dirIndex+1]
 
 TPROOT = '/'.join(topList) # root directory for trading post execution 
 
+# TODO Change tproot to index for main.py instead of searching for exact trading post / add date attribute to etf class
+
 # Debug files 
 LOGROOT = f'{TPROOT}/debug'
 LOGFILE = f'{LOGROOT}/logfile.txt'
