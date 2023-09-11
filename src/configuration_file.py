@@ -4,7 +4,7 @@ This file holds all the configuraion information
 log numbers 001-099
 '''
 
-from datetime import date
+from datetime import date, timedelta 
 import time 
 from polygon import RESTClient 
 import os
@@ -46,10 +46,11 @@ def get_args():
     parser.add_argument('-m', '--FILLPLATFORM', action='store_true', help='outputs a platform to OUTPUTPLATFORM')
     parser.add_argument('-e', '--SENDEMAIL', action='store_true', help='sends an email to EMAILLIST')
     parser.add_argument('-v', '--GETVALUE', action='store_true', help='gets a specific value from given date. NEED TO IMPLEMENT ') # TODO: implement this
-    parser.add_argument('-g', action='store_true', help='generates csv and platform') # TODO: add long option for CSV and FILLPLATFOR 
+    parser.add_argument('-g', '--GENALL', action='store_true', help='generates csv and platform') 
     parser.add_argument('-t', '--ALTTODAY', metavar='<date>', nargs=1, action='store', default='', help='get Trading Post for specific date. yyyy-mm-dd') 
 
-    return vars(parser.parse_args()) 
+    args, unknown = parser.parse_known_args()
+    return vars(args) 
 
 ##############################
 # Main Execution begins here 
@@ -65,6 +66,9 @@ FILLPLATFORM = argDict['FILLPLATFORM'] # outputs a platform to OUTPUTPLATFORM
 SENDEMAIL = argDict['SENDEMAIL'] # sends an email to EMAILLIST 
 GETVALUE = argDict['GETVALUE'] # gets a specific value from given date
 ALTTODAY = argDict['ALTTODAY'] # stores the input date yyyy-mm-dd 
+if argDict['GENALL']: # generate all files 
+    CSV = True
+    FILLPLATFORM = True
 
 # setting date used throughout execution 
 if (ALTTODAY == ''):
@@ -78,6 +82,8 @@ listDate = str(today).split('-')
 TODAYDATE = f'{listDate[1]}/{listDate[2]}'  # mm/yy
 
 STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
+tomorrow = today + timedelta(1)
+STRTOMORROW = tomorrow.strftime('%Y-%m-%d') # used for yahoo finance history 
 
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
@@ -180,9 +186,9 @@ except Exception as e:
     print(f'ERROR: {e}')
     sys.exit(4)
 
-COLORROW = 5 # row on trading post excel with template color
-plainRGB = 'FFFFFFFF' # color white 
-PLAINCOLOR = openpyxl.styles.PatternFill(start_color=plainRGB, end_color=plainRGB, fill_type='solid')
+color_black = '00000000' # color black 
+color_white = 'FFFFFFFF' # color white 
+PLAINCOLOR = openpyxl.styles.PatternFill(start_color=color_white, end_color=color_white, fill_type='solid')
 
 # Cell color templates 
 dark_green = '064A23' # Buy Signal HexColor
