@@ -29,7 +29,7 @@ if (config.PBAR):
     pBar = tqdm(desc='tickers found', total=len(config.TICKERS)) # progress bar 
 for ticker in config.TICKERS:
     # creates a dictionary of Etf objects { ticker: Etf object }
-    etfDict[ticker] = Etf(ticker, '') # TODO: implement names -> 'HighYieldBonds' 
+    etfDict[ticker] = Etf(ticker) 
     if (config.PBAR):
         pBar.update(1)
 if (config.PBAR):
