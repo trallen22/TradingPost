@@ -89,7 +89,7 @@ STRTOMORROW = tomorrow.strftime('%Y-%m-%d') # used for yahoo finance history
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
 EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
-# EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing 
+# EMAILLIST = [ 'trallen@davidson.edu' , 'michaelgkelly01@yahoo.com'] # can be used for testing 
 
 # determine if application is a script file or frozen exe
 # not sure what this means, found it on stack overflow 

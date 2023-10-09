@@ -38,7 +38,9 @@ for ticker in TICKERS:
     # print(f"test 50 day sma: {fifty_interval}")
     # print('--------')
     print("INFO")
-    print(etf.info['previousClose'])
+    # for key in etf.info:
+    #     print(key)
+    print(np.round(info['Close']['2023-09-11 00:00:00-04:00'], 2))
     print(f"50 day sma: {round(etf.info['fiftyDayAverage'], 2)}")
     print(f"200 day sma: {round(etf.info['twoHundredDayAverage'], 2)}")
     print("--------")
