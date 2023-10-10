@@ -42,6 +42,15 @@ def send_email(to, subject, message):
     except Exception as e:
         config.logmsg('ERROR', 602, f'{e}')
         return 1
+    try:
+        # try to add TestPlatform as attachment to email 
+        with open(config.OUTPUTEXCEL, 'rb') as ap:
+            msg.add_attachment(ap.read(), maintype=mime_type, subtype=mime_subtype, \
+                filename=os.path.basename(config.OUTPUTPLATFORM))
+        config.logmsg('DEBUG', 608, f'found file \'{config.OUTPUTPLATFORM}\' to email')
+    except Exception as e:
+        config.logmsg('ERROR', 609, f'{e}')
+        return 1
 
     try:
         # send email

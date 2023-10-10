@@ -57,9 +57,14 @@ if (config.FILLPLATFORM):
 
 # send email to email list 
 if (config.SENDEMAIL): 
-    for address in config.EMAILLIST:
+    combined_email_list = list(set(EMAILLIST + EMAILLIST2))
+    for address in combined_email_list:
         config.logmsg('DEBUG', 107, f'sending email to \'{address}\'')
-        if (send_email(address, 'Todays Trading Post', 'Today\'s Trading Post')):
+        if address in EMAILLIST and address in EMAILLIST2 or address in EMAILLIST2:
+            attachments = [config.OUTPUTEXCEL, config.OUTPUTPLATFORM]  # Both lists, send both attachments
+        elif address in EMAILLIST:
+            attachments = [config.OUTPUTEXCEL] 
+        if (send_email(address, 'Todays Trading Post', 'Today\'s Trading Post', attachments)):
             config.logmsg('ERROR', 105, f'unable to send email to \'{address}\'')
         else:
             config.logmsg('INFO', 106, f'successfully sent email to \'{address}\'')
