@@ -9,10 +9,9 @@ import datetime
 import os
 import glob
 import openpyxl 
-import time
 
-AVAILABLEFUNDS = 10000
-CURRANGE = 1 # number of days/months/years
+AVAILABLEFUNDS = 20000
+CURRANGE = 5 # number of days/months/years
 TIMEUNIT = 365 # 365 to simulate a year 
 
 CURPORTFOLIO = {} # dictionary simulating portfolio { ticker : number of shares }
@@ -53,7 +52,6 @@ def simulate(curTotalPortfolioValue, curPortfolio, initialFunds):
             else:
                 config.logmsg('NOTICE', 702, f'creating Trading Post for {curDay}')
                 try:
-                    # time.sleep(5)
                     # running the main.py trading post script to generate 
                     os.system(f'python3 {config.SRCROOT}/main.py -d -t {curDay}')
                 except:
@@ -113,6 +111,8 @@ def simulate(curTotalPortfolioValue, curPortfolio, initialFunds):
 funds, portfolio = simulate(AVAILABLEFUNDS, CURPORTFOLIO, AVAILABLEFUNDS)
 
 net = totalNetworth(portfolio, funds)
-print(net)
-print(funds)
-print(portfolio)
+
+print(f'final net: {net}')
+print(f'percent growth: {round(((net - AVAILABLEFUNDS) / AVAILABLEFUNDS) * 100, 2)}%')
+print(f'current cash: {funds}')
+print(f'current portfolio: {portfolio}')
