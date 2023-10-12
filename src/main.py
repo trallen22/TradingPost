@@ -1,5 +1,5 @@
 '''
-This is the main execution. Generates 
+This is the main execution. Generates Trading Posts, Platforms and basic csv's
 
 log numbers 100-199
 '''

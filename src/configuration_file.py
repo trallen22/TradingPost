@@ -19,6 +19,7 @@ import argparse
 #       message - string, message to log 
 # returns:  No returns 
 def logmsg(level, logNum, message):
+    DEBUG = True
     localTime = time.localtime()
     curTime = time.strftime("%H:%M:%S", localTime)
     logMessage = f'{date.today()}::{curTime}::{level}::{logNum}::{message}'
@@ -84,6 +85,8 @@ TODAYDATE = f'{listDate[1]}/{listDate[2]}'  # mm/yy
 STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
 tomorrow = today + timedelta(1)
 STRTOMORROW = tomorrow.strftime('%Y-%m-%d') # used for yahoo finance history 
+yesterday = today - timedelta(1)
+STRYESTERDAY = yesterday.strftime('%Y-%m-%d') 
 
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
@@ -91,8 +94,8 @@ EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123'
 EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
 # EMAILLIST = [ 'trallen@davidson.edu' , 'michaelgkelly01@yahoo.com'] # can be used for testing 
 
-# determine if application is a script file or frozen exe
-# not sure what this means, found it on stack overflow 
+# determines if application is a script file or frozen exe
+# not sure exactly what this means, found it on stack overflow 
 if getattr(sys, 'frozen', False):
     curDir = os.path.dirname(sys.executable)
 elif __file__:
@@ -113,7 +116,7 @@ try:
 except FileExistsError:
     # trims the log file to preserve space 
     with open(LOGFILE, mode='r+') as lf:
-        lastLines = lf.readlines()[-200:] # how many lines to save from previous log file 
+        lastLines = lf.readlines()[-2000:] # how many lines to save from previous log file 
     with open(LOGFILE, mode='w') as lf:
         for line in lastLines:
             lf.write(line)
@@ -131,9 +134,9 @@ except FileExistsError:
 
 # Output files 
 OUTROOT = f'{TPROOT}/testTP'
-OUTPUTPLATFORM = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testPlatform.xlsx'
-OUTPUTEXCEL = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testTradingPost.xlsx'
-CSVFILE = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_csv.csv' 
+OUTPUTPLATFORM = f'{OUTROOT}/{STRTODAY}_testPlatform.xlsx'
+OUTPUTEXCEL = f'{OUTROOT}/{STRTODAY}_testTradingPost.xlsx'
+CSVFILE = f'{OUTROOT}/{STRTODAY}_csv.csv' 
 try:
     os.mkdir(f'{OUTROOT}')
     logmsg('DEBUG', '006', f'created src directory \'{OUTROOT}\'')
