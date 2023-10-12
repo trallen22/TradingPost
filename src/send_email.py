@@ -17,7 +17,7 @@ import configuration_file as config
 #       message - string, message for body of the email  
 # returns:  0 - successfully sent email 
 #           1 - failed 
-def send_email(to, subject, message):
+def send_email(to, subject, message, attachments):
     if config.EMAILADDRESS is None or config.EMAILPASSWORD is None:
         # no email address or password
         # something is not configured properly
@@ -35,19 +35,19 @@ def send_email(to, subject, message):
     mime_type, mime_subtype = mime_str.split('/', 1)
     try:
         # try to add Trading Post as attachment to email 
-        with open(config.OUTPUTEXCEL, 'rb') as ap:
+        with open(attachments, 'rb') as ap:
             msg.add_attachment(ap.read(), maintype=mime_type, subtype=mime_subtype, \
-                filename=os.path.basename(config.OUTPUTEXCEL))
-        config.logmsg('DEBUG', 601, f'found file \'{config.OUTPUTEXCEL}\' to email')
+                filename=os.path.basename(attachments))
+        config.logmsg('DEBUG', 601, f'found file \'{attachments}\' to email')
     except Exception as e:
         config.logmsg('ERROR', 602, f'{e}')
         return 1
     try:
         # try to add TestPlatform as attachment to email 
-        with open(config.OUTPUTPLATFORM, 'rb') as ap:
+        with open(attachments, 'rb') as ap:
             msg.add_attachment(ap.read(), maintype=mime_type, subtype=mime_subtype, \
-                filename=os.path.basename(config.OUTPUTPLATFORM))
-        config.logmsg('DEBUG', 608, f'found file \'{config.OUTPUTPLATFORM}\' to email')
+                filename=os.path.basename(attachments))
+        config.logmsg('DEBUG', 608, f'found file \'{attachments}\' to email')
     except Exception as e:
         config.logmsg('ERROR', 609, f'{e}')
         return 1

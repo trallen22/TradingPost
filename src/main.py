@@ -57,11 +57,11 @@ if (config.FILLPLATFORM):
 
 # send email to email list 
 if (config.SENDEMAIL): 
-    combined_email_list = list(set(EMAILLIST + EMAILLIST2))
+    combined_email_list = list(set(EMAILLIST + TestPlatformEMAILLIST))
     for address in combined_email_list:
         config.logmsg('DEBUG', 107, f'sending email to \'{address}\'')
         if address in EMAILLIST and address in EMAILLIST2 or address in EMAILLIST2:
-            attachments = [config.OUTPUTEXCEL, config.OUTPUTPLATFORM]  # Both lists, send both attachments
+            attachments = [config.OUTPUTEXCEL, config.OUTPUTPLATFORM]
         elif address in EMAILLIST:
             attachments = [config.OUTPUTEXCEL] 
         if (send_email(address, 'Todays Trading Post', 'Today\'s Trading Post', attachments)):

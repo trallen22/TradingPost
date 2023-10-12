@@ -83,12 +83,11 @@ STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
 # EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
-# EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing
-EMAILLIST = [ 'hannachrisj@gmail.com' , 'cjhanna@email.sc.edu' ]
-EMAILLIST2 =  [ 'hannachrisj@gmail.com' ]
+EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing
+TestPlatformEMAILLIST =  [ 'hannachrisj@gmail.com' ]
 
 
-#store the directory part of the aboslute path of the current file
+# #store the directory part of the aboslute path of the current file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Navigate up the directory tree until src not located to find the root directory
