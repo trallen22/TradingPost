@@ -57,14 +57,25 @@ if (config.FILLPLATFORM):
 
 # send email to email list 
 if (config.SENDEMAIL): 
-    combined_email_list = list(set(EMAILLIST + TestPlatformEMAILLIST))
-    for address in combined_email_list:
+    for address in EMAILLIST:
         config.logmsg('DEBUG', 107, f'sending email to \'{address}\'')
-        if address in EMAILLIST and address in EMAILLIST2 or address in EMAILLIST2:
-            attachments = [config.OUTPUTEXCEL, config.OUTPUTPLATFORM]
-        elif address in EMAILLIST:
-            attachments = [config.OUTPUTEXCEL] 
+        attachments = [config.OUTPUTEXCEL] 
         if (send_email(address, 'Todays Trading Post', 'Today\'s Trading Post', attachments)):
             config.logmsg('ERROR', 105, f'unable to send email to \'{address}\'')
         else:
             config.logmsg('INFO', 106, f'successfully sent email to \'{address}\'')
+    for address in TestPlatformEMAILLIST:
+        config.logmsg('DEBUG', 110, f'sending email to \'{address}\'') 
+        attachments = [config.OUTPUTPLATFORM]
+        if (send_email(address, 'Todays Trading Post', 'Today\'s Trading Post', attachments)):
+            config.logmsg('ERROR', 108, f'unable to send email to \'{address}\'')
+        else:
+            config.logmsg('INFO', 109, f'successfully sent email to \'{address}\'')
+
+#add signal column at the end of csv file before for loop open excel to read the signal from for loop in simulate function for ticker in config tickers. just need base value from base cell and add 5 to that value
+# with open csv file
+
+# isntead of workbook and active sheet chnage to create csv instead of excel (-c to create csv)
+#find logic so that -c does not create the excel trading post
+
+#if shares dict -= ... = 0 then delete the key 
