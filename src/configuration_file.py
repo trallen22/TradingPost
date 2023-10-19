@@ -87,6 +87,13 @@ EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing
 TestPlatformEMAILLIST =  [ 'hannachrisj@gmail.com' ]
 
 
+# determine if application is a script file or frozen exe
+# not sure what this means, found it on stack overflow 
+# if getattr(sys, 'frozen', False):
+#     curDir = os.path.dirname(sys.executable)
+# elif __file__:
+#     curDir = os.path.abspath(__file__)
+
 # #store the directory part of the aboslute path of the current file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
