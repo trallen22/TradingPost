@@ -6,6 +6,7 @@ log numbers 180-199
 
 import get_data
 import configuration_file as config 
+import datetime
 
 class Etf:
     
@@ -21,8 +22,8 @@ class Etf:
         self.basecell = config.ETFBASECELL[ticker] # ticker cell in tp -> 'C7' 
         self.colbase = self.basecell[0] # letter of basecell -> 'C' 
         self.rowbase = int(self.basecell[1:]) # row num of basecell -> '7'
-
         self.indicatorDict = {} # { indicator: value from polygon }
+        self.date = config.TODAYDATE
 
         config.logmsg('DEBUG', 181, f'getting indicators for ticker \'{ticker}\'')
         indicators = get_data.get_indicators(ticker) 

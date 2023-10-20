@@ -88,21 +88,26 @@ STRTOMORROW = tomorrow.strftime('%Y-%m-%d') # used for yahoo finance history
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
+
 EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
-# EMAILLIST = [ 'trallen@davidson.edu' , 'michaelgkelly01@yahoo.com'] # can be used for testing 
+# EMAILLIST = [ 'trallen@davidson.edu' , 'michaelgkelly01@yahoo.com'] # can be used for testing
+#TestPlatformEMAILLIST =  [ 'hannachrisj@gmail.com' ]
 
 # determine if application is a script file or frozen exe
 # not sure what this means, found it on stack overflow 
-if getattr(sys, 'frozen', False):
-    curDir = os.path.dirname(sys.executable)
-elif __file__:
-    curDir = os.path.abspath(__file__)
+# if getattr(sys, 'frozen', False):
+#     curDir = os.path.dirname(sys.executable)
+# elif __file__:
+#     curDir = os.path.abspath(__file__)
 
-dirList = curDir.split('/')
-dirIndex = dirList.index('TradingPost')
-topList = dirList[:dirIndex+1]
+# #store the directory part of the aboslute path of the current file
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-TPROOT = '/'.join(topList) # root directory for trading post execution 
+# Navigate up the directory tree until src not located to find the root directory
+while "src" in script_dir:
+    script_dir = os.path.dirname(script_dir)
+    
+TPROOT = script_dir  #root directory for trading post execution 
 
 # Debug files 
 LOGROOT = f'{TPROOT}/debug'
