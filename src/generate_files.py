@@ -38,11 +38,18 @@ def generate_tp(etfDict, outputExcel):
         numBase = int(curBase[1:])
 
         activeSheet[curBase] = curEtf.ticker # setting ticker name in tp
-        activeSheet[f'{charBase}{numBase + 1}'].value = curEtf.name # setting etf name in tp 
+        # activeSheet[f'{charBase}{numBase + 1}'].value = curEtf.name # setting etf name in tp #### Leave this commented for now 
         activeSheet[f'{charBase}{numBase + 3}'] = config.TODAYDATE # setting today date in tp 
 
         signal, sigColor, minTradeRange, maxTradeRange = determine_buy_sell(curEtf)
         activeSheet[f'{charBase}{numBase + 5}'] = signal # Buy/Sell/Hold signal 
+        cF = activeSheet[f'{charBase}{numBase + 5}'].font
+        if signal == '!BUY!':
+            activeSheet[f'{charBase}{numBase + 5}'].font = openpyxl.styles.Font(name=f'{cF.name}', color=f'{config.color_white}', sz=f'{cF.sz}', b=True)
+        elif signal == '!SELL!':
+            activeSheet[f'{charBase}{numBase + 5}'].font = openpyxl.styles.Font(name=f'{cF.name}', color=f'{config.color_black}', sz=f'{cF.sz}', b=True)
+        else: 
+            activeSheet[f'{charBase}{numBase + 5}'].font = openpyxl.styles.Font(name=f'{cF.name}', color=f'{config.color_black}', sz=f'{cF.sz}')
         activeSheet[f'{charBase}{numBase + 5}'].fill = sigColor # Buy/Sell/Hold color 
         activeSheet[f'{charBase}{numBase + 6}'] = minTradeRange # min for trade range 
         activeSheet[f'{charBase}{numBase + 7}'] = maxTradeRange # max for trade range 
