@@ -8,12 +8,12 @@ import configuration_file as config
 import datetime 
 import os
 import glob
-import openpyxl 
 import random 
+import csv 
 
 AVAILABLEFUNDS = 20000
-CURRANGE = 5 # number of days/months/years
-TIMEUNIT = 365 # 365 to simulate a year 
+CURRANGE = 5 # number of time units
+TIMEUNIT = 365 # number of days; 365 to simulate a year 
 NUMSHARESDICT = {}
 CURPORTFOLIO = {} # nested dictionary simulating portfolio { ticker : { buy price : number of shares } }
 for ticker in config.TICKERS:
@@ -32,68 +32,54 @@ def determineSell(etfPortfolioDict, sellPrice):
     return etfPortfolioDict.pop(buyPrice), etfPortfolioDict
 
 
-def totalNetworth(portfolio, availableFunds, curSheet=None):
-    if curSheet == None:
-        workbook = openpyxl.load_workbook(f'{config.OUTROOT}/{config.STRYESTERDAY}_testTradingPost.xlsx')
-        curSheet = workbook.active
-
-    # TODO: find way to only go through tickers with at least one share 
-    for ticker in list(portfolio.keys()):
-        curBase = config.ETFBASECELL[ticker]
-        charBase = curBase[0]
-        numBase = int(curBase[1:])
-        curClose = curSheet[f'{charBase}{numBase + 8}'].value # getting close price in tp 
-        availableFunds += curClose * portfolio[ticker]
-
+def totalNetworth(portfolio, availableFunds, curCsvPath=None):
+    if curCsvPath == None:
+        curCsvPath = f"{config.OUTROOT}/{config.STRYESTERDAY}_csv.csv"
+    # TODO: need to add try/except block 
+    with open(curCsvPath, 'r') as curFile:
+        curCsv = csv.DictReader(curFile)
+        for row in curCsv:
+            availableFunds += float(row['close_price']) * portfolio[row['ticker']]
     return availableFunds
 
 def simulate(curCash, curPortfolio, numSharesDict):
-    # any file with "TradingPost" in the name 
-    listFiles = glob.glob(f'{config.OUTROOT}/*TradingPost*')
+    # all the csv files 
+    listFiles = glob.glob(f'{config.OUTROOT}/*.csv')
     setFiles = set(listFiles)
 
-    startDay = datetime.date.today() - datetime.timedelta(CURRANGE * TIMEUNIT + 1)
+    startDay = datetime.date.today() - datetime.timedelta(CURRANGE * TIMEUNIT)
 
     for i in range(CURRANGE * TIMEUNIT):
         curDay = startDay + datetime.timedelta(i) 
 
         # filter out weekends (5 is saturday and 6 is sunday) 
         if not (curDay.weekday() == 5 or curDay.weekday() == 6):
-
-            # config.logmsg('DEBUG', 700, f'current day is {curDay}')
-            curFile = f'{config.OUTROOT}/{curDay}_testTradingPost.xlsx'
+            curFilePath = f'{config.OUTROOT}/{curDay}_csv.csv'
             # check if a trading post has already been generated for curDay
-            if (curFile) in setFiles:
-                pass
-#                config.logmsg('DEBUG', 701, f'Trading Post already created for {curDay}')
+            if (curFilePath) in setFiles:
+                config.logmsg('DEBUG', 701, f'Trading Post already created for {curDay}')
             else:
-                config.logmsg('NOTICE', 702, f'creating Trading Post for {curDay}')
+                config.logmsg('NOTICE', 702, f'creating historical post for {curDay}')
                 try:
                     # running the main.py trading post script to generate 
-                    os.system(f'python3 {config.SRCROOT}/main.py -d -t {curDay}')
+                    os.system(f'python3 {config.SRCROOT}/main.py -c -d -t {curDay}')
                 except:
-                    config.logmsg('ERROR', 703, f'failed to generate Trading Post for {curDay}')
-
-            workbook = openpyxl.load_workbook(curFile)
-            activeSheet = workbook.active
+                    config.logmsg('ERROR', 703, f'failed to generate historical post for {curDay}')
 
             buyDict = {}
             sellDict = {}
 
-            for ticker in config.TICKERS:
-                curBase = config.ETFBASECELL[ticker]
-                charBase = curBase[0]
-                numBase = int(curBase[1:])
-                tempSignal = activeSheet[f'{charBase}{numBase + 5}'].value # Buy/Sell/Hold signal 
-                curSignal = '' if (tempSignal == None) else tempSignal
-                curClose = activeSheet[f'{charBase}{numBase + 8}'].value # setting close price in tp 
+            # TODO: need to add try/except 
+            with open(curFilePath, 'r') as curFile:
+                curCsv = csv.DictReader(curFile)
+                for row in curCsv:
+                    if ('buy' in row['signal'].lower()):
+                        buyDict[row['ticker']] = float(row['close_price'])
+                    elif ('sell' in row['signal'].lower()):
+                        sellDict[row['ticker']] = float(row['close_price'])
 
-                if ('buy' in curSignal.lower()):
-                    buyDict[ticker] = curClose
-                elif ('sell' in curSignal.lower()):
-                    sellDict[ticker] = curClose
-
-            curAccountBalance = totalNetworth(numSharesDict, curCash, activeSheet)
+            curAccountBalance = totalNetworth(numSharesDict, curCash, curFilePath)
+            config.logmsg('DEBUG', 707, f'Account Balance on {curDay} = {curAccountBalance}')
 
             buyKeys = list(buyDict.keys()) 
             random.shuffle(buyKeys) # shuffling prevents always buying same etfs first 
@@ -118,8 +104,7 @@ def simulate(curCash, curPortfolio, numSharesDict):
                     config.logmsg('DEBUG', 705, f'selling {numSell} shares of {key} at {sellDict[key]} on {curDay}')
 
         else:
-            pass 
-#            config.logmsg('DEBUG', 706, f'skipping Trading Post for {curDay} because weekday = {curDay.weekday()}')
+            config.logmsg('DEBUG', 706, f'skipping Trading Post for {curDay} because weekday = {curDay.weekday()}')
 
     return curCash, curPortfolio, numSharesDict
 

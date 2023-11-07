@@ -19,7 +19,6 @@ import argparse
 #       message - string, message to log 
 # returns:  No returns 
 def logmsg(level, logNum, message):
-    DEBUG = True
     localTime = time.localtime()
     curTime = time.strftime("%H:%M:%S", localTime)
     logMessage = f'{date.today()}::{curTime}::{level}::{logNum}::{message}'
@@ -66,6 +65,9 @@ DEBUG = argDict['DEBUG'] # log debug messages to LOGFILE
 CSV = argDict['CSV'] # outputs an excel file to CSVFILE 
 TP = argDict['TP'] # generates an excel trading post 
 FILLPLATFORM = argDict['FILLPLATFORM'] # outputs a platform to OUTPUTPLATFORM 
+if argDict['SENDEMAIL']:
+    SENDEMAIL = True
+    TP = True 
 SENDEMAIL = argDict['SENDEMAIL'] # sends an email to EMAILLIST 
 GETVALUE = argDict['GETVALUE'] # gets a specific value from given date
 ALTTODAY = argDict['ALTTODAY'] # stores the input date yyyy-mm-dd 
@@ -136,7 +138,7 @@ except FileExistsError:
     logmsg('DEBUG', '005', f'src directory already created at \'{SRCROOT}\'')
 
 # Output files 
-OUTROOT = f'{TPROOT}/testTP'
+OUTROOT = f'{TPROOT}/outFiles'
 OUTPUTPLATFORM = f'{OUTROOT}/{STRTODAY}_testPlatform.xlsx'
 OUTPUTEXCEL = f'{OUTROOT}/{STRTODAY}_testTradingPost.xlsx'
 CSVFILE = f'{OUTROOT}/{STRTODAY}_csv.csv' 
