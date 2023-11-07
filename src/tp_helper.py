@@ -71,7 +71,8 @@ def sell_max(etf):
     else:
         return minuteMin - 0.01
 
-# set_ranges: determines the trade ranges in the Trading Post excel 
+# set_ranges: helper function for determine_buy_sell determines 
+#               the trade ranges in the Trading Post excel 
 # parameters: 
 #       etf - Etf object, current etf to get range for 
 # returns: returns the current ranges minimum, maximum and 
