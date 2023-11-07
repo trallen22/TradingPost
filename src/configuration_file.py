@@ -45,6 +45,7 @@ def get_args():
     parser.add_argument('-d', '--DEBUG', action='store_true', help='log debug messages to LOGFILE')
     parser.add_argument('-c', '--CSV', action='store_true', help='outputs an excel file to CSVFILE') 
     parser.add_argument('-m', '--FILLPLATFORM', action='store_true', help='outputs a platform to OUTPUTPLATFORM')
+    parser.add_argument('-x', '--TP', action='store_true', help='generates an excel trading post')
     parser.add_argument('-e', '--SENDEMAIL', action='store_true', help='sends an email to EMAILLIST')
     parser.add_argument('-v', '--GETVALUE', action='store_true', help='gets a specific value from given date. NEED TO IMPLEMENT ') # TODO: implement this
     parser.add_argument('-g', '--GENALL', action='store_true', help='generates csv and platform') 
@@ -63,6 +64,7 @@ PRINTDF = argDict['PRINTDF'] # prints dataframes to terminal
 PBAR = argDict['PBAR'] # print progress bar for polygon calls in main.py
 DEBUG = argDict['DEBUG'] # log debug messages to LOGFILE 
 CSV = argDict['CSV'] # outputs an excel file to CSVFILE 
+TP = argDict['TP'] # generates an excel trading post 
 FILLPLATFORM = argDict['FILLPLATFORM'] # outputs a platform to OUTPUTPLATFORM 
 SENDEMAIL = argDict['SENDEMAIL'] # sends an email to EMAILLIST 
 GETVALUE = argDict['GETVALUE'] # gets a specific value from given date
@@ -70,6 +72,7 @@ ALTTODAY = argDict['ALTTODAY'] # stores the input date yyyy-mm-dd
 if argDict['GENALL']: # generate all files 
     CSV = True
     FILLPLATFORM = True
+    TP = True 
 
 # setting date used throughout execution 
 if (ALTTODAY == ''):
