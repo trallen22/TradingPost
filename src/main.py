@@ -49,9 +49,17 @@ if (config.FILLPLATFORM):
 
 # send email to email list 
 if (config.SENDEMAIL): 
-    for address in config.EMAILLIST:
+    for address in EMAILLIST:
         config.logmsg('DEBUG', 107, f'sending email to \'{address}\'')
-        if (send_email(address, 'Todays Trading Post', 'Today\'s Trading Post')):
+        attachments = [config.OUTPUTEXCEL] 
+        if (send_email(address, 'Todays Trading Post', 'Today\'s Trading Post', attachments)):
             config.logmsg('ERROR', 105, f'unable to send email to \'{address}\'')
         else:
             config.logmsg('INFO', 106, f'successfully sent email to \'{address}\'')
+    for address in TestPlatformEMAILLIST:
+        config.logmsg('DEBUG', 110, f'sending email to \'{address}\'') 
+        attachments = [config.OUTPUTPLATFORM]
+        if (send_email(address, 'Todays Trading Post', 'Today\'s Trading Post', attachments)):
+            config.logmsg('ERROR', 108, f'unable to send email to \'{address}\'')
+        else:
+            config.logmsg('INFO', 109, f'successfully sent email to \'{address}\'')
