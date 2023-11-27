@@ -54,7 +54,7 @@ def simulate(curCash, curPortfolio, numSharesDict):
 
         # filter out weekends (5 is saturday and 6 is sunday) 
         if not (curDay.weekday() == 5 or curDay.weekday() == 6):
-            curFilePath = f'{config.OUTROOT}/{curDay}_csv.csv'
+            curFilePath = f'{config.OUTROOT}/outfiles/{curDay}_csv.csv'
             # check if a trading post has already been generated for curDay
             if (curFilePath) in setFiles:
                 config.logmsg('DEBUG', 701, f'Trading Post already created for {curDay}')
@@ -81,6 +81,15 @@ def simulate(curCash, curPortfolio, numSharesDict):
             curAccountBalance = totalNetworth(numSharesDict, curCash, curFilePath)
             config.logmsg('DEBUG', 707, f'Account Balance on {curDay} = {curAccountBalance}')
 
+            # sellDict is ticker and current price { ticker : current price }
+            for key in sellDict:
+                if (len(curPortfolio[key]) > 0): 
+                    numSell, curPortfolio[key] = determineSell(curPortfolio[key], sellDict[key])
+                    numSell = min(numSell, numSharesDict[key]) # make sure we don't sell shares we don't have. 
+                    curCash += numSell * sellDict[key]
+                    numSharesDict[key] -= numSell
+                    config.logmsg('DEBUG', 705, f'selling {numSell} shares of {key} at {sellDict[key]} on {curDay}')
+
             buyKeys = list(buyDict.keys()) 
             random.shuffle(buyKeys) # shuffling prevents always buying same etfs first 
             for key in buyKeys:
@@ -93,15 +102,6 @@ def simulate(curCash, curPortfolio, numSharesDict):
                         curPortfolio[key][buyDict[key]] = numBuy
                     numSharesDict[key] += numBuy
                     config.logmsg('DEBUG', 704, f'buying {numBuy} shares of {key} at {buyDict[key]} on {curDay}')
-
-            # sellDict is ticker and current price { ticker : current price }
-            for key in sellDict:
-                if (len(curPortfolio[key]) > 0): 
-                    numSell, curPortfolio[key] = determineSell(curPortfolio[key], sellDict[key])
-                    numSell = min(numSell, numSharesDict[key]) # make sure we don't sell shares we don't have. 
-                    curCash += numSell * sellDict[key]
-                    numSharesDict[key] -= numSell
-                    config.logmsg('DEBUG', 705, f'selling {numSell} shares of {key} at {sellDict[key]} on {curDay}')
 
         else:
             config.logmsg('DEBUG', 706, f'skipping Trading Post for {curDay} because weekday = {curDay.weekday()}')

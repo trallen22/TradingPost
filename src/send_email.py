@@ -31,38 +31,38 @@ def send_email(to, subject, message, attachments=None):
     msg['To'] = to
     msg.set_content(message)
 
-if attachments:
-    for attachment in attachments:
-        mime_str, _ = mimetypes.guess_type(attachment) # full MIME type string -> type/subtype
-        mime_type, mime_subtype = mime_str.split('/', 1)
-    try:
-        # try to add attachment to email 
-        with open(attachment, 'rb') as ap:
-            msg.add_attachment(ap.read(), maintype=mime_type, subtype=mime_subtype, \
-                filename=os.path.basename(attachment))
-        config.logmsg('DEBUG', 601, f'found file \'{attachment}\' to email')
-    except Exception as e:
-        config.logmsg('ERROR', 602, f'{e}')
-        return 1
-    try:
-        # send email
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            # logging into smtp 
-            try:
-                smtp.login(config.EMAILADDRESS, config.EMAILPASSWORD)
-                config.logmsg('DEBUG', 603, f'successfully logged into smtp')
-            except Exception as e:
-                config.logmsg('ERROR', 604, f'{e}')
-                return 1
-            # sending email via smtp 
-            try:
-                smtp.send_message(msg)
-                config.logmsg('DEBUG', 605, f'successfully sent smtp message')
-            except Exception as e:
-                config.logmsg('ERROR', 606, f'{e}')
-                return 1
-    except Exception as e:
-        config.logmsg('ERROR', 607, f'{e}')
-        return 1
+    if attachments:
+        for attachment in attachments:
+            mime_str, _ = mimetypes.guess_type(attachment) # full MIME type string -> type/subtype
+            mime_type, mime_subtype = mime_str.split('/', 1)
+        try:
+            # try to add attachment to email 
+            with open(attachment, 'rb') as ap:
+                msg.add_attachment(ap.read(), maintype=mime_type, subtype=mime_subtype, \
+                    filename=os.path.basename(attachment))
+            config.logmsg('DEBUG', 601, f'found file \'{attachment}\' to email')
+        except Exception as e:
+            config.logmsg('ERROR', 602, f'{e}')
+            return 1
+        try:
+            # send email
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                # logging into smtp 
+                try:
+                    smtp.login(config.EMAILADDRESS, config.EMAILPASSWORD)
+                    config.logmsg('DEBUG', 603, f'successfully logged into smtp')
+                except Exception as e:
+                    config.logmsg('ERROR', 604, f'{e}')
+                    return 1
+                # sending email via smtp 
+                try:
+                    smtp.send_message(msg)
+                    config.logmsg('DEBUG', 605, f'successfully sent smtp message')
+                except Exception as e:
+                    config.logmsg('ERROR', 606, f'{e}')
+                    return 1
+        except Exception as e:
+            config.logmsg('ERROR', 607, f'{e}')
+            return 1
 
-    return 0
+        return 0

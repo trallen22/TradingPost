@@ -101,21 +101,12 @@ EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@dav
 # EMAILLIST = [ 'trallen@davidson.edu' , 'michaelgkelly01@yahoo.com'] # can be used for testing
 #TestPlatformEMAILLIST =  [ 'hannachrisj@gmail.com' ]
 
-<<<<<<< HEAD
 # determines if application is a script file or frozen exe
 # not sure exactly what this means, found it on stack overflow 
 if getattr(sys, 'frozen', False):
     curDir = os.path.dirname(sys.executable)
 elif __file__:
     curDir = os.path.abspath(__file__)
-=======
-# determine if application is a script file or frozen exe
-# not sure what this means, found it on stack overflow 
-# if getattr(sys, 'frozen', False):
-#     curDir = os.path.dirname(sys.executable)
-# elif __file__:
-#     curDir = os.path.abspath(__file__)
->>>>>>> main
 
 # #store the directory part of the aboslute path of the current file
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -152,10 +143,10 @@ except FileExistsError:
     logmsg('DEBUG', '005', f'src directory already created at \'{SRCROOT}\'')
 
 # Output files 
-OUTROOT = f'{TPROOT}/outFiles'
-OUTPUTPLATFORM = f'{OUTROOT}/{STRTODAY}_testPlatform.xlsx'
-OUTPUTEXCEL = f'{OUTROOT}/{STRTODAY}_testTradingPost.xlsx'
-CSVFILE = f'{OUTROOT}/{STRTODAY}_csv.csv' 
+OUTROOT = f'{TPROOT}'
+OUTPUTPLATFORM = f'{OUTROOT}/testTP/{STRTODAY}_testPlatform.xlsx'
+OUTPUTEXCEL = f'{OUTROOT}/testTP/{STRTODAY}_testTradingPost.xlsx'
+CSVFILE = f'{OUTROOT}/outFiles/{STRTODAY}_csv.csv' 
 try:
     os.mkdir(f'{OUTROOT}')
     logmsg('DEBUG', '006', f'created src directory \'{OUTROOT}\'')
