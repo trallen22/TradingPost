@@ -52,7 +52,7 @@ if (config.SENDEMAIL):
     for address in config.EMAILLIST:
         config.logmsg('DEBUG', 107, f'sending email to \'{address}\'')
         attachments = [config.OUTPUTEXCEL] 
-        if (send_email(address, 'Todays Trading Post', 'Today\'s Trading Post', attachments)):
+        if (send_email(address, f'Trading Post for {config.STRTODAY}', f'Trading Post for {config.STRTODAY}', attachments)):
             config.logmsg('ERROR', 105, f'unable to send email to \'{address}\'')
         else:
             config.logmsg('INFO', 106, f'successfully sent email to \'{address}\'')
