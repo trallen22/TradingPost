@@ -10,11 +10,13 @@ import os
 import glob
 import random 
 import csv 
+import matplotlib.pyplot as plt
+import numpy as np 
 
-AVAILABLEFUNDS = 20000
-CURRANGE = 5 # number of time units
+AVAILABLEFUNDS = 20000 # starting funds 
+CURRANGE = 5 # number of time units; 5 years default 
 TIMEUNIT = 365 # number of days; 365 to simulate a year 
-NUMSHARESDICT = {}
+NUMSHARESDICT = {} # dictionary of number of shares for each ticker { ticker : 3 (# shares) }
 CURPORTFOLIO = {} # nested dictionary simulating portfolio { ticker : { buy price : number of shares } }
 for ticker in config.TICKERS:
     CURPORTFOLIO[ticker] = {}
@@ -34,7 +36,7 @@ def determineSell(etfPortfolioDict, sellPrice):
 
 def totalNetworth(portfolio, availableFunds, curCsvPath=None):
     if curCsvPath == None:
-        curCsvPath = f"{config.OUTROOT}/{config.STRYESTERDAY}_csv.csv"
+        curCsvPath = f"{config.OUTROOT}/outFiles/{config.STRYESTERDAY}_csv.csv"
     # TODO: need to add try/except block 
     with open(curCsvPath, 'r') as curFile:
         curCsv = csv.DictReader(curFile)
@@ -43,18 +45,21 @@ def totalNetworth(portfolio, availableFunds, curCsvPath=None):
     return availableFunds
 
 def simulate(curCash, curPortfolio, numSharesDict):
+    listDailyNetValue = []
+    listDates = []
     # all the csv files 
-    listFiles = glob.glob(f'{config.OUTROOT}/*.csv')
+    listFiles = glob.glob(f'{config.OUTROOT}/outFiles/*.csv')
     setFiles = set(listFiles)
 
     startDay = datetime.date.today() - datetime.timedelta(CURRANGE * TIMEUNIT)
 
     for i in range(CURRANGE * TIMEUNIT):
         curDay = startDay + datetime.timedelta(i) 
+        skipDay = 0
 
         # filter out weekends (5 is saturday and 6 is sunday) 
         if not (curDay.weekday() == 5 or curDay.weekday() == 6):
-            curFilePath = f'{config.OUTROOT}/outfiles/{curDay}_csv.csv'
+            curFilePath = f'{config.OUTROOT}/outFiles/{curDay}_csv.csv'
             # check if a trading post has already been generated for curDay
             if (curFilePath) in setFiles:
                 config.logmsg('DEBUG', 701, f'Trading Post already created for {curDay}')
@@ -73,13 +78,18 @@ def simulate(curCash, curPortfolio, numSharesDict):
             with open(curFilePath, 'r') as curFile:
                 curCsv = csv.DictReader(curFile)
                 for row in curCsv:
+                    if (float(row['close_price']) < 0): 
+                        config.logmsg('DEBUG', 708, f'Found negative close price on {curDay}, skipping buy/sell')
+                        skipDay = 1
+                        break 
                     if ('buy' in row['signal'].lower()):
                         buyDict[row['ticker']] = float(row['close_price'])
+                        if (float(row['close_price']) < 0): 
+                            config.logmsg('ERROR', 709, f'negative buy value')
                     elif ('sell' in row['signal'].lower()):
                         sellDict[row['ticker']] = float(row['close_price'])
-
-            curAccountBalance = totalNetworth(numSharesDict, curCash, curFilePath)
-            config.logmsg('DEBUG', 707, f'Account Balance on {curDay} = {curAccountBalance}')
+                        if (float(row['close_price']) < 0): 
+                            config.logmsg('ERROR', 710, f'negative sell value')
 
             # sellDict is ticker and current price { ticker : current price }
             for key in sellDict:
@@ -103,8 +113,21 @@ def simulate(curCash, curPortfolio, numSharesDict):
                     numSharesDict[key] += numBuy
                     config.logmsg('DEBUG', 704, f'buying {numBuy} shares of {key} at {buyDict[key]} on {curDay}')
 
+            if not (skipDay): 
+                curAccountBalance = round(totalNetworth(numSharesDict, curCash, curFilePath), 2)
+                listDailyNetValue.append(curAccountBalance)
+                listDates.append(curDay)
+                config.logmsg('DEBUG', 707, f'Account Balance on {curDay} = {curAccountBalance}')
+
         else:
             config.logmsg('DEBUG', 706, f'skipping Trading Post for {curDay} because weekday = {curDay.weekday()}')
+
+    plt.plot(listDates, listDailyNetValue)
+    plt.ylabel("net value")
+    plt.xlabel("year")
+    plt.ylim(ymin=0)
+    plt.grid(True)
+    plt.show()
 
     return curCash, curPortfolio, numSharesDict
 
