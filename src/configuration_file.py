@@ -49,6 +49,7 @@ def get_args():
     parser.add_argument('-v', '--GETVALUE', action='store_true', help='gets a specific value from given date. NEED TO IMPLEMENT ') # TODO: implement this
     parser.add_argument('-g', '--GENALL', action='store_true', help='generates csv and platform') 
     parser.add_argument('-t', '--ALTTODAY', metavar='<date>', nargs=1, action='store', default='', help='get Trading Post for specific date. yyyy-mm-dd') 
+    parser.add_argument('-s', '--SIMULATE', action='store_true', help='simulates using Trading Post for period of time')
 
     args, unknown = parser.parse_known_args()
     return vars(args) 
@@ -75,6 +76,7 @@ if argDict['GENALL']: # generate all files
     CSV = True
     FILLPLATFORM = True
     TP = True 
+SIMULATE = argDict['SIMULATE'] # runs a simulation for using Trading Post 
 
 # setting date used throughout execution 
 if (ALTTODAY == ''):
