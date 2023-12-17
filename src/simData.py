@@ -47,6 +47,7 @@ def totalNetworth(portfolio, availableFunds, curCsvPath=None):
 def simulate(curCash, curPortfolio, numSharesDict):
     listDailyNetValue = []
     listDates = []
+    curAccountBalance = curCash # will need to change this if want to start with non-empty portfolio 
     # all the csv files 
     listFiles = glob.glob(f'{config.OUTROOT}/outFiles/*.csv')
     setFiles = set(listFiles)
@@ -90,30 +91,29 @@ def simulate(curCash, curPortfolio, numSharesDict):
                         sellDict[row['ticker']] = float(row['close_price'])
                         if (float(row['close_price']) < 0): 
                             config.logmsg('ERROR', 710, f'negative sell value')
-
-            # sellDict is ticker and current price { ticker : current price }
-            for key in sellDict:
-                if (len(curPortfolio[key]) > 0): 
-                    numSell, curPortfolio[key] = determineSell(curPortfolio[key], sellDict[key])
-                    numSell = min(numSell, numSharesDict[key]) # make sure we don't sell shares we don't have. 
-                    curCash += numSell * sellDict[key]
-                    numSharesDict[key] -= numSell
-                    config.logmsg('DEBUG', 705, f'selling {numSell} shares of {key} at {sellDict[key]} on {curDay}')
-
-            buyKeys = list(buyDict.keys()) 
-            random.shuffle(buyKeys) # shuffling prevents always buying same etfs first 
-            for key in buyKeys:
-                numBuy = max(((curAccountBalance * 0.01) // buyDict[key]), 1)
-                if numBuy * buyDict[key] < curCash: 
-                    curCash -= numBuy * buyDict[key]
-                    try: 
-                        curPortfolio[key][buyDict[key]] += numBuy # this looks like { JNK : { $20:2, $30:1 } }
-                    except Exception: 
-                        curPortfolio[key][buyDict[key]] = numBuy
-                    numSharesDict[key] += numBuy
-                    config.logmsg('DEBUG', 704, f'buying {numBuy} shares of {key} at {buyDict[key]} on {curDay}')
-
             if not (skipDay): 
+                # sellDict is ticker and current price { ticker : current price }
+                for key in sellDict:
+                    if (len(curPortfolio[key]) > 0): 
+                        numSell, curPortfolio[key] = determineSell(curPortfolio[key], sellDict[key])
+                        numSell = min(numSell, numSharesDict[key]) # make sure we don't sell shares we don't have. 
+                        curCash += numSell * sellDict[key]
+                        numSharesDict[key] -= numSell
+                        config.logmsg('DEBUG', 705, f'selling {numSell} shares of {key} at {sellDict[key]} on {curDay}')
+
+                buyKeys = list(buyDict.keys()) 
+                random.shuffle(buyKeys) # shuffling prevents always buying same etfs first 
+                for key in buyKeys:
+                    numBuy = max(((curAccountBalance * 0.01) // buyDict[key]), 1)
+                    if numBuy * buyDict[key] < curCash: 
+                        curCash -= numBuy * buyDict[key]
+                        try: 
+                            curPortfolio[key][buyDict[key]] += numBuy # this looks like { JNK : { $20:2, $30:1 } }
+                        except Exception: 
+                            curPortfolio[key][buyDict[key]] = numBuy
+                        numSharesDict[key] += numBuy
+                        config.logmsg('DEBUG', 704, f'buying {numBuy} shares of {key} at {buyDict[key]} on {curDay}')
+
                 curAccountBalance = round(totalNetworth(numSharesDict, curCash, curFilePath), 2)
                 listDailyNetValue.append(curAccountBalance)
                 listDates.append(curDay)
@@ -127,11 +127,11 @@ def simulate(curCash, curPortfolio, numSharesDict):
     plt.xlabel("year")
     plt.ylim(ymin=0)
     plt.grid(True)
-    plt.show()
+    plt.savefig(f"/Users/tristanallen/Desktop/TradingPost/visuals/testGraph.pdf")
 
-    return curCash, curPortfolio, numSharesDict
+    return curCash, curPortfolio, numSharesDict, listDailyNetValue, listDates
 
-funds, portfolio, numShares = simulate(AVAILABLEFUNDS, CURPORTFOLIO, NUMSHARESDICT)
+funds, portfolio, numShares, x, y = simulate(AVAILABLEFUNDS, CURPORTFOLIO, NUMSHARESDICT)
 
 net = totalNetworth(numShares, funds)
 
