@@ -11,16 +11,7 @@ import glob
 import random 
 import csv 
 import matplotlib.pyplot as plt
-import numpy as np 
-
-AVAILABLEFUNDS = 20000 # starting funds 
-CURRANGE = 5 # number of time units; 5 years default 
-TIMEUNIT = 365 # number of days; 365 to simulate a year 
-NUMSHARESDICT = {} # dictionary of number of shares for each ticker { ticker : 3 (# shares) }
-CURPORTFOLIO = {} # nested dictionary simulating portfolio { ticker : { buy price : number of shares } }
-for ticker in config.TICKERS:
-    CURPORTFOLIO[ticker] = {}
-    NUMSHARESDICT[ticker] = 0
+from tqdm import tqdm
 
 def determineSell(etfPortfolioDict, sellPrice):
     buyPrice = 0
@@ -31,8 +22,7 @@ def determineSell(etfPortfolioDict, sellPrice):
             maxReturn = curReturn 
             buyPrice = price 
     # returns the number of shares from best price (lot of shares) to sell 
-    return etfPortfolioDict.pop(buyPrice), etfPortfolioDict
-
+    return etfPortfolioDict.pop(buyPrice), etfPortfolioDict 
 
 def totalNetworth(portfolio, availableFunds, curCsvPath=None):
     if curCsvPath == None:
@@ -44,7 +34,13 @@ def totalNetworth(portfolio, availableFunds, curCsvPath=None):
             availableFunds += float(row['close_price']) * portfolio[row['ticker']]
     return availableFunds
 
-def simulate(curCash, curPortfolio, numSharesDict):
+def simulate(curCash, curRange=5, timeUnit=365):
+    numSharesDict = {} # dictionary of number of shares for each ticker { ticker : 3 (# shares) }
+    curPortfolio = {} # nested dictionary simulating portfolio { ticker : { buy price : number of shares } }
+    for ticker in config.TICKERS:
+        curPortfolio[ticker] = {}
+        numSharesDict[ticker] = 0
+
     listDailyNetValue = []
     listDates = []
     curAccountBalance = curCash # will need to change this if want to start with non-empty portfolio 
@@ -52,9 +48,9 @@ def simulate(curCash, curPortfolio, numSharesDict):
     listFiles = glob.glob(f'{config.OUTROOT}/outFiles/*.csv')
     setFiles = set(listFiles)
 
-    startDay = datetime.date.today() - datetime.timedelta(CURRANGE * TIMEUNIT)
+    startDay = datetime.date.today() - datetime.timedelta(curRange * timeUnit)
 
-    for i in range(CURRANGE * TIMEUNIT):
+    for i in range(curRange * timeUnit):
         curDay = startDay + datetime.timedelta(i) 
         skipDay = 0
 
@@ -122,23 +118,39 @@ def simulate(curCash, curPortfolio, numSharesDict):
         else:
             config.logmsg('DEBUG', 706, f'skipping Trading Post for {curDay} because weekday = {curDay.weekday()}')
 
-    plt.plot(listDates, listDailyNetValue)
+    return listDailyNetValue, listDates 
+
+def generate_sim_chart(listDailyVals, listDates):
+    for i in range(len(listDailyVals)): 
+        plt.plot(listDates[i], listDailyVals[i], linewidth=0.5)
     plt.ylabel("net value")
     plt.xlabel("year")
     plt.ylim(ymin=0)
     plt.grid(True)
     plt.savefig(f"/Users/tristanallen/Desktop/TradingPost/visuals/testGraph.pdf")
 
-    return curCash, curPortfolio, numSharesDict, listDailyNetValue, listDates
-
-funds, portfolio, numShares, x, y = simulate(AVAILABLEFUNDS, CURPORTFOLIO, NUMSHARESDICT)
-
-net = totalNetworth(numShares, funds)
-
-print(f'initial amount: {AVAILABLEFUNDS}')
-print(f'final net: {round(net, 2)}')
-print(f'percent growth: {round(((net - AVAILABLEFUNDS) / AVAILABLEFUNDS) * 100, 2)}%')
-print(f'current cash: {round(funds, 2)}')
-
-# for ticker in config.TICKERS:
-#     print(f'current portfolio for {ticker}:\n {portfolio[ticker]}')
+def run_simulation(): 
+    listDailyVals = []
+    listDates = []
+    tryCash = 1
+    while (tryCash): 
+        try: 
+            initialCash = int(input("How much cash to start with: "))
+            tryCash = 0
+        except ValueError:
+            print("invalid value, please enter positive integer")
+    tryNumSims = 1
+    while (tryNumSims):
+        try: 
+            numSims = int(input("How many simulations: "))
+            tryNumSims = 0
+        except ValueError:
+            print("invalid value, please enter positive")
+    pbar = tqdm(desc='simulations ran', total=numSims)
+    for i in range(numSims): 
+        DailyVals, Dates = simulate(initialCash)
+        listDailyVals.append(DailyVals)
+        listDates.append(Dates)
+        pbar.update(1)
+    pbar.close()
+    generate_sim_chart(listDailyVals, listDates)

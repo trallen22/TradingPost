@@ -10,11 +10,19 @@ from etf import Etf
 import configuration_file as config
 from generate_files import generate_csv, fill_platform, generate_tp
 from send_email import send_email
+from simData import run_simulation
 
 multiprocessing.freeze_support() # prevents multithreading in pyinstaller --onedir
 
 etfDict = {} # { str ticker : etf object }
 
+# run a simulation for Trading Post 
+if (config.SIMULATE): 
+    run_simulation()
+
+exit(0)
+
+# gets tickers and values 
 if (config.PBAR):
     pBar = tqdm(desc='tickers found', total=len(config.TICKERS)) # progress bar 
 for ticker in config.TICKERS:
