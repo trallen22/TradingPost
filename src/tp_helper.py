@@ -123,7 +123,7 @@ def determine_buy_sell(etf):
                 return signal, color, minTradeRange, maxTradeRange
     else:
         # Looking for buy signals 
-        if (etfVals['close_price'] < etfVals['one_day_50']):
+        if (etfVals['close_price'] < etfVals['one_day_200']):
             maxPrice = -1
             for col in config.MINDICATORS:
                 maxPrice = max(maxPrice, etfVals[col])
