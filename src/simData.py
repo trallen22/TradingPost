@@ -12,6 +12,8 @@ import random
 import csv 
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from sortedcontainers import SortedList
+from statistics import mean, median
 
 def determineSell(etfPortfolioDict, sellPrice):
     buyPrice = 0
@@ -44,6 +46,23 @@ def simulate(curCash, curRange=5, timeUnit=365):
     listDailyNetValue = []
     listDates = []
     curAccountBalance = curCash # will need to change this if want to start with non-empty portfolio 
+    # very convoluted dictionary for dictMonthlyPrices 
+    # dMP = { 
+    #       year : {
+    #               n(umber of months in year) : 
+    #               month : {
+    #                       n(umber of days in month) : int, 
+    #                       sum (of net worth for each day) : int, 
+    #                       min (net worth for the month): int, 
+    #                       max (net worth for the month) : int, 
+    #                       sortedList (used for median) : SortedList 
+    #                       }
+    #               month2 : ...
+    #               }     
+    #       year2 : ...
+    #   }
+    dictMonthlyPrices = {} 
+
     # all the csv files 
     listFiles = glob.glob(f'{config.OUTROOT}/outFiles/*.csv')
     setFiles = set(listFiles)
@@ -52,7 +71,6 @@ def simulate(curCash, curRange=5, timeUnit=365):
 
     for i in range(curRange * timeUnit):
         curDay = startDay + datetime.timedelta(i) 
-        skipDay = 0
 
         # filter out weekends (5 is saturday and 6 is sunday) 
         if not (curDay.weekday() == 5 or curDay.weekday() == 6):
@@ -70,6 +88,7 @@ def simulate(curCash, curRange=5, timeUnit=365):
 
             buyDict = {}
             sellDict = {}
+            skipDay = 0
 
             # TODO: need to add try/except 
             with open(curFilePath, 'r') as curFile:
@@ -115,10 +134,58 @@ def simulate(curCash, curRange=5, timeUnit=365):
                 listDates.append(curDay)
                 config.logmsg('DEBUG', 707, f'Account Balance on {curDay} = {curAccountBalance}')
 
+                onlyYear = str(curDay)[:4]
+                onlyMonth = str(curDay)[5:7]
+                # checking if current year is in the dictionary yet 
+                try:
+                    dictMonthlyPrices[onlyYear]
+                except KeyError:
+                    # TODO: Could try to make this similar to monthly nested dict to try and get per year data 
+                    dictMonthlyPrices[onlyYear] = {} 
+                # checking if current month is in the year's nested dict 
+                try: 
+                    dictMonthlyPrices[onlyYear][onlyMonth]
+                except KeyError:
+                    dictMonthlyPrices[onlyYear][onlyMonth] = { 'numDays': 0, 'startPrice': curAccountBalance, 'monthSumNet': 0, 'monthMin': 1000000, 'monthMax': -1, 'sortedClosePrices': SortedList() }
+                # filling dMP 
+                dictMonthlyPrices[onlyYear][onlyMonth]['numDays'] += 1 # TODO: could probably get rid of 'numDays' and use len(sortedClosePrices) 
+                dictMonthlyPrices[onlyYear][onlyMonth]['monthSumNet'] += curAccountBalance
+                if (curAccountBalance < dictMonthlyPrices[onlyYear][onlyMonth]['monthMin']):
+                    dictMonthlyPrices[onlyYear][onlyMonth]['monthMin'] = curAccountBalance
+                elif (curAccountBalance > dictMonthlyPrices[onlyYear][onlyMonth]['monthMax']): 
+                    dictMonthlyPrices[onlyYear][onlyMonth]['monthMax'] = curAccountBalance
+                dictMonthlyPrices[onlyYear][onlyMonth]['sortedClosePrices'].add(curAccountBalance)
+                generate_sim_csv(dictMonthlyPrices)
         else:
             config.logmsg('DEBUG', 706, f'skipping Trading Post for {curDay} because weekday = {curDay.weekday()}')
 
     return listDailyNetValue, listDates 
+
+def generate_sim_csv(dictMonthlyVals):
+    csvFile = f"/Users/tristanallen/Desktop/TradingPost/visuals/testSimReport.csv"
+    with open(csvFile, mode='w') as curCsv:
+        fieldNames = ['month', 'month_min', 'month_max', 'mean_price', 'median_price', 'start_price']
+        writer = csv.DictWriter(curCsv, fieldnames=fieldNames)
+        writer.writeheader() 
+        for year in list(dictMonthlyVals.keys()):
+            for month in dictMonthlyVals[year]:
+                curNumDays = dictMonthlyVals[year][month]['numDays']
+                curMean = round(dictMonthlyVals[year][month]['monthSumNet'] / curNumDays, 2)
+                sortedPrice = list(dictMonthlyVals[year][month]['sortedClosePrices'])
+                midIndex = curNumDays // 2
+                if curNumDays % 2 == 1:
+                    curMedian = sortedPrice[midIndex]
+                else: 
+                    curMedian = round(((sortedPrice[midIndex - 1] + sortedPrice[midIndex]) / 2), 2)
+
+                writer.writerow({
+                    'month': f"{year}-{month}", 
+                    'month_min': dictMonthlyVals[year][month]['monthMin'], 
+                    'month_max': dictMonthlyVals[year][month]['monthMax'], 
+                    'mean_price': curMean, 
+                    'median_price': curMedian, 
+                    'start_price': dictMonthlyVals[year][month]['startPrice']
+                })
 
 def generate_sim_chart(listDailyVals, listDates):
     for i in range(len(listDailyVals)): 
@@ -145,7 +212,7 @@ def run_simulation():
             numSims = int(input("How many simulations: "))
             tryNumSims = 0
         except ValueError:
-            print("invalid value, please enter positive")
+            print("invalid value, please enter positive integer")
     pbar = tqdm(desc='simulations ran', total=numSims)
     for i in range(numSims): 
         DailyVals, Dates = simulate(initialCash)
