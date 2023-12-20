@@ -4,6 +4,7 @@ This file simulates using the Trading Post on historical price data
 log numbers 700-799
 '''
 
+from ast import Name
 import configuration_file as config 
 import datetime 
 import os
@@ -51,11 +52,10 @@ def simulate(curCash, curRange=5, timeUnit=365):
     #       year : {
     #               n(umber of months in year) : 
     #               month : {
-    #                       n(umber of days in month) : int, 
     #                       sum (of net worth for each day) : int, 
     #                       min (net worth for the month): int, 
     #                       max (net worth for the month) : int, 
-    #                       sortedList (used for median) : SortedList 
+    #                       sortedList (of days; used for median) : SortedList 
     #                       }
     #               month2 : ...
     #               }     
@@ -141,6 +141,7 @@ def simulate(curCash, curRange=5, timeUnit=365):
                     dictMonthlyPrices[onlyYear]
                 except KeyError:
                     # TODO: Could try to make this similar to monthly nested dict to try and get per year data 
+                    # TODO: for mean could could sum over sortedClosePrices for each month 
                     dictMonthlyPrices[onlyYear] = {} 
                 # checking if current month is in the year's nested dict 
                 try: 
@@ -148,44 +149,51 @@ def simulate(curCash, curRange=5, timeUnit=365):
                 except KeyError:
                     dictMonthlyPrices[onlyYear][onlyMonth] = { 'numDays': 0, 'startPrice': curAccountBalance, 'monthSumNet': 0, 'monthMin': 1000000, 'monthMax': -1, 'sortedClosePrices': SortedList() }
                 # filling dMP 
-                dictMonthlyPrices[onlyYear][onlyMonth]['numDays'] += 1 # TODO: could probably get rid of 'numDays' and use len(sortedClosePrices) 
                 dictMonthlyPrices[onlyYear][onlyMonth]['monthSumNet'] += curAccountBalance
                 if (curAccountBalance < dictMonthlyPrices[onlyYear][onlyMonth]['monthMin']):
                     dictMonthlyPrices[onlyYear][onlyMonth]['monthMin'] = curAccountBalance
                 elif (curAccountBalance > dictMonthlyPrices[onlyYear][onlyMonth]['monthMax']): 
                     dictMonthlyPrices[onlyYear][onlyMonth]['monthMax'] = curAccountBalance
                 dictMonthlyPrices[onlyYear][onlyMonth]['sortedClosePrices'].add(curAccountBalance)
-                generate_sim_csv(dictMonthlyPrices)
+                gen_monthly_sim_csv(dictMonthlyPrices)
         else:
             config.logmsg('DEBUG', 706, f'skipping Trading Post for {curDay} because weekday = {curDay.weekday()}')
 
     return listDailyNetValue, listDates 
 
-def generate_sim_csv(dictMonthlyVals):
-    csvFile = f"/Users/tristanallen/Desktop/TradingPost/visuals/testSimReport.csv"
+def gen_monthly_sim_csv(dictMonthlyVals):
+    csvFile = f"/Users/tristanallen/Desktop/TradingPost/visuals/testSimMonthlyReport.csv"
     with open(csvFile, mode='w') as curCsv:
-        fieldNames = ['month', 'month_min', 'month_max', 'mean_price', 'median_price', 'start_price']
+        fieldNames = ['month', 'month_min', 'month_max', 'mean_price', 'median_price', 'start_price', 'month_over_month']
         writer = csv.DictWriter(curCsv, fieldnames=fieldNames)
         writer.writeheader() 
         for year in list(dictMonthlyVals.keys()):
             for month in dictMonthlyVals[year]:
-                curNumDays = dictMonthlyVals[year][month]['numDays']
-                curMean = round(dictMonthlyVals[year][month]['monthSumNet'] / curNumDays, 2)
+                curNumDays = len(dictMonthlyVals[year][month]['sortedClosePrices'])
+                curMean = dictMonthlyVals[year][month]['monthSumNet'] / curNumDays
                 sortedPrice = list(dictMonthlyVals[year][month]['sortedClosePrices'])
                 midIndex = curNumDays // 2
                 if curNumDays % 2 == 1:
                     curMedian = sortedPrice[midIndex]
                 else: 
-                    curMedian = round(((sortedPrice[midIndex - 1] + sortedPrice[midIndex]) / 2), 2)
+                    curMedian = ((sortedPrice[midIndex - 1] + sortedPrice[midIndex]) / 2)
+                curMonthStart = dictMonthlyVals[year][month]['startPrice']
+                try: 
+                    monthOverMonth = ((curMonthStart - prevMonthStart) / prevMonthStart) * 100 
+                except NameError:
+                    prevMonthStart = curMonthStart
+                    monthOverMonth = 0
 
                 writer.writerow({
                     'month': f"{year}-{month}", 
                     'month_min': dictMonthlyVals[year][month]['monthMin'], 
                     'month_max': dictMonthlyVals[year][month]['monthMax'], 
-                    'mean_price': curMean, 
-                    'median_price': curMedian, 
-                    'start_price': dictMonthlyVals[year][month]['startPrice']
+                    'mean_price': round(curMean, 2), 
+                    'median_price': round(curMedian, 2), 
+                    'start_price': curMonthStart, 
+                    'month_over_month': round(monthOverMonth, 2)
                 })
+                prevMonthStart = curMonthStart
 
 def generate_sim_chart(listDailyVals, listDates):
     for i in range(len(listDailyVals)): 
