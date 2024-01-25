@@ -99,7 +99,7 @@ STRYESTERDAY = yesterday.strftime('%Y-%m-%d')
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
 
-EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
+EMAILLIST = [ 'trallen@davidson.edu', 'hannachrisj@gmail.com' ] 
 # EMAILLIST = [ 'trallen@davidson.edu' , 'michaelgkelly01@yahoo.com'] # can be used for testing
 #TestPlatformEMAILLIST =  [ 'hannachrisj@gmail.com' ]
 

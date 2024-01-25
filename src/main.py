@@ -19,8 +19,7 @@ etfDict = {} # { str ticker : etf object }
 # run a simulation for Trading Post 
 if (config.SIMULATE): 
     run_simulation()
-
-exit(0)
+    exit(0)
 
 # gets tickers and values 
 if (config.PBAR):
