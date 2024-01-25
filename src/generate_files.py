@@ -8,7 +8,6 @@ import csv
 import openpyxl
 import shutil 
 import configuration_file as config
-from tp_helper import determine_buy_sell
 
 # generate_tp: generates the Trading Post output excel 
 # parameters: 
@@ -38,14 +37,20 @@ def generate_tp(etfDict, outputExcel):
         numBase = int(curBase[1:])
 
         activeSheet[curBase] = curEtf.ticker # setting ticker name in tp
-        activeSheet[f'{charBase}{numBase + 1}'].value = curEtf.name # setting etf name in tp 
+        # activeSheet[f'{charBase}{numBase + 1}'].value = curEtf.name # setting etf name in tp #### Leave this commented for now 
         activeSheet[f'{charBase}{numBase + 3}'] = config.TODAYDATE # setting today date in tp 
 
-        signal, sigColor, minTradeRange, maxTradeRange = determine_buy_sell(curEtf)
-        activeSheet[f'{charBase}{numBase + 5}'] = signal # Buy/Sell/Hold signal 
-        activeSheet[f'{charBase}{numBase + 5}'].fill = sigColor # Buy/Sell/Hold color 
-        activeSheet[f'{charBase}{numBase + 6}'] = minTradeRange # min for trade range 
-        activeSheet[f'{charBase}{numBase + 7}'] = maxTradeRange # max for trade range 
+        activeSheet[f'{charBase}{numBase + 5}'] = curEtf.signal # Buy/Sell/Hold signal 
+        cF = activeSheet[f'{charBase}{numBase + 5}'].font
+        if curEtf.signal == '!BUY!':
+            activeSheet[f'{charBase}{numBase + 5}'].font = openpyxl.styles.Font(name=f'{cF.name}', color=f'{config.color_white}', sz=f'{cF.sz}', b=True)
+        elif curEtf.signal == '!SELL!':
+            activeSheet[f'{charBase}{numBase + 5}'].font = openpyxl.styles.Font(name=f'{cF.name}', color=f'{config.color_black}', sz=f'{cF.sz}', b=True)
+        else: 
+            activeSheet[f'{charBase}{numBase + 5}'].font = openpyxl.styles.Font(name=f'{cF.name}', color=f'{config.color_black}', sz=f'{cF.sz}')
+        activeSheet[f'{charBase}{numBase + 5}'].fill = curEtf.color # Buy/Sell/Hold color 
+        activeSheet[f'{charBase}{numBase + 6}'] = curEtf.minTradeRange # min for trade range 
+        activeSheet[f'{charBase}{numBase + 7}'] = curEtf.maxTradeRange # max for trade range 
         activeSheet[f'{charBase}{numBase + 8}'] = curEtf.indicatorDict['close_price'] # setting close price in tp 
 
     config.logmsg('DEBUG', 100, f'saving Trading Post as {outputExcel}')
@@ -66,7 +71,7 @@ def generate_csv(etfDict, csvFile):
             fieldnames = ['ticker', 'one_day_50',
                             'one_day_200', 'five_min_50', 
                             'five_min_200','one_min_50', 
-                            'one_min_200', 'close_price']
+                            'one_min_200', 'close_price', 'signal']
             writer = csv.DictWriter(curCsv, fieldnames=fieldnames)
             writer.writeheader() # creates the csv header from fieldnames 
             for ticker in config.TICKERS:
@@ -81,7 +86,8 @@ def generate_csv(etfDict, csvFile):
                     'five_min_200': etfVals['five_min_200'],
                     'one_min_50': etfVals['one_min_50'],
                     'one_min_200': etfVals['one_min_200'],
-                    'close_price': etfVals['close_price']
+                    'close_price': etfVals['close_price'], 
+                    'signal': curEtf.signal
                 })
         config.logmsg('DEBUG', 400, f'saving csv file as {csvFile}')
     except Exception as e:

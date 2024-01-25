@@ -4,12 +4,13 @@ This file holds all the configuraion information
 log numbers 001-099
 '''
 
-from datetime import date, timedelta
+from datetime import date, timedelta 
+import time 
 from polygon import RESTClient 
 import os
 import sys 
-from sys import exit
 import openpyxl
+import argparse 
 
 # logmsg: logs a given message to the log file at LOGFILE
 # parameters: 
@@ -18,7 +19,9 @@ import openpyxl
 #       message - string, message to log 
 # returns:  No returns 
 def logmsg(level, logNum, message):
-    logMessage = f'{date.today()}::{level}::{logNum}::{message}'
+    localTime = time.localtime()
+    curTime = time.strftime("%H:%M:%S", localTime)
+    logMessage = f'{date.today()}::{curTime}::{level}::{logNum}::{message}'
     # prints messages that aren't DEBUG 
     if not (level == 'DEBUG'): 
         print(logMessage)
@@ -30,79 +33,91 @@ def logmsg(level, logNum, message):
     except Exception as e:
         print(f'{e}')
 
-PRINTDF = 0 # prints dataframes to terminal
-PBAR = 1 # print progress bar for polygon calls in main.py
-DEBUG = 0 # log debug messages to LOGFILE 
-CSV = 0 # outputs an excel file to CSVFILE 
-FILLPLATFORM = 0 # outputs a platform to OUTPUTPLATFORM 
-SENDEMAIL = 0 # sends an email to EMAILLIST 
-GETVALUE = 0 # gets a specific value from given date 
+# get_args: gets the command line arguments that were given 
+# parameters: no parameters 
+# returns: returns a dictionary of command line constants and their values 
+def get_args():
+    parser = argparse.ArgumentParser(description='generates a Trading Post')
+    # adding each argument to the parser 
+    parser.add_argument('-f', '--PRINTDF', action='store_true', help='prints dataframes to terminal') 
+    parser.add_argument('-p', '--PBAR', action='store_true', default=True, help='print progress bar for polygon calls in main.py') 
+    parser.add_argument('-d', '--DEBUG', action='store_true', help='log debug messages to LOGFILE')
+    parser.add_argument('-c', '--CSV', action='store_true', help='outputs an excel file to CSVFILE') 
+    parser.add_argument('-m', '--FILLPLATFORM', action='store_true', help='outputs a platform to OUTPUTPLATFORM')
+    parser.add_argument('-x', '--TP', action='store_true', help='generates an excel trading post')
+    parser.add_argument('-e', '--SENDEMAIL', action='store_true', help='sends an email to EMAILLIST')
+    parser.add_argument('-v', '--GETVALUE', action='store_true', help='gets a specific value from given date. NEED TO IMPLEMENT ') # TODO: implement this
+    parser.add_argument('-g', '--GENALL', action='store_true', help='generates csv and platform') 
+    parser.add_argument('-t', '--ALTTODAY', metavar='<date>', nargs=1, action='store', default='', help='get Trading Post for specific date. yyyy-mm-dd') 
+    parser.add_argument('-s', '--SIMULATE', action='store_true', help='simulates using Trading Post for period of time')
 
-# TODO: convert todays date to mm/dd form; I don't remember what this means 
-today = date.today() # TODO: add command argument to change this 
+    args, unknown = parser.parse_known_args()
+    return vars(args) 
 
-helpMenu = 'Usage: main.py [-options]\n \
-        -h,  Opens this help menu\n \
-        -f,  Print dataframes to the terminal\n \
-        -p,  Show progress bar\n \
-        -d,  logs Debug messages to LOGFILE\n \
-        -c,  Generate a CSV file with ticker data\n \
-        -m,  Generate a Platform file with ticker data\n \
-        -g,  Geneartes CSV and Platform files\n \
-        -e,  Send email to addresses in email list\n \
-        -v,  Get specific value by date, interval and ticker\n'
+##############################
+# Main Execution begins here 
+##############################
 
-for arg in sys.argv[1:]: # skip main.py
-    if arg == '-h':
-        print(helpMenu)
-        exit(0)
-    elif arg == '-f':
-        PRINTDF = 1
-    elif arg == '-p':
-        PBAR = 1 
-    elif arg == '-d':
-        DEBUG = 1 
-    elif arg == '-c':
-        CSV = 1
-    elif arg == '-m':
-        FILLPLATFORM = 1 
-    elif arg == '-e':
-        SENDEMAIL = 1
-    elif arg == '-v':
-        GETVALUE = 1
-    elif arg == '-g':
-        CSV = 1
-        FILLPLATFORM = 1
-    elif arg == '-t':
-        index = sys.argv.index('-t')
+argDict = get_args()
 
-    else:
-        print(f'NOTICE::003::bad argument given \'{arg}\'')
-        # logmsg('NOTICE', '003', f'bad argument given \'{arg}\'')
+PRINTDF = argDict['PRINTDF'] # prints dataframes to terminal
+PBAR = argDict['PBAR'] # print progress bar for polygon calls in main.py
+DEBUG = argDict['DEBUG'] # log debug messages to LOGFILE 
+CSV = argDict['CSV'] # outputs an excel file to CSVFILE 
+TP = argDict['TP'] # generates an excel trading post 
+FILLPLATFORM = argDict['FILLPLATFORM'] # outputs a platform to OUTPUTPLATFORM 
+if argDict['SENDEMAIL']:
+    SENDEMAIL = True
+    TP = True 
+SENDEMAIL = argDict['SENDEMAIL'] # sends an email to EMAILLIST 
+GETVALUE = argDict['GETVALUE'] # gets a specific value from given date
+ALTTODAY = argDict['ALTTODAY'] # stores the input date yyyy-mm-dd 
+if argDict['GENALL']: # generate all files 
+    CSV = True
+    FILLPLATFORM = True
+    TP = True 
+SIMULATE = argDict['SIMULATE'] # runs a simulation for using Trading Post 
+
+# setting date used throughout execution 
+if (ALTTODAY == ''):
+    today = date.today()
+else:
+    # set today date to command line argument value 
+    todayList = ALTTODAY[0].split('-')
+    today = date(int(todayList[0]), int(todayList[1]), int(todayList[2]))
 
 listDate = str(today).split('-')
 TODAYDATE = f'{listDate[1]}/{listDate[2]}'  # mm/yy
 
 STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
+tomorrow = today + timedelta(1)
+STRTOMORROW = tomorrow.strftime('%Y-%m-%d') # used for yahoo finance history 
+yesterday = today - timedelta(1)
+STRYESTERDAY = yesterday.strftime('%Y-%m-%d') 
 
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
-EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
-# EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing 
 
-# determine if application is a script file or frozen exe
-# not sure what this means, found it on stack overflow 
+EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
+# EMAILLIST = [ 'trallen@davidson.edu' , 'michaelgkelly01@yahoo.com'] # can be used for testing
+#TestPlatformEMAILLIST =  [ 'hannachrisj@gmail.com' ]
+
+# determines if application is a script file or frozen exe
+# not sure exactly what this means, found it on stack overflow 
 if getattr(sys, 'frozen', False):
     curDir = os.path.dirname(sys.executable)
 elif __file__:
     curDir = os.path.abspath(__file__)
 
-dirList = curDir.split('/')
-dirIndex = dirList.index('TradingPost')
-topList = dirList[:dirIndex+1]
+# #store the directory part of the aboslute path of the current file
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-TPROOT = '/'.join(topList) # root directory for trading post execution 
+# Navigate up the directory tree until src not located to find the root directory
+while "src" in script_dir:
+    script_dir = os.path.dirname(script_dir)
+    
+TPROOT = script_dir  #root directory for trading post execution 
 
 # Debug files 
 LOGROOT = f'{TPROOT}/debug'
@@ -111,8 +126,9 @@ try:
     os.mkdir(f'{LOGROOT}')
     logmsg('DEBUG', '008', f'created src directory \'{LOGROOT}\'')
 except FileExistsError:
+    # trims the log file to preserve space 
     with open(LOGFILE, mode='r+') as lf:
-        lastLines = lf.readlines()[-100:]
+        lastLines = lf.readlines()[-2000:] # how many lines to save from previous log file 
     with open(LOGFILE, mode='w') as lf:
         for line in lastLines:
             lf.write(line)
@@ -121,7 +137,7 @@ except FileExistsError:
 # Template files 
 SRCROOT = f'{TPROOT}/src'
 TEMPLATEPLATFORM = f'{SRCROOT}/TA.WORK.xlsx' 
-TEMPEXCEL = f'{SRCROOT}/stocktradingpost.xlsx' 
+TEMPEXCEL = f'{SRCROOT}/stocktradingpostdemo.xlsx' 
 try:
     os.mkdir(f'{SRCROOT}')
     logmsg('DEBUG', '004', f'created src directory \'{SRCROOT}\'')
@@ -129,10 +145,10 @@ except FileExistsError:
     logmsg('DEBUG', '005', f'src directory already created at \'{SRCROOT}\'')
 
 # Output files 
-OUTROOT = f'{TPROOT}/testTP'
-OUTPUTPLATFORM = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testPlatform.xlsx'
-OUTPUTEXCEL = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testTradingPost.xlsx'
-CSVFILE = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_csv.csv' 
+OUTROOT = f'{TPROOT}'
+OUTPUTPLATFORM = f'{OUTROOT}/testTP/{STRTODAY}_testPlatform.xlsx'
+OUTPUTEXCEL = f'{OUTROOT}/testTP/{STRTODAY}_testTradingPost.xlsx'
+CSVFILE = f'{OUTROOT}/outFiles/{STRTODAY}_csv.csv' 
 try:
     os.mkdir(f'{OUTROOT}')
     logmsg('DEBUG', '006', f'created src directory \'{OUTROOT}\'')
@@ -169,10 +185,10 @@ PLATFORMCOLS = { 'date':'E', 'close_price':'G', 'one_day_50':'H', 'one_day_200':
             'five_min_200':'K', 'one_min_50':'L', 'one_min_200':'M' }
 
 # base cell for each ticker in Trading Post excel 
-ETFBASECELL = { 'JNK':'C7', 'GDX':'D7', 'VCR':'E7', 'VDC':'F7', 'VIG':'G7', 
-            'VDE':'H7', 'VFH':'I7', 'VWO':'C17', 'VHT':'D17', 'VIS':'E17', 'VGT':'F17', 
-            'VAW':'G17', 'VNQ':'H17', 'VOO':'I17', 'VOX':'C27', 'BND':'D27', 
-            'BNDX':'E27', 'VXUS':'F27', 'VTI':'G27', 'VPU':'H27', 'XTN':'I27' }
+ETFBASECELL = { 'JNK':'B3', 'GDX':'C3', 'VCR':'D3', 'VDC':'E3', 'VIG':'F3', 
+            'VDE':'G3', 'VFH':'H3', 'VWO':'B13', 'VHT':'C13', 'VIS':'D13', 'VGT':'E13', 
+            'VAW':'F13', 'VNQ':'G13', 'VOO':'H13', 'VOX':'B23', 'BND':'C23', 
+            'BNDX':'D23', 'VXUS':'E23', 'VTI':'F23', 'VPU':'G23', 'XTN':'H23' }
 
 # cell with date in Trading Post 
 PLATDATECELL = 'B3'
@@ -183,34 +199,42 @@ try:
     excelSheet = workbook.active
 except Exception as e:
     print(f'ERROR: {e}')
-    exit(4)
+    sys.exit(4)
 
-COLORROW = 5 # row on trading post excel with template color
-plainRGB = 'FFFFFFFF' # color white 
-PLAINCOLOR = openpyxl.styles.PatternFill(start_color=plainRGB, end_color=plainRGB, fill_type='solid')
+color_black = '00000000' # color black 
+color_white = 'FFFFFFFF' # color white 
+PLAINCOLOR = openpyxl.styles.PatternFill(start_color=color_white, end_color=color_white, fill_type='solid')
 
 # Cell color templates 
-try:
-    buyRGB = excelSheet[f'A{COLORROW}'].fill.fgColor
-    BUYCOLOR = openpyxl.styles.PatternFill(start_color=buyRGB, end_color=buyRGB, fill_type='solid')
-except Exception:
+dark_green = '064A23' # Buy Signal HexColor
+light_green = '87C94B' # Hold-Buy Signal HexColor
+brown_yellow = 'A28818' # Sell Signal HexColor
+bright_yellow ='F6DD58' # Hold-Sell Signal HexColor
+try: 
+    BUYCOLOR = openpyxl.styles.PatternFill(start_color = dark_green, end_color = dark_green, fill_type = 'solid')
+    logmsg('DEBUG', '010', 'BUY Signal Color Template')
+except Exception as e:
     BUYCOLOR = PLAINCOLOR
-    print(f'NOTICE: Buy Color set as plain')
+    logmsg('ERROR', '011', f'{e}')
+    logmsg('NOTICE', '011', 'BUY Color Signal set as plain')
 try:
-    hoBuyRGB = excelSheet[F'C{COLORROW}'].fill.fgColor
-    HOBUYCOLOR = openpyxl.styles.PatternFill(start_color=hoBuyRGB, end_color=hoBuyRGB, fill_type='solid')
-except Exception:
+    HOBUYCOLOR = openpyxl.styles.PatternFill(start_color = light_green, end_color = light_green, fill_type = 'solid')
+    logmsg('DEBUG', '012', 'HOBUY Signal Color Template')
+except Exception as e:
     HOBUYCOLOR = PLAINCOLOR
-    print(f'NOTICE: Hold to Buy Color set as plain')
+    logmsg('ERROR', '013', f'{e}')
+    logmsg('NOTICE', '013', 'HOBUY Color Signal set as plain')
 try:
-    sellRGB = excelSheet[f'E{COLORROW}'].fill.fgColor
-    SELLCOLOR = openpyxl.styles.PatternFill(start_color=sellRGB, end_color=sellRGB, fill_type='solid')
-except Exception:
+    SELLCOLOR = openpyxl.styles.PatternFill(start_color = brown_yellow, end_color = brown_yellow, fill_type = 'solid')
+    logmsg('DEBUG', '014', 'SELL Signal Color Template')
+except Exception as e:
     SELLCOLOR = PLAINCOLOR
-    print(f'NOTICE: Sell Color set as plain')
+    logmsg('ERROR', '015', f'{e}')
+    logmsg('NOTICE', '015', 'SELL Color Signal set as plain')
 try:
-    hoSellRGB = excelSheet[f'F{COLORROW}'].fill.fgColor
-    HOSELLCOLOR = openpyxl.styles.PatternFill(start_color=hoSellRGB, end_color=hoSellRGB, fill_type='solid')
-except Exception:
+    HOSELLCOLOR = openpyxl.styles.PatternFill(start_color = bright_yellow, end_color = bright_yellow, fill_type = 'solid')
+    logmsg('DEBUG', '016', 'HOSELL Signal Color Template')
+except Exception as e:
     HOSELLCOLOR = PLAINCOLOR
-    print(f'NOTICE: Hold to Sell Color set as plain')
+    logmsg('ERROR', '017', f'{e}')
+    logmsg('NOTICE', '017', 'HOSELL Color Signal set as plain')
