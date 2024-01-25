@@ -38,6 +38,7 @@ def totalNetworth(portfolio, availableFunds, curCsvPath=None):
     return availableFunds
 
 def simulate(curCash, curRange=5, timeUnit=365):
+    startingCash = curCash
     numSharesDict = {} # dictionary of number of shares for each ticker { ticker : 3 (# shares) }
     curPortfolio = {} # nested dictionary simulating portfolio { ticker : { buy price : number of shares } }
     for ticker in config.TICKERS:
@@ -50,7 +51,6 @@ def simulate(curCash, curRange=5, timeUnit=365):
     # very convoluted dictionary for dictMonthlyPrices 
     # dMP = { 
     #       year : {
-    #               n(umber of months in year) : 
     #               month : {
     #                       sum (of net worth for each day) : int, 
     #                       min (net worth for the month): int, 
@@ -155,18 +155,21 @@ def simulate(curCash, curRange=5, timeUnit=365):
                 elif (curAccountBalance > dictMonthlyPrices[onlyYear][onlyMonth]['monthMax']): 
                     dictMonthlyPrices[onlyYear][onlyMonth]['monthMax'] = curAccountBalance
                 dictMonthlyPrices[onlyYear][onlyMonth]['sortedClosePrices'].add(curAccountBalance)
-                gen_monthly_sim_csv(dictMonthlyPrices)
         else:
             config.logmsg('DEBUG', 706, f'skipping Trading Post for {curDay} because weekday = {curDay.weekday()}')
 
+    gen_monthly_sim_csv(dictMonthlyPrices, startingCash)
     return listDailyNetValue, listDates 
 
-def gen_monthly_sim_csv(dictMonthlyVals):
-    csvFile = f"/Users/tristanallen/Desktop/TradingPost/visuals/testSimMonthlyReport.csv"
-    with open(csvFile, mode='w') as curCsv:
-        fieldNames = ['month', 'month_min', 'month_max', 'mean_price', 'median_price', 'start_price', 'month_over_month']
-        writer = csv.DictWriter(curCsv, fieldnames=fieldNames)
-        writer.writeheader() 
+def gen_monthly_sim_csv(dictMonthlyVals, initialCash):
+    monthCsvFile = f"/Users/tristanallen/Desktop/TradingPost/visuals/testSimMonthlyReport.csv"
+    yearlyCsvFile = f"/Users/tristanallen/Desktop/TradingPost/visuals/testSimYearlyReport.csv"
+    with open(monthCsvFile, mode='w') as curCsv, open(yearlyCsvFile, mode='w') as yearCsv:
+        fieldNames = ['month', 'month_min', 'month_max', 'mean_price', 'median_price', 'start_price', 'month_over_month', 'start_to_date']
+        monthWriter = csv.DictWriter(curCsv, fieldnames=fieldNames)
+        monthWriter.writeheader() 
+        # yearWriter = csv.DictWriter(yearCsv, fieldnames=fieldNames)
+        # yearWriter.writeheader()
         for year in list(dictMonthlyVals.keys()):
             for month in dictMonthlyVals[year]:
                 curNumDays = len(dictMonthlyVals[year][month]['sortedClosePrices'])
@@ -183,17 +186,19 @@ def gen_monthly_sim_csv(dictMonthlyVals):
                 except NameError:
                     prevMonthStart = curMonthStart
                     monthOverMonth = 0
-
-                writer.writerow({
+                yearToDate = ((curMonthStart - initialCash) / initialCash) * 100
+                monthWriter.writerow({
                     'month': f"{year}-{month}", 
                     'month_min': dictMonthlyVals[year][month]['monthMin'], 
                     'month_max': dictMonthlyVals[year][month]['monthMax'], 
                     'mean_price': round(curMean, 2), 
                     'median_price': round(curMedian, 2), 
                     'start_price': curMonthStart, 
-                    'month_over_month': round(monthOverMonth, 2)
+                    'month_over_month': round(monthOverMonth, 2),
+                    'start_to_date': round(yearToDate, 2)
                 })
                 prevMonthStart = curMonthStart
+            
 
 def generate_sim_chart(listDailyVals, listDates):
     for i in range(len(listDailyVals)): 
