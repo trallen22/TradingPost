@@ -96,7 +96,7 @@ def get_indicators(ticker):
         downTime = 0
         try: 
             # Loop while unable to get api call 
-            while (apiLimit):
+            while (apiLimit): # TODO: could this just be a while(True) and continue
                 try:
                     curDF = get_dataframe(ticker, curTimeInterval, curMultiplier)
                     apiLimit = 0

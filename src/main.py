@@ -55,7 +55,7 @@ if (config.FILLPLATFORM):
         config.logmsg('INFO', 104, f'saved platform to {config.OUTPUTPLATFORM}')
 
 # send email to email list 
-if (config.SENDEMAIL): 
+if (config.SENDEMAIL) and 0: # TODO: remove "and 0" to send emails
     for address in config.EMAILLIST:
         config.logmsg('DEBUG', 107, f'sending email to \'{address}\'')
         attachments = [config.OUTPUTEXCEL] 
