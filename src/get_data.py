@@ -11,7 +11,6 @@ import time
 import pandas as pd 
 import numpy as np
 from sys import exit
-
 import configuration_file as config
 
 # I didn't create this function and I honestly don't know what it means 

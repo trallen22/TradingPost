@@ -99,8 +99,8 @@ STRYESTERDAY = yesterday.strftime('%Y-%m-%d')
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
 
-EMAILLIST = [ 'trallen@davidson.edu', 'hannachrisj@gmail.com' ] 
-# EMAILLIST = [ 'trallen@davidson.edu' , 'michaelgkelly01@yahoo.com'] # can be used for testing
+# EMAILLIST = [ 'trallen@davidson.edu', 'hannachrisj@gmail.com' ] 
+EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing
 #TestPlatformEMAILLIST =  [ 'hannachrisj@gmail.com' ]
 
 # determines if application is a script file or frozen exe
@@ -156,9 +156,10 @@ except FileExistsError:
     logmsg('DEBUG', '007', f'output directory already created at \'{OUTROOT}\'')
 
 # polygon login 
-key = "CP1nN_q8W8C4eG7phIPNgLNCyPEyDZPe" # paid standard version 
+POLYGON_API_KEY = "CP1nN_q8W8C4eG7phIPNgLNCyPEyDZPe" # paid standard version 
+API_GOOD_RESPONSE = "OK"
 try:
-    CLIENT = RESTClient(key)
+    CLIENT = RESTClient(POLYGON_API_KEY)
     logmsg('DEBUG', '001', 'loading RESTClient')
 except Exception as e:
     logmsg('ERROR', '002', f'{e}')
