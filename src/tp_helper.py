@@ -6,6 +6,15 @@ log numbers 400-499
 '''
 
 import configuration_file as config
+from polygon_api import PolygonApi
+
+def findRelatedTickers(ticker: str) -> list[str]:
+    relatedTickers = []
+    response = PolygonApi.getRelatedCompanies(ticker)
+    for sym in response["results"]:
+        relatedTickers.append(sym["ticker"])   
+    return relatedTickers
+
 
 # buy_min: determines the buy range minimum value. Helper function 
 #           for set_ranges.  

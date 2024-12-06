@@ -194,13 +194,13 @@ ETFBASECELL = { 'JNK':'B3', 'GDX':'C3', 'VCR':'D3', 'VDC':'E3', 'VIG':'F3',
 # cell with date in Trading Post 
 PLATDATECELL = 'B3'
 
-try: 
-    # loading excel as workbook object
-    workbook = openpyxl.load_workbook(TEMPEXCEL)
-    excelSheet = workbook.active
-except Exception as e:
-    print(f'ERROR: {e}')
-    sys.exit(4)
+# try: 
+#     # loading excel as workbook object
+#     workbook = openpyxl.load_workbook(TEMPEXCEL)
+#     excelSheet = workbook.active
+# except Exception as e:
+#     print(f'ERROR: {e}')
+#     sys.exit(4)
 
 color_black = '00000000' # color black 
 color_white = 'FFFFFFFF' # color white 
