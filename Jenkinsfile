@@ -13,7 +13,7 @@ pipeline {
         }
         stage('deploy') {
             steps {
-                sh 'app was deployed'
+                sh 'echo app was deployed'
             }
         }
     }
