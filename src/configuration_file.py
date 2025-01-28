@@ -44,10 +44,12 @@ def get_args():
     parser.add_argument('-d', '--DEBUG', action='store_true', help='log debug messages to LOGFILE')
     parser.add_argument('-c', '--CSV', action='store_true', help='outputs an excel file to CSVFILE') 
     parser.add_argument('-m', '--FILLPLATFORM', action='store_true', help='outputs a platform to OUTPUTPLATFORM')
+    parser.add_argument('-x', '--TP', action='store_true', help='generates an excel trading post')
     parser.add_argument('-e', '--SENDEMAIL', action='store_true', help='sends an email to EMAILLIST')
     parser.add_argument('-v', '--GETVALUE', action='store_true', help='gets a specific value from given date. NEED TO IMPLEMENT ') # TODO: implement this
     parser.add_argument('-g', '--GENALL', action='store_true', help='generates csv and platform') 
     parser.add_argument('-t', '--ALTTODAY', metavar='<date>', nargs=1, action='store', default='', help='get Trading Post for specific date. yyyy-mm-dd') 
+    parser.add_argument('-s', '--SIMULATE', action='store_true', help='simulates using Trading Post for period of time')
 
     args, unknown = parser.parse_known_args()
     return vars(args) 
@@ -62,13 +64,19 @@ PRINTDF = argDict['PRINTDF'] # prints dataframes to terminal
 PBAR = argDict['PBAR'] # print progress bar for polygon calls in main.py
 DEBUG = argDict['DEBUG'] # log debug messages to LOGFILE 
 CSV = argDict['CSV'] # outputs an excel file to CSVFILE 
+TP = argDict['TP'] # generates an excel trading post 
 FILLPLATFORM = argDict['FILLPLATFORM'] # outputs a platform to OUTPUTPLATFORM 
+if argDict['SENDEMAIL']:
+    SENDEMAIL = True
+    TP = True 
 SENDEMAIL = argDict['SENDEMAIL'] # sends an email to EMAILLIST 
 GETVALUE = argDict['GETVALUE'] # gets a specific value from given date
 ALTTODAY = argDict['ALTTODAY'] # stores the input date yyyy-mm-dd 
 if argDict['GENALL']: # generate all files 
     CSV = True
     FILLPLATFORM = True
+    TP = True 
+SIMULATE = argDict['SIMULATE'] # runs a simulation for using Trading Post 
 
 # setting date used throughout execution 
 if (ALTTODAY == ''):
@@ -84,21 +92,23 @@ TODAYDATE = f'{listDate[1]}/{listDate[2]}'  # mm/yy
 STRTODAY = today.strftime('%Y-%m-%d') # used with polygon data; yy-mm-dd
 tomorrow = today + timedelta(1)
 STRTOMORROW = tomorrow.strftime('%Y-%m-%d') # used for yahoo finance history 
+yesterday = today - timedelta(1)
+STRYESTERDAY = yesterday.strftime('%Y-%m-%d') 
 
 # Email variables 
 EMAILADDRESS = 'etfsender@gmail.com'
 EMAILPASSWORD = 'egztwpmmkbicpjfd' # 'P@55w0rd123' 
 
-EMAILLIST = [ 'trallen@davidson.edu', 'michaelgkelly01@yahoo.com', 'ludurkin@davidson.edu', 'hannachrisj@gmail.com' ] 
-# EMAILLIST = [ 'trallen@davidson.edu' , 'michaelgkelly01@yahoo.com'] # can be used for testing
+# EMAILLIST = [ 'trallen@davidson.edu', 'hannachrisj@gmail.com' ] 
+EMAILLIST = [ 'trallen@davidson.edu' ] # can be used for testing
 #TestPlatformEMAILLIST =  [ 'hannachrisj@gmail.com' ]
 
-# determine if application is a script file or frozen exe
-# not sure what this means, found it on stack overflow 
-# if getattr(sys, 'frozen', False):
-#     curDir = os.path.dirname(sys.executable)
-# elif __file__:
-#     curDir = os.path.abspath(__file__)
+# determines if application is a script file or frozen exe
+# not sure exactly what this means, found it on stack overflow 
+if getattr(sys, 'frozen', False):
+    curDir = os.path.dirname(sys.executable)
+elif __file__:
+    curDir = os.path.abspath(__file__)
 
 # #store the directory part of the aboslute path of the current file
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -118,7 +128,7 @@ try:
 except FileExistsError:
     # trims the log file to preserve space 
     with open(LOGFILE, mode='r+') as lf:
-        lastLines = lf.readlines()[-200:] # how many lines to save from previous log file 
+        lastLines = lf.readlines()[-2000:] # how many lines to save from previous log file 
     with open(LOGFILE, mode='w') as lf:
         for line in lastLines:
             lf.write(line)
@@ -135,10 +145,10 @@ except FileExistsError:
     logmsg('DEBUG', '005', f'src directory already created at \'{SRCROOT}\'')
 
 # Output files 
-OUTROOT = f'{TPROOT}/testTP'
-OUTPUTPLATFORM = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testPlatform.xlsx'
-OUTPUTEXCEL = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_testTradingPost.xlsx'
-CSVFILE = f'{OUTROOT}/{listDate[1]}-{listDate[2]}_csv.csv' 
+OUTROOT = f'{TPROOT}'
+OUTPUTPLATFORM = f'{OUTROOT}/testTP/{STRTODAY}_testPlatform.xlsx'
+OUTPUTEXCEL = f'{OUTROOT}/testTP/{STRTODAY}_testTradingPost.xlsx'
+CSVFILE = f'{OUTROOT}/outFiles/{STRTODAY}_csv.csv' 
 try:
     os.mkdir(f'{OUTROOT}')
     logmsg('DEBUG', '006', f'created src directory \'{OUTROOT}\'')
@@ -146,9 +156,10 @@ except FileExistsError:
     logmsg('DEBUG', '007', f'output directory already created at \'{OUTROOT}\'')
 
 # polygon login 
-key = "CP1nN_q8W8C4eG7phIPNgLNCyPEyDZPe" # paid standard version 
+POLYGON_API_KEY = "CP1nN_q8W8C4eG7phIPNgLNCyPEyDZPe" # paid standard version 
+API_GOOD_RESPONSE = "OK"
 try:
-    CLIENT = RESTClient(key)
+    CLIENT = RESTClient(POLYGON_API_KEY)
     logmsg('DEBUG', '001', 'loading RESTClient')
 except Exception as e:
     logmsg('ERROR', '002', f'{e}')
@@ -183,13 +194,13 @@ ETFBASECELL = { 'JNK':'B3', 'GDX':'C3', 'VCR':'D3', 'VDC':'E3', 'VIG':'F3',
 # cell with date in Trading Post 
 PLATDATECELL = 'B3'
 
-try: 
-    # loading excel as workbook object
-    workbook = openpyxl.load_workbook(TEMPEXCEL)
-    excelSheet = workbook.active
-except Exception as e:
-    print(f'ERROR: {e}')
-    sys.exit(4)
+# try: 
+#     # loading excel as workbook object
+#     workbook = openpyxl.load_workbook(TEMPEXCEL)
+#     excelSheet = workbook.active
+# except Exception as e:
+#     print(f'ERROR: {e}')
+#     sys.exit(4)
 
 color_black = '00000000' # color black 
 color_white = 'FFFFFFFF' # color white 

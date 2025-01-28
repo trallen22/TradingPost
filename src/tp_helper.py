@@ -6,6 +6,15 @@ log numbers 400-499
 '''
 
 import configuration_file as config
+from polygon_api import PolygonApi
+
+def findRelatedTickers(ticker: str) -> list[str]:
+    relatedTickers = []
+    response = PolygonApi.getRelatedCompanies(ticker)
+    for sym in response["results"]:
+        relatedTickers.append(sym["ticker"])   
+    return relatedTickers
+
 
 # buy_min: determines the buy range minimum value. Helper function 
 #           for set_ranges.  
@@ -71,7 +80,8 @@ def sell_max(etf):
     else:
         return minuteMin - 0.01
 
-# set_ranges: determines the trade ranges in the Trading Post excel 
+# set_ranges: helper function for determine_buy_sell determines 
+#               the trade ranges in the Trading Post excel 
 # parameters: 
 #       etf - Etf object, current etf to get range for 
 # returns: returns the current ranges minimum, maximum and 
@@ -122,7 +132,7 @@ def determine_buy_sell(etf):
                 return signal, color, minTradeRange, maxTradeRange
     else:
         # Looking for buy signals 
-        if (etfVals['close_price'] < etfVals['one_day_50']):
+        if (etfVals['close_price'] < etfVals['one_day_200']):
             maxPrice = -1
             for col in config.MINDICATORS:
                 maxPrice = max(maxPrice, etfVals[col])

@@ -6,83 +6,41 @@ and 1 day and close price
 log numbers 200-299
 '''
 
-from datetime import timedelta
+from datetime import timedelta, date
 import time
 import pandas as pd 
 import numpy as np
 from sys import exit
-
 import configuration_file as config
+from polygon_api import PolygonApi
+from models import AggregateData
 
-# I didn't create this function and I honestly don't know what it means 
-def ts_to_time_of_day(ts) -> timedelta:
-    return timedelta(seconds=ts.second,minutes=ts.minute,hours=ts.hour)
+def convertToDataFrame(dataDict: dict) -> pd.DataFrame:
+    return pd.DataFrame(dataDict)
 
-# get_dataframe: helper function for get_indicators(). Gets the 50 and 
-#                   200 values for a given index. (ex: 1 min, 5 min, 1 day) 
-# parameters: 
-#       curTicker - string, etf ticker -> 'JNK' 
-#       timeUnit - string, time interval (minute, day) 
-#       intMultiplier - integer, interval multiplier (1, 5) 
-# returns: returns the 50 and 200 sma values for a given ticker and time interval 
-def get_dataframe(curTicker, timeUnit, intMultiplier):
+def calculateDataBars(ticker, multiplier, timeIntervalType, fromDate, toDate):
+    try:
+        response = PolygonApi.getAggregate(ticker, multiplier, timeIntervalType, fromDate, toDate)
+    except Exception as e:
+        print(f"{e}")
+    if (response["resultsCount"] == 0):
+        print(f"No data was found for {ticker}")
+        return {}
+    barsDataPoints = AggregateData()
+    for dataPoint in response['results']:
+        barsDataPoints.appendDataPoint(dataPoint)
+    df = pd.DataFrame(barsDataPoints.convertToDict())
+    # TODO: shouldn't return the a dataframe, just return the dictionary
+    # TODO: just need to use convertToDF()
+    return df
 
-    config.logmsg('DEBUG', 200, f"Retrieving data for {curTicker} - {intMultiplier} {timeUnit}")
-
-    endDay = config.today
-
-    if timeUnit == 'minute':
-        days = timedelta(7)
-    elif timeUnit == 'day':
-        days = timedelta(300)
-    else: 
-        print('Invalid time unit')
-        exit(5)
-
-    startDay = endDay - days
-    startDay = startDay.strftime('%Y-%m-%d')
-
-    # call to polygon.io api 
-    resp = config.CLIENT.get_aggs(ticker=curTicker, multiplier=intMultiplier, timespan = timeUnit, from_=startDay, to=config.STRTODAY, adjusted=True, sort="desc")
-    df = pd.DataFrame(resp)
-
-    # converts UTC timestampt to EST and creates time of day column
-    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True, unit='ms')
-    df["timestamp"] = df["timestamp"].dt.tz_convert('US/Eastern')
-    df["time_of_day"] = df["timestamp"].apply(ts_to_time_of_day)
-
-    # use time of day to filter normal market hours 
-    market_open = timedelta(seconds=0, minutes=30, hours=9)
-    market_close = timedelta(seconds=0, minutes=59, hours=15)
-
-    df = df[df["time_of_day"] <= market_close]
-    if (timeUnit == 'minute'):
-        df = df[df["time_of_day"] >= market_open]
-
-    # in case the market closes early and values get skewed
-    df = df[df["transactions"].notnull()]
-
-    # assigns value of ticker to simple moving average of last 50mins of before market close and rounds to two decimal
-    fifty_interval = round(np.mean(df[["close"]].head(50),axis=0).values[0],2)
-
-    # assigns value of ticker to simple moving average of last 200mins of before market close and rounds to two decimal
-    two_hundred_interval = round(np.mean(df[["close"]].head(200), axis=0).values[0],2)
-
-    # prints each dataframe. Used for debugging 
-    if (config.PRINTDF):
-        print('#################')
-        print(f'--- {intMultiplier} {timeUnit} ---')
-        print('#################')
-        print(df)
-    config.logmsg('DEBUG', 201, f"Data retrieved for {curTicker} - {intMultiplier} {timeUnit}")
-    return fifty_interval, two_hundred_interval
-
+# TODO: this needs to be fixed or deleted (probably deleted)
 # get_indicators: gets the indices for a given ticker   
 # parameters: 
 #       ticker - string, etf ticker -> 'JNK'  
 # returns: integers for each index. Variable names are pretty 
 #           self explanatory 
-def get_indicators(ticker):
+def get_smas(ticker, date):
     finalIndexes = []
     config.logmsg('DEBUG', 203, f'Starting indicator retrieval for ticker \'{ticker}\'')
     # Generate 50 and 200 for given time interval(s) in paramSet
@@ -96,9 +54,11 @@ def get_indicators(ticker):
         downTime = 0
         try: 
             # Loop while unable to get api call 
-            while (apiLimit):
+            while (apiLimit): # TODO: could this just be a while(True) and continue
                 try:
-                    curDF = get_dataframe(ticker, curTimeInterval, curMultiplier)
+                    curDF = get_fifty_and_200_sma(ticker, curTimeInterval, curMultiplier)
+                    fifty = PolygonApi.getSimpleMovingAverage(ticker)
+                    curDF = ()
                     apiLimit = 0
                     downTime = 0
                 except Exception:
@@ -140,3 +100,6 @@ def get_indicators(ticker):
     config.logmsg('DEBUG', 206, f'Indicator retrieval completed for ticker \'{ticker}\'')
     return ticker_fifty_one_minute, ticker_two_hundred_one_minute, ticker_fifty_five_minute, \
     ticker_two_hundred_five_minute, ticker_fifty_one_day, ticker_two_hundred_one_day, close_price
+
+
+# print(get_fifty_and_200_sma("AAPL", "day", 1))
