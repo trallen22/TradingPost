@@ -66,3 +66,6 @@ def send_email(to, subject, message, attachments=None):
             return 1
 
         return 0
+
+    config.logmsg('DEBUG', 608, f'no attachments')
+    return 1
