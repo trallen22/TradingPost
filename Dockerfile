@@ -1,14 +1,14 @@
 # use base image
-FROM python:3.14.0b1-slim-bookworm
+FROM python:3.12-slim-bookworm
 
 # set up working directory 
-WORKDIR /Users/tristanallen/Desktop/TradingPost/src
+WORKDIR /app
 
 # copy project files
 COPY . .
 
 # install dependencies
-# RUN pip install
+RUN pip install --no-cache-dir -r dependencies.txt
 
 # setup default command
-CMD [ "python" ]
+CMD [ "python", "src/ticker_news.py" ]

@@ -74,13 +74,16 @@ class TickerNews():
         return json.dumps(self.dictTickerArticles, indent=4)
 
 if __name__ == "__main__":
-    testArticles = []
-    testNews = TickerNews()
-    for ticker in TEST_LIST_TICKERS:
-        testArticles.append(testNews.getArticlesForTicker(ticker))
-    testNews.WeightNewsHighestVolumeArticles()
-    relativeArticles = testNews.returnNewsHighestVolumeArticles(numArticles=5)
-    for i in relativeArticles:
+    # testArticles = []
+    # testNews = TickerNews()
+    # for ticker in TEST_LIST_TICKERS:
+    #     testArticles.append(testNews.getArticlesForTicker(ticker))
+    # testNews.WeightNewsHighestVolumeArticles()
+    # relativeArticles = testNews.returnNewsHighestVolumeArticles(numArticles=5)
+    # for i in relativeArticles:
+    #     print(i.title)
+    #     print(i.article_url)
+    #     print()
+    for i in config.CLIENT.list_ticker_news(TEST_TICKER, limit=1000, published_utc="2025-05-06"): # config.STRYESTERDAY):
         print(i.title)
-        print(i.article_url)
         print()
