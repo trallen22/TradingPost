@@ -12,23 +12,26 @@ import sys
 import openpyxl
 import argparse 
 
-# logmsg: logs a given message to the log file at LOGFILE
-# parameters: 
-#       level - string, log level for message urgency -> 'ERROR', 'INFO', 'NOTICE', 'DEBUG' 
-#       logNum - int/string, log ID number for current message
-#       message - string, message to log 
-# returns:  No returns 
+
 def logmsg(level, logNum, message):
+    """
+    logmsg: logs a given message to the log file at LOGFILE
+    parameters: 
+        level - string, log level for message urgency -> 'ERROR', 'INFO', 'NOTICE', 'DEBUG' 
+        logNum - int/string, log ID number for current message
+        message - string, message to log 
+    returns:  No returns     
+    """
     localTime = time.localtime()
     curTime = time.strftime("%H:%M:%S", localTime)
     logMessage = f'{date.today()}::{curTime}::{level}::{logNum}::{message}'
     # prints messages that aren't DEBUG 
-    if not (level == 'DEBUG'): 
+    if (level != 'DEBUG'): 
         print(logMessage)
     try: 
         # writes output to LOGFILE, checks if DEBUG is enabled 
         with open(LOGFILE, mode='a') as logFile:
-            if not (level == 'DEBUG' and not DEBUG):
+            if (level != 'DEBUG' or DEBUG):
                 logFile.write(f'{logMessage}\n')
     except Exception as e:
         print(f'{e}')
@@ -160,7 +163,7 @@ POLYGON_API_KEY = "CP1nN_q8W8C4eG7phIPNgLNCyPEyDZPe" # paid standard version
 API_GOOD_RESPONSE = "OK"
 try:
     CLIENT = RESTClient(POLYGON_API_KEY)
-    logmsg('DEBUG', '001', 'loading RESTClient')
+    logmsg('DEBUG', '001', 'loading polygon RESTClient')
 except Exception as e:
     logmsg('ERROR', '002', f'{e}')
 
