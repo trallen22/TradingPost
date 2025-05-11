@@ -14,16 +14,18 @@ class PolygonApi():
 
     @classmethod
     def makeGetRequest(cls, apiEndpoint: str):
+        curSleepTotal = 0
         # need to check if '?' is in apiEndpoint to allow the apiKey to be added to the end
         if ("?" not in apiEndpoint):
             apiEndpoint = f"{apiEndpoint}?"
         while True:
+            curSleepTotal += cls._SLEEP_DURATION
             response = requests.get(f"{cls._POLYGON_API_ENDPOINT}{apiEndpoint}&apiKey={cls._POLYGON_API_KEY}")
             match response.status_code:
                 case cls._GOOD_RESPONSE:
                     return response.json()
                 case cls._API_LIMIT_RESPONSE:
-                    print(f"sleeping for {cls._SLEEP_DURATION}")
+                    print(f"sleeping for {cls._SLEEP_DURATION}. Current total sleep: {curSleepTotal}")
                     time.sleep(cls._SLEEP_DURATION)
                     continue
                 case _:
@@ -36,10 +38,6 @@ class PolygonApi():
     @classmethod
     def getExtendedTickerInfo(cls, ticker):
         return cls.makeGetRequest(f"/v3/reference/tickers/{ticker}")
-
-    @classmethod
-    def getTickerNews(cls, ticker):
-        return cls.makeGetRequest(f"/v2/reference/news?ticker={ticker}")
 
     @classmethod
     def getDailyOpenClose(cls, ticker, date=None):
@@ -75,6 +73,7 @@ class PolygonApi():
     def getRelatedCompanies(cls, ticker):
         return cls.makeGetRequest(f"/v1/related-companies/{ticker}")
 
+    # don't think I need this with News() class
     @classmethod
     def getTickerNews(cls, ticker, limit=1000):
         # TODO: need to implement published_utc
