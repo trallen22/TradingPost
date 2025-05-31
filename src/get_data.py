@@ -12,8 +12,8 @@ import pandas as pd
 import numpy as np
 from sys import exit
 import configuration_file as config
-from polygon_api import PolygonApi
-from models import AggregateData
+from old_code.polygon_api import PolygonApi
+from old_code.models import AggregateData
 
 def convertToDataFrame(dataDict: dict) -> pd.DataFrame:
     return pd.DataFrame(dataDict)

@@ -1,6 +1,6 @@
 import get_data
 import tp_helper
-from option import Option
+from old_code.option import Option
 
 # test = get_data.calculateDataBars("AAPL", 1, "hour", "2024-11-04", "2024-11-08")
 

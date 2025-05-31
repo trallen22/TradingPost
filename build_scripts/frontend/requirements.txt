@@ -1,0 +1,3 @@
+react-router-dom
+react-bootstrap
+styled-components

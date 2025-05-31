@@ -6,7 +6,7 @@ log numbers 400-499
 '''
 
 import configuration_file as config
-from polygon_api import PolygonApi
+from old_code.polygon_api import PolygonApi
 
 def findRelatedTickers(ticker: str) -> list[str]:
     relatedTickers = []

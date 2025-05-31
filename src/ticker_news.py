@@ -6,84 +6,49 @@ NOT SURE IF THIS IS NEEDED, might be able to add logic to polygon_api
 log numbers 800-899
 '''
 
-from polygon_api import PolygonApi
 import configuration_file as config
-import json
+from polygon.rest import models
 
 TEST_LIST_TICKERS = [ "AAPL", "GOOG", "AMZN", "META" ]
 TEST_TICKER = "AAPL"
-TEST_RESP_LIMIT = 1
+TEST_DATE = "2025-05-20"
 
 class Article():
-    def __init__(self, article_api=None, publisher_name=None, title=None, description=None, article_url=None):
-        # TODO: should try to implement sentiment somehow
-        self.publisher_name = article_api['publisher']['name']
-        self.title = article_api['title']
-        self.article_url = article_api['article_url']
-        self.associated_tickers = article_api['tickers']
+    def __init__(self, PolygonObj: models.TickerNews) -> None:
+        self.title = PolygonObj.title
+        self.author = PolygonObj.author
+        self.article_url = PolygonObj.article_url
+        self.description = PolygonObj.description
 
-    def __eq__(self, other):
-        if isinstance(other, Article):
-            return self.article_url == other.article_url
-        return False
+    def toDict(self):
+        return {
+            "title": self.title,
+            "author": self.author,
+            "article_url": self.article_url,
+            "description": self.description
+        }
 
-    def __hash__(self):
-        return hash(self.article_url)
+    def __str__(self) -> str:
+        return str(self.toDict())
 
-class TickerNews():
-    def __init__(self) -> None:
-        self.articles = []
-        self.articlesWithWeights = {} # { Article: <num instances>, ... }
-        self.dictTickerArticles = {} # this would hold ticker and related articles; psuedo caching
-        self.tickers = set()
+def getArticlesForTicker(ticker: str, publishDate: str) -> dict:
+    curArticles = dict()
+    index = 0
+    for i in config.CLIENT.list_ticker_news(ticker, limit=1000, published_utc=publishDate):
+        curArticles[f"{index}"] = Article(i).toDict()
+        index += 1
+    return curArticles
 
-    def WeightNewsHighestVolumeArticles(self) -> dict[Article: int]:
-        self.articlesWithWeights = {}
-        for i in self.articles:
-            try:
-                self.articlesWithWeights[i] += 1
-            except:
-                self.articlesWithWeights[i] = 1
-
-    def returnNewsHighestVolumeArticles(self, numArticles=None):
-        listArticles = sorted(self.articlesWithWeights, key=self.articlesWithWeights.get, reverse=True)
-        if (isinstance(numArticles, int) and numArticles > 0):
-            listArticles = listArticles[:numArticles]
-        return listArticles
-
-    def callNewsApi(self, ticker=None, published_utc=None, order=None, limit=1000, sort=None):
-        tickerParam = f"ticker={ticker}"
-        limitParam = f"&limit={limit}"
-        newsData = PolygonApi.makeGetRequest(f"/v2/reference/news?{tickerParam}{limitParam}")
-        for i in newsData["results"]:
-            curArticle = Article(i)
-            self.articles.append(curArticle)
-            try:
-                self.dictTickerArticles[ticker].append(curArticle)
-            except:
-                self.dictTickerArticles[ticker] = [curArticle]
-
-    def getArticlesForTicker(self, ticker=None):
-        if (not ticker in self.tickers):
-            config.logmsg("DEBUG", 800, f"calling api for article for ticker '{ticker}'")
-            self.callNewsApi(ticker)
-        return self.dictTickerArticles[ticker]
-        
-
-    def __str__(self):
-        return json.dumps(self.dictTickerArticles, indent=4)
+def getArticles(tickers: list[str]) -> dict:
+    for curTicker in tickers:
+        continue
+    return
 
 if __name__ == "__main__":
-    # testArticles = []
-    # testNews = TickerNews()
-    # for ticker in TEST_LIST_TICKERS:
-    #     testArticles.append(testNews.getArticlesForTicker(ticker))
-    # testNews.WeightNewsHighestVolumeArticles()
-    # relativeArticles = testNews.returnNewsHighestVolumeArticles(numArticles=5)
-    # for i in relativeArticles:
-    #     print(i.title)
-    #     print(i.article_url)
-    #     print()
-    for i in config.CLIENT.list_ticker_news(TEST_TICKER, limit=1000, published_utc="2025-05-06"): # config.STRYESTERDAY):
-        print(i.title)
-        print()
+    for ticker in TEST_LIST_TICKERS:
+        testArts = getArticlesForTicker(ticker, TEST_DATE)
+        for i in range(len(testArts)):
+            print(testArts[f"{i}"])
+            print(type(i))
+            print()
+        break
