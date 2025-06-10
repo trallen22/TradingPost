@@ -4,9 +4,10 @@ import {
     BrowserRouter as Router,
     Routes,
     Route,
-	Navigate,
+	// Navigate,
 } from "react-router-dom";
 import Home from './pages/home';
+import News from './pages/news';
 
 function App() {
   return (
@@ -16,6 +17,10 @@ function App() {
 					<Route
 						path="/*"
 						element={<Home />}
+					></Route>
+					<Route
+						path="/ticker-news/*"
+						element={<News />}
 					></Route>
 				</Routes>
 			</Router>

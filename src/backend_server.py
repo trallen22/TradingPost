@@ -7,7 +7,7 @@ from flask_login import LoginManager, login_user, logout_user, current_user, Use
 # from user import User
 # from backend_funcs import top_recommendations, get_movie_details_by_name, sql_query, rate_movie, user_opinion_of_movie, search_movie_by_name, get_disliked_movies, get_liked_movies, get_favorite_movies, get_recent_movies, get_sorted_ratings, reset_password, send_recovery_email, search_by_genre, get_movie_details_by_id
 # from flask_login import UserMixin
-from ticker_news import getArticlesForTicker, TEST_DATE
+from ticker_news import getArticlesForTicker, TEST_DATE, getRelatedToTicker
 import json
 
 class User(UserMixin):
@@ -141,13 +141,22 @@ class TickerNews(Resource):
         dictArticles = getArticlesForTicker(ticker, TEST_DATE)
         return jsonify(dictArticles)
 
+class RelatedCompanies(Resource):
+    def get(self, ticker):
+        dictRelated = dict()
+        listRelated = getRelatedToTicker(ticker)
+        for i in range(listRelated):
+            dictRelated[i] = listRelated[i]
+        return jsonify(dictRelated)
+
 api.add_resource(SignUp, "/sign-up")
 api.add_resource(Login, "/login")
 api.add_resource(Logout, "/logout")
 api.add_resource(GetUser, "/get-user")
 api.add_resource(Profile, "/profile")
 api.add_resource(TickerNews, "/ticker-news/<ticker>")
+api.add_resource(RelatedCompanies, "/related-companies/<ticker>")
 
 if __name__ == "__main__":
     # running on host='0.0.0.0' so docker container will listen on all ports
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

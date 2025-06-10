@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from "react";
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Card from 'react-bootstrap/Card';
-import CardGroup from 'react-bootstrap/CardGroup';
+// import Row from 'react-bootstrap/Row';
+// import Col from 'react-bootstrap/Col';
+// import Card from 'react-bootstrap/Card';
+// import CardGroup from 'react-bootstrap/CardGroup';
 import Spinner from 'react-bootstrap/Spinner';
+import { useLocation } from 'react-router-dom';
 
 const News = () => {
+    let location = useLocation();
+
     const [dictTickerNews, setDictTickerNews] = useState({});
     const [isLoading, setIsLoading] = useState(true); 
   
     useEffect(() => {
-        setIsLoading(true); 
-        fetch('http://127.0.0.1:5000/ticker-news/AAPL').then((res) => {
+        console.log(location.pathname);
+        fetch(location.pathname).then((res) => {
             res.json().then((data) => {
                 setDictTickerNews(data);
             })
@@ -20,8 +23,7 @@ const News = () => {
             })
         })
         setIsLoading(false);
-    }, []);
-
+    }, [location.pathname]);
   
     return (
         <div>
@@ -35,7 +37,7 @@ const News = () => {
                         <div key={key}>
                             <h1>{value.title}</h1>
                             <p>{value.author}</p>
-                            <p>{value.article_url}</p>
+                            <a href={value.article_url}>{value.article_url}</a>
                         </div>
                     ))}
                 </div>

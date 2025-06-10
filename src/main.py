@@ -8,9 +8,9 @@ import multiprocessing
 from tqdm import tqdm
 from old_code.etf import Etf 
 import configuration_file as config
-from generate_files import generate_csv, fill_platform, generate_tp
+from old_code.generate_files import generate_csv, fill_platform, generate_tp
 from send_email import send_email
-from simData import run_simulation
+from old_code.simData import run_simulation
 
 multiprocessing.freeze_support() # prevents multithreading in pyinstaller --onedir
 
