@@ -1,3 +1,7 @@
+"""
+This file is an attempt at a lightweight API for making requests to Polygon.io
+"""
+
 import time
 import requests
 from datetime import datetime

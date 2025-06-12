@@ -13,5 +13,6 @@
 
 # txt files
 *.txt
+!requirements.txt
 
 main

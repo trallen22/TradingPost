@@ -1,20 +1,39 @@
+from curses import curs_set
 import os
-import mysql.connector
+import psycopg2
 
-HOST = 'localhost'
-USER = 'root'
-DATABASE = "OptionsHistorical"
+# database connection variables
+HOST = 'host.docker.internal' # this is for running inside the container
+USER = 'tristanallen'
+DATABASE = "trading_post"
+DB_PORT = "5432"
+# test variables
+TEST_TABLE = "related_tickers"
+TEST_TICKER = "APPL"
+TEST_RELATED = [ "GOOG", "META" ]
+TEST_DATE = "2025-06-07"
+TEST_INSERT = (TEST_TICKER, f'{TEST_RELATED}', TEST_DATE)
+TEST_SELECT_COLS = [ "ticker_symbol", "related_tickers" ]
 
-# sqlInsert: executes a SQL insert statement on a given table
-# parameters: 
-# 	table - str, name of table to insert values into 
-#	curTuple - tuple, tuple of values to insert into table 	
-def sqlInsert(table, curTuple):
-    try: 
-        connection = mysql.connector.connect(host=HOST, user=USER, database=DATABASE) 
-    except Exception as e:
-        print(f'error: {e}')
-        return 1
+# we'll try to open a connection 
+try: 
+    connection = psycopg2.connect(host=HOST, user=USER, database=DATABASE, port=DB_PORT) 
+except Exception as e:
+    print(f"ERROR: failed to connect to database")
+    print(f'error: {e}')
+    exit(1)
+
+def sqlInsert(table: str, curTuple: tuple[str,str,str]) -> int:
+    """
+    sqlInsert: executes a SQL insert statement on a given table \\
+    parameters: \\
+    	table - str, name of table to insert values into \\
+    	curTuple - tuple, tuple of values to insert into table \\
+    returns: \\
+        0 - success \\
+        1 - connection failed \\
+        2 - execution failed
+    """
     curCursor = connection.cursor()
     # actually inserting into the table
     curValStr = "%s, " * len(curTuple) # "%s, %s, ..., %s"
@@ -31,6 +50,28 @@ def sqlInsert(table, curTuple):
     curCursor.close()
     return 0
 
-def resetDatabase(database: str):
-    os.system(f'mysql -e "CREATE DATABASE IF NOT EXISTS {database}"')
-    os.system(f'mysql {database} < "{os.getcwd()}/options_db_schema.sql"')
+def sqlSelect(table: str, columns: list[str]):
+    curCursor = connection.cursor()
+    columnStr = ""
+    for col in columns:
+        columnStr += f"{col}, "
+    # running the sql statement
+    sqlStr = f"SELECT {columnStr[:-2]} FROM {table};"
+    try:
+        curCursor.execute(sqlStr)
+    except Exception as e:
+        print(f"failed table: {table}")
+        print(f"failed col string: {columnStr}")
+        print(f"ERROR: {e}")
+        return []
+    # fetching the results
+    queryResults = curCursor.fetchall()
+    # cleanup
+    connection.commit()
+    curCursor.close()
+    return queryResults
+
+if __name__ == "__main__":
+    # sqlInsert(TEST_TABLE, TEST_INSERT)
+    print("test")
+    print(sqlSelect(TEST_TABLE, "*"))

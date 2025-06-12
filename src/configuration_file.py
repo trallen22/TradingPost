@@ -114,13 +114,14 @@ elif __file__:
     curDir = os.path.abspath(__file__)
 
 # #store the directory part of the aboslute path of the current file
-script_dir = os.path.dirname(os.path.abspath(__file__))
+config_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Navigate up the directory tree until src not located to find the root directory
-while "src" in script_dir:
-    script_dir = os.path.dirname(script_dir)
+BACKEND_DIRNAME = "backend"
+while "src" in config_dir:
+    config_dir = os.path.dirname(config_dir)
     
-TPROOT = script_dir  #root directory for trading post execution 
+TPROOT = config_dir  #root directory for trading post execution 
 
 # Debug files 
 LOGROOT = f'{TPROOT}/debug'

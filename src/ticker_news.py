@@ -6,81 +6,117 @@ NOT SURE IF THIS IS NEEDED, might be able to add logic to polygon_api
 log numbers 800-899
 '''
 
-from polygon_api import PolygonApi
 import configuration_file as config
-import json
+import time
+from polygon.rest import models
+from urllib3.exceptions import ResponseError, MaxRetryError
+from database_utilities import sqlInsert, sqlSelect
 
 TEST_LIST_TICKERS = [ "AAPL", "GOOG", "AMZN", "META" ]
 TEST_TICKER = "AAPL"
-TEST_RESP_LIMIT = 1
+TEST_DATE = "2025-06-07"
+NUM_RETRIES = 4
+SLEEP_DURATION = 15
+MAX_RESETS = 3
+MAX_DEPTH = 1
 
 class Article():
-    def __init__(self, article_api=None, publisher_name=None, title=None, description=None, article_url=None):
-        # TODO: should try to implement sentiment somehow
-        self.publisher_name = article_api['publisher']['name']
-        self.title = article_api['title']
-        self.article_url = article_api['article_url']
-        self.associated_tickers = article_api['tickers']
+    def __init__(self, PolygonObj: models.TickerNews) -> None:
+        self.title = PolygonObj.title
+        self.author = PolygonObj.author
+        self.article_url = PolygonObj.article_url
+        self.description = PolygonObj.description
 
-    def __eq__(self, other):
-        if isinstance(other, Article):
-            return self.article_url == other.article_url
-        return False
+    def toDict(self):
+        return {
+            "title": self.title,
+            "author": self.author,
+            "article_url": self.article_url,
+            "description": self.description
+        }
 
-    def __hash__(self):
-        return hash(self.article_url)
+    def __str__(self) -> str:
+        return str(self.toDict())
 
-class TickerNews():
-    def __init__(self) -> None:
-        self.articles = []
-        self.articlesWithWeights = {} # { Article: <num instances>, ... }
-        self.dictTickerArticles = {} # this would hold ticker and related articles; psuedo caching
-        self.tickers = set()
+def getArticlesForTicker(ticker: str, publishDate: str) -> dict:
+    curArticles = dict()
+    index = 0
+    curTry = 0
+    totalResets = 0
+    newsIterable = config.CLIENT.list_ticker_news(ticker, limit=1, published_utc=publishDate)
+    while curTry < NUM_RETRIES:
+        success = 0
+        try:
+            curItem = next(iter(newsIterable))
+            curArticles[f"{index}"] = Article(curItem).toDict()
+            index += 1
+            success = 1
+            curTry = 0
+        except StopIteration:
+            print("finished iteration")
+            break
+        except ResponseError as e:
+            print(f"Error 1: {e}")
+        except MaxRetryError as e:
+            print(f"Error 2: {e}")
+        except Exception as e:
+            print(f"Error 3: {e.__class__}")
+        if not success:
+            # reset the iterable
+            newsIterable = config.CLIENT.list_ticker_news(ticker, limit=1, published_utc=publishDate)
+            curArticles = dict()
+            curTry += 1
+            totalResets += 1
+            print(f"Waiting {SLEEP_DURATION} seconds")
+            time.sleep(SLEEP_DURATION)
+        if totalResets == MAX_RESETS:
+            print("unable to get full iterable")
+            break
+    if not curArticles:
+        print(f"Failed to get articles for {ticker}")
+    return curArticles
 
-    def WeightNewsHighestVolumeArticles(self) -> dict[Article: int]:
-        self.articlesWithWeights = {}
-        for i in self.articles:
-            try:
-                self.articlesWithWeights[i] += 1
-            except:
-                self.articlesWithWeights[i] = 1
+def getArticles(tickers: list[str]) -> dict:
+    for curTicker in tickers:
+        continue
+    return
 
-    def returnNewsHighestVolumeArticles(self, numArticles=None):
-        listArticles = sorted(self.articlesWithWeights, key=self.articlesWithWeights.get, reverse=True)
-        if (isinstance(numArticles, int) and numArticles > 0):
-            listArticles = listArticles[:numArticles]
-        return listArticles
+def getRelatedToTicker(ticker: str) -> list[str]:
+    relatedTickers = []
+    curRetry = 0
+    while curRetry < NUM_RETRIES:
+        try:
+            relatedTickers = config.CLIENT.get_related_companies(ticker)
+            break
+        except Exception as e:
+            curRetry += 1
+            print(f"ERROR: failed try {curRetry} to get related tickers: {e}")
+            time.sleep(SLEEP_DURATION)
+    relatedTickers = map(lambda x: x.ticker, relatedTickers)
+    return list(relatedTickers)
 
-    def callNewsApi(self, ticker=None, published_utc=None, order=None, limit=1000, sort=None):
-        tickerParam = f"ticker={ticker}"
-        limitParam = f"&limit={limit}"
-        newsData = PolygonApi.makeGetRequest(f"/v2/reference/news?{tickerParam}{limitParam}")
-        for i in newsData["results"]:
-            curArticle = Article(i)
-            self.articles.append(curArticle)
-            try:
-                self.dictTickerArticles[ticker].append(curArticle)
-            except:
-                self.dictTickerArticles[ticker] = [curArticle]
-
-    def getArticlesForTicker(self, ticker=None):
-        if (not ticker in self.tickers):
-            config.logmsg("DEBUG", 800, f"calling api for article for ticker '{ticker}'")
-            self.callNewsApi(ticker)
-        return self.dictTickerArticles[ticker]
-        
-
-    def __str__(self):
-        return json.dumps(self.dictTickerArticles, indent=4)
+def getAllRelatedTickers(ticker: str) -> list[str]:
+    tickersToCheck = [ticker]
+    alreadyChecked = set()
+    depth = 0
+    relatedTickers = set()
+    while depth < MAX_DEPTH:
+        newFinds = set()
+        for t in tickersToCheck:
+            if t in alreadyChecked:
+                continue
+            alreadyChecked.add(t)
+            listCurRelated = getRelatedToTicker(t)
+            newFinds.update(listCurRelated)
+        depth += 1
+        tickersToCheck = list(newFinds)
+        relatedTickers.update(newFinds)
+    return list(relatedTickers)
 
 if __name__ == "__main__":
-    testArticles = []
-    testNews = TickerNews()
-    for ticker in TEST_LIST_TICKERS:
-        testArticles.append(testNews.getArticlesForTicker(ticker))
-    testNews.WeightNewsHighestVolumeArticles()
-    relativeArticles = testNews.returnNewsHighestVolumeArticles(numArticles=5)
-    for i in relativeArticles:
-        print(i.title)
-        print(i.article_url)
+    for ticker in [TEST_TICKER]:
+        # relatedTickers = getAllRelatedTickers(ticker)
+        relatedTickers = getRelatedToTicker(ticker)
+        print(relatedTickers)
         print()
+

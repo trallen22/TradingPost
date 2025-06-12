@@ -6,7 +6,7 @@ log numbers 180-199
 
 import get_data
 import configuration_file as config 
-from tp_helper import determine_buy_sell
+from old_code.tp_helper import determine_buy_sell
 
 class Etf:
     

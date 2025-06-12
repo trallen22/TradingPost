@@ -2,7 +2,7 @@
 This is a class for options, extended from the polygon_api
 '''
 
-from polygon_api import PolygonApi
+from old_code.polygon_api import PolygonApi
 
 class Option(PolygonApi):
     # TODO: need a way to reliable parse an option symbol
