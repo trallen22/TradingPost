@@ -10,6 +10,7 @@ import configuration_file as config
 import time
 from polygon.rest import models
 from urllib3.exceptions import ResponseError, MaxRetryError
+from database_utilities import sqlInsert, sqlSelect
 
 TEST_LIST_TICKERS = [ "AAPL", "GOOG", "AMZN", "META" ]
 TEST_TICKER = "AAPL"
@@ -17,7 +18,7 @@ TEST_DATE = "2025-06-07"
 NUM_RETRIES = 4
 SLEEP_DURATION = 15
 MAX_RESETS = 3
-MAX_DEPTH = 2
+MAX_DEPTH = 1
 
 class Article():
     def __init__(self, PolygonObj: models.TickerNews) -> None:
@@ -92,7 +93,7 @@ def getRelatedToTicker(ticker: str) -> list[str]:
             print(f"ERROR: failed try {curRetry} to get related tickers: {e}")
             time.sleep(SLEEP_DURATION)
     relatedTickers = map(lambda x: x.ticker, relatedTickers)
-    return relatedTickers
+    return list(relatedTickers)
 
 def getAllRelatedTickers(ticker: str) -> list[str]:
     tickersToCheck = [ticker]
@@ -114,7 +115,8 @@ def getAllRelatedTickers(ticker: str) -> list[str]:
 
 if __name__ == "__main__":
     for ticker in [TEST_TICKER]:
-        relatedTickers = getAllRelatedTickers(ticker)
+        # relatedTickers = getAllRelatedTickers(ticker)
+        relatedTickers = getRelatedToTicker(ticker)
         print(relatedTickers)
         print()
 

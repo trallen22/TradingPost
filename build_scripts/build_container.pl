@@ -6,9 +6,10 @@ use strict;
 use warnings;
 
 my $componentToBuild = ''; # this determines which component to build (frontend/backend)
+my $curFileName = basename($0);
 GetOptions('component=s' => \$componentToBuild);
 if (($componentToBuild ne 'backend') && ($componentToBuild ne 'frontend')) {
-    print("component must be 'backend' or 'frontend'\n");
+    print("ERROR: usage: $curFileName [--c <backend/frontend>]\n");
     exit 1;
 }
 

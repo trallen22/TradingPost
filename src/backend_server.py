@@ -145,7 +145,7 @@ class RelatedCompanies(Resource):
     def get(self, ticker):
         dictRelated = dict()
         listRelated = getRelatedToTicker(ticker)
-        for i in range(listRelated):
+        for i in range(len(listRelated)):
             dictRelated[i] = listRelated[i]
         return jsonify(dictRelated)
 
