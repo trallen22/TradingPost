@@ -139,6 +139,7 @@ class SignUp(Resource):
 class TickerNews(Resource):
     def get(self, ticker):
         dictArticles = getArticlesForTicker(ticker, TEST_DATE)
+        print(dictArticles)
         return jsonify(dictArticles)
 
 class RelatedCompanies(Resource):

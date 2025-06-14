@@ -18,12 +18,6 @@ if (($componentToRun ne 'backend') && ($componentToRun ne 'frontend')) {
     exit 1;
 }
 
-my $dockerCmd = '';
-my $dockerItFlag= '';
-if ($interactive) {
-    $dockerCmd = '/bin/bash';
-    $dockerItFlag = '-it'; # for interactive container
-}
 my $curDirPath = dirname($0); # this should resolve to 'build_scripts/'
 my $absPath = abs_path($curDirPath);
 my $topPath = "$absPath/../"; # this should go up to TradingPost
@@ -32,8 +26,11 @@ my $hostIP = "127.0.0.1";
 my %ports = (
     'backend' => '5000',
     'frontend' => '3000',
-    'hostDB' => '5433',
-    'database' => '5432'
 );
+# TODO: maybe clean this up
 # `docker run --rm --volume $topPath:/app --publish 127.0.0.1:5000:5000 $imageName`;
-exec("docker", "run", "--rm", "$dockerItFlag", "--init", "--volume", "$topPath:/app", "--publish", "$hostIP:$ports{$componentToRun}:$ports{$componentToRun}", "$imageName", "$dockerCmd");
+if ($interactive) {
+    exec("docker", "run", "--rm", "-it", "--init", "--volume", "$topPath:/app", "--publish", "$hostIP:$ports{$componentToRun}:$ports{$componentToRun}", "$imageName", "/bin/bash");
+} else {
+    exec("docker", "run", "--rm", "--init", "--volume", "$topPath:/app", "--publish", "$hostIP:$ports{$componentToRun}:$ports{$componentToRun}", "$imageName");
+}
