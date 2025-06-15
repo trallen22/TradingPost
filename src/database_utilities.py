@@ -1,13 +1,19 @@
 import psycopg2
 
 # database connection variables
-HOST = 'host.docker.internal' # this is for running inside the container
-USER = 'tristanallen'
+# TODO: need a way to not have to comment this
+# ec2 credentials 
+HOST = '172.17.0.1'
+USER = 'postgres'
+# local credentials
+# HOST = 'host.docker.internal' # this is for running inside the container
+# USER = 'tristanallen'
 DATABASE = "trading_post"
 DB_PORT = "5432"
 # table names
 TICKER_NEWS_TABLE = "ticker_news"
 NEWS_ARTICLES_TABLE = "news_articles"
+RELATED_TICKER_TABLE = "related_tickers"
 # columns 
 ARTICLE_ID_COL = "article_id"
 ARTICLE_TITLE_COL = "article_title"

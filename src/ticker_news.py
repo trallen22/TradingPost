@@ -10,7 +10,7 @@ import configuration_file as config
 import time
 from polygon.rest import models
 from urllib3.exceptions import ResponseError, MaxRetryError
-from database_utilities import sqlDelete, sqlInsert, sqlSelect, TEST_DATE, TICKER_NEWS_TABLE, NEWS_ARTICLES_TABLE, ARTICLE_ID_COL, ARTICLE_TITLE_COL, ARTICLE_URL_COL, ARTICLE_DESC_COL, ARTICLE_AUTHOR_COL
+from database_utilities import sqlDelete, sqlInsert, sqlSelect, TEST_DATE, TICKER_NEWS_TABLE, NEWS_ARTICLES_TABLE, ARTICLE_ID_COL, ARTICLE_TITLE_COL, ARTICLE_URL_COL, ARTICLE_DESC_COL, ARTICLE_AUTHOR_COL, RELATED_TICKER_TABLE
 
 TEST_LIST_TICKERS = [ "AAPL", "GOOG", "AMZN", "META" ]
 TEST_TICKER = "GOOGL"
@@ -118,9 +118,8 @@ def getArticlesForTicker(ticker: str, publishDate: str) -> dict:
     return curArticles
 
 def getRelatedToTicker(ticker: str) -> list[str]:
-    RELATED_TABLE = "related_tickers"
     # first check if we already have the related tickers in the db
-    relatedTickers = sqlSelect(RELATED_TABLE, where={"ticker_symbol": ticker})
+    relatedTickers = sqlSelect(RELATED_TICKER_TABLE, where={"ticker_symbol": ticker})
     if relatedTickers: # we found something
         # eval it twice for weird sql shenanigans
         relatedTickers = eval(relatedTickers[0][1])
@@ -139,7 +138,7 @@ def getRelatedToTicker(ticker: str) -> list[str]:
         relatedTickers = list(map(lambda x: x.ticker, relatedTickers))
         # we'll add the ticker to the db since we didn't have it already
         # TODO: need to implement the time
-        sqlInsert(RELATED_TABLE, (ticker, f'"{relatedTickers}"', TEST_DATE))
+        sqlInsert(RELATED_TICKER_TABLE, (ticker, f'"{relatedTickers}"', TEST_DATE))
     return relatedTickers
 
 def getAllRelatedTickers(ticker: str, maxDepth: int=MAX_DEPTH) -> list[str]:
